@@ -1,10 +1,16 @@
 rgee_harmonic_regression <- function(dataset, dependent, harmonics = 1L, aoi,
                                      resolution = 10000, dsn = NULL, 
-                                     mask = NULL) {
+                                     mask = NULL, refdataset = NULL) {
   aoi <- sf_as_ee(aoi)
   
-  # dataset <- ee$ImageCollection("NASA/GIMMS/3GV0")
   dataset <- ee$ImageCollection(dataset)
+  
+  if (!is.null(refdataset)) {
+    ref_daterange <- ee$List(ee$ImageCollection(refdataset)$get('date_range'))
+    dataset <- dataset$
+      filterDate(ref_daterange$get(0L), ref_daterange$get(1L))$
+      select(dependent)
+  }
   
   # The dependent variable we're modelling
   dependent <- dependent
