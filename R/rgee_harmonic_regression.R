@@ -84,8 +84,11 @@ rgee_harmonic_regression <- function(dataset, dependent, harmonics = 1L, aoi,
     map(addConstant)$
     map(addTime)$
     map(addHarmonics(harmonicFrequencies))$
-    map(clipToAoi)$
-    map(maskValues)
+    map(clipToAoi)
+  
+  if (!is.null(mask)) {
+    harmonicDep <- harmonicDep$map(maskValues)
+  }
   
   # Detrend data using linear regression.
   detrendIndependents <- ee$List(c('constant', 't'))
