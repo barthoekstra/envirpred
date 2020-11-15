@@ -1,15 +1,35 @@
 # GEE: Harmonic Regression
 
-```{r}
+In this project we want to explore to what degree environmental predictability can explain species declines among sub-Saharan migrant songbirds. We define environmental predictability as the degree to which a simple harmonic regression model can fit the seasonal changes of environmental variables in the wintering areas of these sub-Saharan migrants.
+
+To be able to run this harmonic time series analysis on a fine-scale across the full extent of wintering ranges of these birds, we use the [Google Earth Engine](https://earthengine.google.com) (GEE).
+
+## Processing environment
+```{r setup_rgee_environment}
 library(rgee)
 library(sf)
+library(leaflet)
 ee_Initialize(drive = TRUE)
 ```
 
-```{r}
+## Apply harmonic regression to GEE datasets
+
+The function `R/rgee_harmonic_regression.R` contains the code necessary to run the harmonic regression on GEE using the [rgee](https://github.com/r-spatial/rgee) package. We export the harmonic regression results at a 10km resolution and limit the spatial domain to the following area.
+
+```{r display_aoi}
+aoi <- read_sf("data/AOI.geojson")
+leaflet(aoi) %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  addPolygons(color = "black")
+```
+
+Obviously that area spans much more than just Africa, but for our interpretation of results (and possible future expansion of the analysis to include breeding areas), this is more beneficial.
+
+We can now run the harmonic regression on GEE and generate GeoTIFFs for each of the analyses. As we are particularly interested in `NDVI` we use the temporal range of the `NASA/GIMMS/3GV0` dataset (in GEE) to determine the time frame over which to run the analysis.
+
+```{r run_harmonic_regression_on_gee, results='hide'}
 source("R/rgee_harmonic_regression.R")
 
-aoi <- read_sf("data/AOI.geojson")
 res <- 10000
 
 ndvi1 <- rgee_harmonic_regression(dataset = "NASA/GIMMS/3GV0", dependent = "ndvi", harmonics = 1, 
