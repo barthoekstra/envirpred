@@ -226,6 +226,13 @@
       "Repository": "CRAN",
       "Hash": "ae55f5d7c02f0ab43c58dd050694f2b4"
     },
+    "crul": {
+      "Package": "crul",
+      "Version": "1.0.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "9c36cf228a33d1aafc2658ce3d422698"
+    },
     "curl": {
       "Package": "curl",
       "Version": "4.3",
@@ -401,6 +408,13 @@
       "Repository": "CRAN",
       "Hash": "726671f634529d470545f9fd1a9d1869"
     },
+    "hoardr": {
+      "Package": "hoardr",
+      "Version": "0.5.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "ca8a25aa079a8cb4fe44fe12b17b0eda"
+    },
     "htmltools": {
       "Package": "htmltools",
       "Version": "0.5.0",
@@ -414,6 +428,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "0aaf56b7960bb066646e1868cadcaf07"
+    },
+    "httpcode": {
+      "Package": "httpcode",
+      "Version": "0.3.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "13641a1c6d2cc98801b76764078e17ea"
     },
     "httr": {
       "Package": "httr",
@@ -648,10 +669,17 @@
     },
     "raster": {
       "Package": "raster",
-      "Version": "3.3-13",
+      "Version": "3.4-5",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "51cfecf7b9518d46b119f92d581616b6"
+      "Hash": "a3ded548110163cf499d63c3932dd499"
+    },
+    "rdryad": {
+      "Package": "rdryad",
+      "Version": "1.0.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "dfabf5af9017b44dd3761bb1bb3ac645"
     },
     "readr": {
       "Package": "readr",
@@ -854,12 +882,26 @@
       "Repository": "CRAN",
       "Hash": "264b4a31d35bb6833566a7763356ab63"
     },
+    "triebeard": {
+      "Package": "triebeard",
+      "Version": "0.3.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "847a9d113b78baca4a9a8639609ea228"
+    },
     "units": {
       "Package": "units",
       "Version": "0.6-7",
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "4a3df844d6d35ca2ba2b7ba95446b955"
+    },
+    "urltools": {
+      "Package": "urltools",
+      "Version": "1.7.3",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "e86a704261a105f4703f653e05defa3e"
     },
     "utf8": {
       "Package": "utf8",
@@ -930,6 +972,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "2826c5d9efb0a88f657c7a679c7106db"
+    },
+    "zip": {
+      "Package": "zip",
+      "Version": "2.1.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "3bc8405c637d988801ec5ea88372d0c2"
     }
   }
 }
