@@ -1,0 +1,192 @@
+# Bird trends and distribution maps
+
+```{r setup_processing_environment, include=FALSE}
+library(gdalUtils)
+library(tidyverse)
+library(fasterize)
+library(raster)
+library(stars)
+library(sf)
+library(rdryad)
+```
+
+## Converting the ESRI Geodatabase
+
+We use the [BirdLife species distribution maps](http://datazone.birdlife.org/species/requestdis) to determine the extents of our analyses. As this data is provided in an ESRI File Geodatabase that is somehow difficult to query due to its size, we convert it to a Geopackage first. The file will be substantially bigger, but much quicker to query.
+
+```{r convert_geodatabase_to_geopackage, eval=FALSE, include=TRUE}
+ogr2ogr("data/raw/birdlife/BOTW.gdb", "data/raw/birdlife/BOTW.gpkg", f = "GPKG", nlt = "MULTIPOLYGON", sql = "SELECT * FROM All_Species", progress = TRUE)
+```
+
+## Load species trends
+
+We will use species trends derived from PECBMS, the Pan-European Common Bird Monitoring Scheme, which contains trends for 179 European breeding birds.
+
+```{r load_trend_dataset}
+colnames_species <- c("euring", "species", "namenote", "trend_long", "trend_short", "trend_long_slope",
+                      "trend_long_se", "trend_short_slope", "trend_short_se", "habitat", "common_name",
+                      "trend_classification", "graphnote")
+coltypes_species <- "ncnnnnnnncccc"
+
+species <- read_delim("data/raw/pecbms/pecbms-europe-indicesandtrends-2019.csv", delim = ";", 
+                      col_names = colnames_species, col_types = coltypes_species, skip = 1)
+species
+```
+
+## Loading species traits
+
+We use Storchova & Horak, 2018 to add life-history characteristics to the species in the PECBMS trends dataset.
+
+```{r download_life_history_characteristics}
+if (!file.exists("data/raw/life-history-characteristics/Life-history characteristics of European birds.txt")) {
+  paths_cache <- dryad_download("10.5061/dryad.n6k3n")[[1]]
+  paths_final <- paste0("data/raw/life-history-characteristics/", basename(paths_cache))
+  
+  if(!dir.exists("data/raw/life-history-characteristics")) {
+    dir.create("data/raw/life-history-characteristics")
+  }
+  file.copy(from = paths_cache, to = paths_final)
+  file.remove(paths_cache)
+}
+```
+We can now load the dataset and extract species name and migratory characteristics, so we can filter for the latter later.
+
+```{r load_life_history_characteristics}
+lhc <- read_tsv("data/raw/life-history-characteristics/Life-history characteristics of European birds.txt",
+                col_types = cols_only(`Species` = col_character(), `Family` = col_character(),
+                                      `Sedentary` = col_double(), `Facultative migrant` = col_double(),
+                                      `Short distance migrant` = col_double(), `Long distance migrant` = col_double())) %>%
+  rename(species = Species, family = Family, sedentary = Sedentary, facultative = `Facultative migrant`, 
+         shortdist = `Short distance migrant`, longdist = `Long distance migrant`) %>%
+  drop_na()
+```
+
+We add the species trends and life-history characteristics to a single dataframe.
+
+```{r merge_species_lhc_dataset}
+species %>%
+  left_join(lhc, by = c("species" = "species")) -> species
+```
+
+We can inspect for which species no migration strategy has been found yet because of mismatching species name-pairs. These are species which have `NA` values for the `family` column.
+
+```{r display_mismatched_species}
+species %>%
+  filter(is.na(family))
+```
+
+We can now manually change the scientific names in the life-history characteristics dataset to match with the PECBMS dataset.
+
+```{r tweak_scientific_names}
+name_replacements <-
+  c("Ptyonoprogne rupestris" = "Hirundo rupestris",
+    "Cecropis daurica" = "Hirundo daurica",
+    "Cyanecula svecica" = "Luscinia svecica",
+    "Oenanthe pleschanka" = "Oenanthe cypriaca",
+    "Iduna pallida" = "Hippolais pallida",
+    "Sylvia melanothorax" = "Sylvia melanothorax",  # Not in LHC dataset
+    "Poecile palustris" = "Parus palustris",
+    "Poecile montanus" = "Parus montanus",
+    "Lophophanes cristatus" = "Parus cristatus",
+    "Periparus ater" = "Parus ater",
+    "Cyanistes caeruleus" = "Parus caeruleus",
+    "Chloris chloris" = "Carduelis chloris",
+    "Spinus spinus" = "Carduelis spinus",
+    "Linaria cannabina" = "Carduelis cannabina",
+    "Acanthis flammea" = "Carduelis flammea",
+    "Emberiza calandra" = "Miliaria calandra"
+    )
+speciesnames <- lhc$species
+oldnames <- speciesnames
+for (name in names(name_replacements)) {
+  speciesnames <- replace(speciesnames, which(speciesnames == name), name_replacements[name])
+}
+lhc$species <- speciesnames
+```
+
+And we once again join the LHC and PECBMS datasets.
+
+```{r match_species_using_tweaked_names}
+species %>%
+  dplyr::select(-colnames(lhc)[!colnames(lhc) %in% c("species")]) %>%
+  left_join(lhc, by = c("species" = "species")) %>%
+  drop_na(family) %>%
+  identity() -> species
+
+species
+```
+
+## Select migratory species
+
+We now have a dataset of `r nrow(species)` species, but we are merely interested in those that are actually migratory, so we filter out resident and facultative migrants.
+
+```{r filter_nonmigratory_species}
+species %>%
+  filter(sedentary != 1 & facultative != 1) -> species
+
+species
+```
+
+## Match names to BirdLife taxonomy
+
+Finally, we will be querying BirdLife distribution maps, so we have to match scientific names with the taxonomy used by BirdLife.
+
+```{r match_birdlife_taxonomy}
+birdlife_taxonomy <- readxl::read_excel("data/raw/birdlife/HBW-BirdLife_List_of_Birds_v4.xlsx", 
+                                        col_names = c("family_birdlife", "common_name_birdlife", "species", "iucn_redlist"))
+
+species %>%
+  left_join(birdlife_taxonomy, by = c("species" = "species")) -> species
+```
+
+Once again, we see which species are not matched and tweak these manually to match with the BirdLife dataset.
+
+```{r}
+species %>%
+  filter(is.na(family_birdlife))
+```
+
+```{r tweak_scientific_names_birdlife}
+name_replacements_birdlife <-
+  c("Hirundo daurica" = "Cecropis daurica",
+    "Luscinia svecica" = "Cyanecula svecica",
+    "Hippolais pallida" = "Iduna pallida",
+    "Carduelis spinus" = "Spinus spinus",
+    "Carduelis flammea" = "Acanthis flammea"
+    )
+speciesnames <- species$species
+oldnames <- speciesnames
+for (name in names(name_replacements_birdlife)) {
+  speciesnames <- replace(speciesnames, which(speciesnames == name), name_replacements_birdlife[name])
+}
+species$species_birdlife <- speciesnames
+```
+
+## Querying distribution maps
+
+Now that we have gathered the species trends and selected only migratory species, we can query the database to select the corresponding distribution maps. As some species are distributed over massive areas, we already select only these species distributions that intersect with the bounding box of Africa.
+
+```{r query_geodatabase, eval=FALSE}
+species_query <- str_sub(str_replace_all(toString(paste0("SCINAME = '", species$species_birdlife, "' OR ")), " OR , ", " OR "),
+                         start = 1, end = -5)
+query <- paste("SELECT * FROM All_Species WHERE (", species_query, ") AND PRESENCE = 1 AND SEASONAL = 3", sep = "")
+
+africa <- st_read("data/raw/Africa.gpkg")
+
+ogr2ogr("data/raw/birdlife/BOTW.gpkg", "data/processed/TrendSpecies.gpkg", sql = query, f = "GPKG", nlt = "MULTIPOLYGON", progress = TRUE,
+        spat = st_bbox(africa))
+```
+
+We can now join these datasets again and save them for upcoming analysis steps.
+
+```{r join_species_distributions_trends, echo=FALSE}
+st_read("data/processed/TrendSpecies.gpkg") %>%
+  group_by(SCINAME) %>%
+  summarise(species = SCINAME, geometry = st_union(st_buffer(geom, dist = 0))) %>%
+  distinct(species) %>%
+  left_join(species, by = c("species" = "species")) %>%
+  identity() -> trendspecies
+
+saveRDS(trendspecies, file = "data/processed/trendspecies.RDS")
+```
+
