@@ -17,7 +17,7 @@ ee_Initialize(drive = TRUE)
 The function `R/rgee_harmonic_regression.R` contains the code necessary to run the harmonic regression on GEE using the [rgee](https://github.com/r-spatial/rgee) package. We export the harmonic regression results at a 10km resolution and limit the spatial domain to the following area.
 
 ```{r display_aoi}
-aoi <- read_sf("data/AOI.geojson")
+aoi <- read_sf("data/raw/studyarea.geojson")
 leaflet(aoi) %>%
   addProviderTiles("CartoDB.Positron") %>%
   addPolygons(color = "black")
@@ -33,24 +33,24 @@ source("R/rgee_harmonic_regression.R")
 res <- 10000
 
 ndvi1 <- rgee_harmonic_regression(dataset = "NASA/GIMMS/3GV0", dependent = "ndvi", harmonics = 1, 
-                                  aoi = aoi, resolution = res, dsn = "data/gee/ndvi_1.tif", mask = -1)
+                                  aoi = aoi, resolution = res, dsn = "data/raw/gee/ndvi_1.tif", mask = -1)
 ndvi2 <- rgee_harmonic_regression(dataset = "NASA/GIMMS/3GV0", dependent = "ndvi", harmonics = 2,
-                                  aoi = aoi, resolution = res, dsn = "data/gee/ndvi_2.tif", mask = -1)
+                                  aoi = aoi, resolution = res, dsn = "data/raw/gee/ndvi_2.tif", mask = -1)
 aet1 <- rgee_harmonic_regression(dataset = "IDAHO_EPSCOR/TERRACLIMATE", dependent = "aet", harmonics = 1,
-                                 aoi = aoi, resolution = res, dsn = "data/gee/aet_1.tif")
+                                 aoi = aoi, resolution = res, dsn = "data/gee/raw/aet_1.tif")
 aet2 <- rgee_harmonic_regression(dataset = "IDAHO_EPSCOR/TERRACLIMATE", dependent = "aet", harmonics = 2,
-                                 aoi = aoi, resolution = res, dsn = "data/gee/aet_2.tif")
+                                 aoi = aoi, resolution = res, dsn = "data/gee/raw/aet_2.tif")
 pr1 <- rgee_harmonic_regression(dataset = "IDAHO_EPSCOR/TERRACLIMATE", dependent = "pr", harmonics = 1,
-                                aoi = aoi, resolution = res, dsn = "data/gee/pr_1.tif")
+                                aoi = aoi, resolution = res, dsn = "data/gee/raw/pr_1.tif")
 pr2 <- rgee_harmonic_regression(dataset = "IDAHO_EPSCOR/TERRACLIMATE", dependent = "pr", harmonics = 2,
-                                aoi = aoi, resolution = res, dsn = "data/gee/pr_2.tif")
+                                aoi = aoi, resolution = res, dsn = "data/gee/raw/pr_2.tif")
 tmmn1 <- rgee_harmonic_regression(dataset = "IDAHO_EPSCOR/TERRACLIMATE", dependent = "tmmn", harmonics = 1,
-                                  aoi = aoi, resolution = res, dsn = "data/gee/tmmn_1.tif")
+                                  aoi = aoi, resolution = res, dsn = "data/gee/raw/tmmn_1.tif")
 tmmn2 <- rgee_harmonic_regression(dataset = "IDAHO_EPSCOR/TERRACLIMATE", dependent = "tmmn", harmonics = 2,
-                                  aoi = aoi, resolution = res, dsn = "data/gee/tmmn_2.tif")
+                                  aoi = aoi, resolution = res, dsn = "data/gee/raw/tmmn_2.tif")
 tmmx1 <- rgee_harmonic_regression(dataset = "IDAHO_EPSCOR/TERRACLIMATE", dependent = "tmmx", harmonics = 1,
-                                  aoi = aoi, resolution = res, dsn = "data/gee/tmmx_1.tif")
+                                  aoi = aoi, resolution = res, dsn = "data/gee/raw/tmmx_1.tif")
 tmmx2 <- rgee_harmonic_regression(dataset = "IDAHO_EPSCOR/TERRACLIMATE", dependent = "tmmx", harmonics = 2,
-                                  aoi = aoi, resolution = res, dsn = "data/gee/tmmx_2.tif")
+                                  aoi = aoi, resolution = res, dsn = "data/gee/raw/tmmx_2.tif")
 ```
 
