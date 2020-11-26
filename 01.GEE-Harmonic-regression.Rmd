@@ -27,7 +27,7 @@ Obviously that area spans much more than just Africa, but for our interpretation
 
 We can now run the harmonic regression on GEE and generate GeoTIFFs for each of the analyses. As we are particularly interested in `NDVI` we use the temporal range of the `NASA/GIMMS/3GV0` dataset (in GEE) to determine the time frame over which to run the analysis.
 
-```{r run_harmonic_regression_on_gee, results='hide'}
+```{r run_harmonic_regression_on_gee, results='hide', eval=FALSE}
 source("R/rgee_harmonic_regression.R")
 
 res <- 10000
