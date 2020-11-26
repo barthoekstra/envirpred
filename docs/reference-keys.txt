@@ -1,0 +1,12 @@
+reproducible-analysis
+gee-harmonic-regression
+processing-environment
+apply-harmonic-regression-to-gee-datasets
+preprocess-bird-trends-and-distribution-maps
+converting-the-esri-geodatabase
+load-species-trends
+loading-species-traits
+select-migratory-species
+match-names-to-birdlife-taxonomy
+querying-distribution-maps
+references

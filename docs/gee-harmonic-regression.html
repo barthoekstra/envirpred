@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>1 GEE: Harmonic Regression | Environmental predictability &amp; Population trends</title>
+<meta name="author" content="Bart Hoekstra">
+<!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.2"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.5.1/jquery-3.5.1.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link href="libs/bootstrap-4.5.3/bootstrap.min.css" rel="stylesheet">
+<script src="libs/bootstrap-4.5.3/bootstrap.bundle.min.js"></script><script src="libs/bs3compat-0.2.3.9000/tabs.js"></script><script src="libs/bs3compat-0.2.3.9000/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
+<script src="libs/bs4_book-1.0.0/bs4_book.js"></script><script src="libs/accessible-code-block-0.0.1/empty-anchor.js"></script><script src="libs/htmlwidgets-1.5.2/htmlwidgets.js"></script><link href="libs/leaflet-1.3.1/leaflet.css" rel="stylesheet">
+<script src="libs/leaflet-1.3.1/leaflet.js"></script><link href="libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet">
+<script src="libs/Proj4Leaflet-1.0.1/proj4-compressed.js"></script><script src="libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script><link href="libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet">
+<script src="libs/leaflet-binding-2.0.3/leaflet.js"></script><script src="libs/leaflet-providers-1.9.0/leaflet-providers_1.9.0.js"></script><script src="libs/leaflet-providers-plugin-2.0.3/leaflet-providers-plugin.js"></script><script src="https://cdn.jsdelivr.net/autocomplete.js/0/autocomplete.jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/mark.js@8.11.1/dist/mark.min.js"></script><!-- CSS -->
+</head>
+<body data-spy="scroll" data-target="#toc">
+
+<div class="container-fluid">
+<div class="row">
+  <header class="col-sm-12 col-lg-3 sidebar sidebar-book"><a class="sr-only sr-only-focusable" href="#content">Skip to main content</a>
+
+    <div class="d-flex align-items-start justify-content-between">
+      <h1>
+        <a href="index.html" title="Linking environmental predictability to assemblage population trends of Afro-Palearctic migrants">Environmental predictability &amp; Population trends</a>:
+        <small class="text-muted">Linking environmental predictability to assemblage population trends of Afro-Palearctic migrants</small>
+      </h1>
+      <button class="btn btn-outline-primary d-lg-none ml-2 mt-1" type="button" data-toggle="collapse" data-target="#main-nav" aria-expanded="true" aria-controls="main-nav"><i class="fas fa-bars"></i><span class="sr-only">Show table of contents</span></button>
+    </div>
+
+    <div id="main-nav" class="collapse-lg">
+      <form role="search">
+        <input id="search" class="form-control" type="search" placeholder="Search" aria-label="Search">
+</form>
+
+      <nav aria-label="Table of contents"><h2>Table of contents</h2>
+        <ul class="book-toc list-unstyled">
+<li><a class="" href="index.html">Introduction</a></li>
+<li><a class="active" href="gee-harmonic-regression.html"><span class="header-section-number">1</span> GEE: Harmonic Regression</a></li>
+<li><a class="" href="preprocess-bird-trends-and-distribution-maps.html"><span class="header-section-number">2</span> Preprocess bird trends and distribution maps</a></li>
+<li class="book-part">Other</li>
+<li><a class="" href="references.html"><span class="header-section-number">3</span> References</a></li>
+</ul>
+
+        <div class="book-extra">
+          <p><a id="book-repo" href="https://github.com/barthoekstra/envirpred">View book source <i class="fab fa-github"></i></a></p>
+        </div>
+      </nav>
+</div>
+  </header><main class="col-sm-12 col-md-9 col-lg-7" id="content"><div id="gee-harmonic-regression" class="section level1">
+<h1>
+<span class="header-section-number">1</span> GEE: Harmonic Regression<a class="anchor" aria-label="anchor" href="#gee-harmonic-regression"><i class="fas fa-link"></i></a>
+</h1>
+<p>In this project we want to explore to what degree environmental predictability can explain species declines among sub-Saharan migrant songbirds. We define environmental predictability as the degree to which a simple harmonic regression model can fit the seasonal changes of environmental variables in the wintering areas of these sub-Saharan migrants.</p>
+<p>To be able to run this harmonic time series analysis on a fine-scale across the full extent of wintering ranges of these birds, we use the <a href="https://earthengine.google.com">Google Earth Engine</a> (GEE).</p>
+<div id="processing-environment" class="section level2">
+<h2>
+<span class="header-section-number">1.1</span> Processing environment<a class="anchor" aria-label="anchor" href="#processing-environment"><i class="fas fa-link"></i></a>
+</h2>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-spatial/rgee">rgee</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/">sf</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://rstudio.github.io/leaflet/">leaflet</a></span><span class="op">)</span>
+<span class="fu"><a href="http://r-spatial.github.io/rgee/reference/ee_Initialize.html">ee_Initialize</a></span><span class="op">(</span>drive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+<pre><code>## ── rgee 1.0.6 ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── earthengine-api 0.1.240 ── 
+##  ✓ email: not_defined
+##  ✓ Google Drive credentials:
+ ✓ Google Drive credentials:  FOUND
+##  ✓ Initializing Google Earth Engine:
+ ✓ Initializing Google Earth Engine:  DONE!
+## 
+ ✓ Earth Engine user: users/barthoekstra 
+## ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</code></pre>
+</div>
+<div id="apply-harmonic-regression-to-gee-datasets" class="section level2">
+<h2>
+<span class="header-section-number">1.2</span> Apply harmonic regression to GEE datasets<a class="anchor" aria-label="anchor" href="#apply-harmonic-regression-to-gee-datasets"><i class="fas fa-link"></i></a>
+</h2>
+<p>The function <code>R/rgee_harmonic_regression.R</code> contains the code necessary to run the harmonic regression on GEE using the <a href="https://github.com/r-spatial/rgee">rgee</a> package. We export the harmonic regression results at a 10km resolution and limit the spatial domain to the following area.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">aoi</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="st">"data/raw/studyarea.geojson"</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/leaflet/man/leaflet.html">leaflet</a></span><span class="op">(</span><span class="va">aoi</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu"><a href="https://rdrr.io/pkg/leaflet/man/addProviderTiles.html">addProviderTiles</a></span><span class="op">(</span><span class="st">"CartoDB.Positron"</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu"><a href="https://rdrr.io/pkg/leaflet/man/map-layers.html">addPolygons</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"black"</span><span class="op">)</span></code></pre></div>
+<div id="htmlwidget-ec66faffcf226381212c" style="width:672px;height:480px;" class="leaflet html-widget"></div>
+<script type="application/json" data-for="htmlwidget-ec66faffcf226381212c">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addProviderTiles","args":["CartoDB.Positron",null,null,{"errorTileUrl":"","noWrap":false,"detectRetina":false}]},{"method":"addPolygons","args":[[[[{"lng":[-19.7806825253499,61.0786924746501,61.0786924746501,-19.7806825253499,-19.7806825253499],"lat":[-36.3622269211034,-36.3622269211034,71.8380113698745,71.8380113698745,-36.3622269211034]}]]],null,null,{"interactive":true,"className":"","stroke":true,"color":"black","weight":5,"opacity":0.5,"fill":true,"fillColor":"black","fillOpacity":0.2,"smoothFactor":1,"noClip":false},null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"limits":{"lat":[-36.3622269211034,71.8380113698745],"lng":[-19.7806825253499,61.0786924746501]}},"evals":[],"jsHooks":[]}</script><p>Obviously that area spans much more than just Africa, but for our interpretation of results (and possible future expansion of the analysis to include breeding areas), this is more beneficial.</p>
+<p>We can now run the harmonic regression on GEE and generate GeoTIFFs for each of the analyses. As we are particularly interested in <code>NDVI</code> we use the temporal range of the <code>NASA/GIMMS/3GV0</code> dataset (in GEE) to determine the time frame over which to run the analysis.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/source.html">source</a></span><span class="op">(</span><span class="st">"R/rgee_harmonic_regression.R"</span><span class="op">)</span>
+
+<span class="va">res</span> <span class="op">&lt;-</span> <span class="fl">10000</span>
+
+<span class="va">ndvi1</span> <span class="op">&lt;-</span> <span class="fu">rgee_harmonic_regression</span><span class="op">(</span>dataset <span class="op">=</span> <span class="st">"NASA/GIMMS/3GV0"</span>, dependent <span class="op">=</span> <span class="st">"ndvi"</span>, harmonics <span class="op">=</span> <span class="fl">1</span>, 
+                                  aoi <span class="op">=</span> <span class="va">aoi</span>, resolution <span class="op">=</span> <span class="va">res</span>, dsn <span class="op">=</span> <span class="st">"data/raw/gee/ndvi_1.tif"</span>, mask <span class="op">=</span> <span class="op">-</span><span class="fl">1</span><span class="op">)</span>
+<span class="va">ndvi2</span> <span class="op">&lt;-</span> <span class="fu">rgee_harmonic_regression</span><span class="op">(</span>dataset <span class="op">=</span> <span class="st">"NASA/GIMMS/3GV0"</span>, dependent <span class="op">=</span> <span class="st">"ndvi"</span>, harmonics <span class="op">=</span> <span class="fl">2</span>,
+                                  aoi <span class="op">=</span> <span class="va">aoi</span>, resolution <span class="op">=</span> <span class="va">res</span>, dsn <span class="op">=</span> <span class="st">"data/raw/gee/ndvi_2.tif"</span>, mask <span class="op">=</span> <span class="op">-</span><span class="fl">1</span><span class="op">)</span>
+<span class="va">aet1</span> <span class="op">&lt;-</span> <span class="fu">rgee_harmonic_regression</span><span class="op">(</span>dataset <span class="op">=</span> <span class="st">"IDAHO_EPSCOR/TERRACLIMATE"</span>, dependent <span class="op">=</span> <span class="st">"aet"</span>, harmonics <span class="op">=</span> <span class="fl">1</span>,
+                                 aoi <span class="op">=</span> <span class="va">aoi</span>, resolution <span class="op">=</span> <span class="va">res</span>, dsn <span class="op">=</span> <span class="st">"data/gee/raw/aet_1.tif"</span><span class="op">)</span>
+<span class="va">aet2</span> <span class="op">&lt;-</span> <span class="fu">rgee_harmonic_regression</span><span class="op">(</span>dataset <span class="op">=</span> <span class="st">"IDAHO_EPSCOR/TERRACLIMATE"</span>, dependent <span class="op">=</span> <span class="st">"aet"</span>, harmonics <span class="op">=</span> <span class="fl">2</span>,
+                                 aoi <span class="op">=</span> <span class="va">aoi</span>, resolution <span class="op">=</span> <span class="va">res</span>, dsn <span class="op">=</span> <span class="st">"data/gee/raw/aet_2.tif"</span><span class="op">)</span>
+<span class="va">pr1</span> <span class="op">&lt;-</span> <span class="fu">rgee_harmonic_regression</span><span class="op">(</span>dataset <span class="op">=</span> <span class="st">"IDAHO_EPSCOR/TERRACLIMATE"</span>, dependent <span class="op">=</span> <span class="st">"pr"</span>, harmonics <span class="op">=</span> <span class="fl">1</span>,
+                                aoi <span class="op">=</span> <span class="va">aoi</span>, resolution <span class="op">=</span> <span class="va">res</span>, dsn <span class="op">=</span> <span class="st">"data/gee/raw/pr_1.tif"</span><span class="op">)</span>
+<span class="va">pr2</span> <span class="op">&lt;-</span> <span class="fu">rgee_harmonic_regression</span><span class="op">(</span>dataset <span class="op">=</span> <span class="st">"IDAHO_EPSCOR/TERRACLIMATE"</span>, dependent <span class="op">=</span> <span class="st">"pr"</span>, harmonics <span class="op">=</span> <span class="fl">2</span>,
+                                aoi <span class="op">=</span> <span class="va">aoi</span>, resolution <span class="op">=</span> <span class="va">res</span>, dsn <span class="op">=</span> <span class="st">"data/gee/raw/pr_2.tif"</span><span class="op">)</span>
+<span class="va">tmmn1</span> <span class="op">&lt;-</span> <span class="fu">rgee_harmonic_regression</span><span class="op">(</span>dataset <span class="op">=</span> <span class="st">"IDAHO_EPSCOR/TERRACLIMATE"</span>, dependent <span class="op">=</span> <span class="st">"tmmn"</span>, harmonics <span class="op">=</span> <span class="fl">1</span>,
+                                  aoi <span class="op">=</span> <span class="va">aoi</span>, resolution <span class="op">=</span> <span class="va">res</span>, dsn <span class="op">=</span> <span class="st">"data/gee/raw/tmmn_1.tif"</span><span class="op">)</span>
+<span class="va">tmmn2</span> <span class="op">&lt;-</span> <span class="fu">rgee_harmonic_regression</span><span class="op">(</span>dataset <span class="op">=</span> <span class="st">"IDAHO_EPSCOR/TERRACLIMATE"</span>, dependent <span class="op">=</span> <span class="st">"tmmn"</span>, harmonics <span class="op">=</span> <span class="fl">2</span>,
+                                  aoi <span class="op">=</span> <span class="va">aoi</span>, resolution <span class="op">=</span> <span class="va">res</span>, dsn <span class="op">=</span> <span class="st">"data/gee/raw/tmmn_2.tif"</span><span class="op">)</span>
+<span class="va">tmmx1</span> <span class="op">&lt;-</span> <span class="fu">rgee_harmonic_regression</span><span class="op">(</span>dataset <span class="op">=</span> <span class="st">"IDAHO_EPSCOR/TERRACLIMATE"</span>, dependent <span class="op">=</span> <span class="st">"tmmx"</span>, harmonics <span class="op">=</span> <span class="fl">1</span>,
+                                  aoi <span class="op">=</span> <span class="va">aoi</span>, resolution <span class="op">=</span> <span class="va">res</span>, dsn <span class="op">=</span> <span class="st">"data/gee/raw/tmmx_1.tif"</span><span class="op">)</span>
+<span class="va">tmmx2</span> <span class="op">&lt;-</span> <span class="fu">rgee_harmonic_regression</span><span class="op">(</span>dataset <span class="op">=</span> <span class="st">"IDAHO_EPSCOR/TERRACLIMATE"</span>, dependent <span class="op">=</span> <span class="st">"tmmx"</span>, harmonics <span class="op">=</span> <span class="fl">2</span>,
+                                  aoi <span class="op">=</span> <span class="va">aoi</span>, resolution <span class="op">=</span> <span class="va">res</span>, dsn <span class="op">=</span> <span class="st">"data/gee/raw/tmmx_2.tif"</span><span class="op">)</span></code></pre></div>
+
+</div>
+</div>
+  <div class="chapter-nav">
+<div class="prev"><a href="index.html">Introduction</a></div>
+<div class="next"><a href="preprocess-bird-trends-and-distribution-maps.html"><span class="header-section-number">2</span> Preprocess bird trends and distribution maps</a></div>
+</div></main><div class="col-md-3 col-lg-2 d-none d-md-block sidebar sidebar-chapter">
+    <nav id="toc" data-toggle="toc" aria-label="On this page"><h2>On this page</h2>
+      <ul class="nav navbar-nav">
+<li><a class="nav-link" href="#gee-harmonic-regression"><span class="header-section-number">1</span> GEE: Harmonic Regression</a></li>
+<li><a class="nav-link" href="#processing-environment"><span class="header-section-number">1.1</span> Processing environment</a></li>
+<li><a class="nav-link" href="#apply-harmonic-regression-to-gee-datasets"><span class="header-section-number">1.2</span> Apply harmonic regression to GEE datasets</a></li>
+</ul>
+
+      <div class="book-extra">
+        <ul class="list-unstyled">
+<li><a id="book-source" href="https://github.com/barthoekstra/envirpred/blob/master/01.GEE-Harmonic-regression.Rmd">View source <i class="fab fa-github"></i></a></li>
+          <li><a id="book-edit" href="https://github.com/barthoekstra/envirpred/edit/master/01.GEE-Harmonic-regression.Rmd">Edit this page <i class="fab fa-github"></i></a></li>
+        </ul>
+</div>
+    </nav>
+</div>
+
+</div>
+</div> <!-- .container -->
+
+<footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>"<strong>Environmental predictability &amp; Population trends</strong>: Linking environmental predictability to assemblage population trends of Afro-Palearctic migrants" was written by Bart Hoekstra. </p>
+  </div>
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>This book was built by the <a class="text-light" href="https://bookdown.org">bookdown</a> R package.</p>
+  </div>
+
+</div></div>
+</footer>
+</body>
+</html>
