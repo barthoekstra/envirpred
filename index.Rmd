@@ -1,4 +1,28 @@
 ---
-title: "EnvPred: Environmental Predictability "
+title: "Environmental predictability & Population trends"
+subtitle: "Linking environmental predictability to assemblage population trends of Afro-Palearctic migrants"
 author: "Bart Hoekstra"
+site: bookdown::bookdown_site
+documentclass: book
+bibliography: references.bib
+csl: current-biology.csl
+link-citations: yes
 ---
+
+# Introduction {-}
+
+## Reproducible analysis
+
+The entire analysis contained in this book can be reproduced by running the following function from the `bookdown` package.
+
+```{r bookdown_code, eval=FALSE}
+bookdown::render_book("index.Rmd")
+```
+
+It may be necessary to install some additional packages to make use the `bs4_book` template for this book.
+
+```{r bookdown_dependencies, eval=FALSE}
+install.packages("remotes")
+remotes::install_github("rstudio/bslib")
+install.packages("downlit")
+```
