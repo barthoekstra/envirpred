@@ -1,4 +1,4 @@
-# Bird trends and distribution maps
+# Preprocess bird trends and distribution maps
 
 ```{r setup_processing_environment, include=FALSE}
 library(gdalUtils)
@@ -12,7 +12,7 @@ library(rdryad)
 
 ## Converting the ESRI Geodatabase
 
-We use the [BirdLife species distribution maps](http://datazone.birdlife.org/species/requestdis) to determine the extents of our analyses. As this data is provided in an ESRI File Geodatabase that is somehow difficult to query due to its size, we convert it to a Geopackage first. The file will be substantially bigger, but much quicker to query.
+We use the [BirdLife species distribution maps](http://datazone.birdlife.org/species/requestdis) [-@birdlife2019] to determine the extents of our analyses. As this data is provided in an ESRI File Geodatabase that is somehow difficult to query due to its size, we convert it to a Geopackage first. The file will be substantially bigger, but much quicker to query.
 
 ```{r convert_geodatabase_to_geopackage, eval=FALSE, include=TRUE}
 ogr2ogr("data/raw/birdlife/BOTW.gdb", "data/raw/birdlife/BOTW.gpkg", f = "GPKG", nlt = "MULTIPOLYGON", sql = "SELECT * FROM All_Species", progress = TRUE)
@@ -20,7 +20,7 @@ ogr2ogr("data/raw/birdlife/BOTW.gdb", "data/raw/birdlife/BOTW.gpkg", f = "GPKG",
 
 ## Load species trends
 
-We will use species trends derived from PECBMS, the Pan-European Common Bird Monitoring Scheme, which contains trends for 179 European breeding birds.
+We will use species trends derived from [PECBMS](https://pecbms.info/trends-and-indicators/species-trends/), the Pan-European Common Bird Monitoring Scheme, which contains trends for 179 European breeding birds.
 
 ```{r load_trend_dataset}
 colnames_species <- c("euring", "species", "namenote", "trend_long", "trend_short", "trend_long_slope",
@@ -30,12 +30,12 @@ coltypes_species <- "ncnnnnnnncccc"
 
 species <- read_delim("data/raw/pecbms/pecbms-europe-indicesandtrends-2019.csv", delim = ";", 
                       col_names = colnames_species, col_types = coltypes_species, skip = 1)
-species
+head(species)
 ```
 
 ## Loading species traits
 
-We use Storchova & Horak, 2018 to add life-history characteristics to the species in the PECBMS trends dataset.
+We download a dataset of life-history characteristics (LHC) by Storchová & Hořák [-@storchova2018].
 
 ```{r download_life_history_characteristics}
 if (!file.exists("data/raw/life-history-characteristics/Life-history characteristics of European birds.txt")) {
@@ -72,7 +72,8 @@ We can inspect for which species no migration strategy has been found yet becaus
 
 ```{r display_mismatched_species}
 species %>%
-  filter(is.na(family))
+  filter(is.na(family)) %>%
+  head()
 ```
 
 We can now manually change the scientific names in the life-history characteristics dataset to match with the PECBMS dataset.
@@ -113,7 +114,7 @@ species %>%
   drop_na(family) %>%
   identity() -> species
 
-species
+head(species)
 ```
 
 ## Select migratory species
@@ -124,7 +125,7 @@ We now have a dataset of `r nrow(species)` species, but we are merely interested
 species %>%
   filter(sedentary != 1 & facultative != 1) -> species
 
-species
+head(species)
 ```
 
 ## Match names to BirdLife taxonomy
@@ -143,8 +144,11 @@ Once again, we see which species are not matched and tweak these manually to mat
 
 ```{r}
 species %>%
-  filter(is.na(family_birdlife))
+  filter(is.na(family_birdlife)) %>%
+  head()
 ```
+
+And we tweak those species manually.
 
 ```{r tweak_scientific_names_birdlife}
 name_replacements_birdlife <-
@@ -164,9 +168,9 @@ species$species_birdlife <- speciesnames
 
 ## Querying distribution maps
 
-Now that we have gathered the species trends and selected only migratory species, we can query the database to select the corresponding distribution maps. As some species are distributed over massive areas, we already select only these species distributions that intersect with the bounding box of Africa.
+Now that we have gathered the species trends and selected only migratory species, we can query the database to select the corresponding distribution maps. As some species are distributed over massive areas, we select only these parts of their distributions that intersect with the bounding box of Africa.
 
-```{r query_geodatabase, eval=FALSE}
+```{r query_geodatabase, results='hide'}
 species_query <- str_sub(str_replace_all(toString(paste0("SCINAME = '", species$species_birdlife, "' OR ")), " OR , ", " OR "),
                          start = 1, end = -5)
 query <- paste("SELECT * FROM All_Species WHERE (", species_query, ") AND PRESENCE = 1 AND SEASONAL = 3", sep = "")
@@ -179,7 +183,7 @@ ogr2ogr("data/raw/birdlife/BOTW.gpkg", "data/processed/TrendSpecies.gpkg", sql =
 
 We can now join these datasets again and save them for upcoming analysis steps.
 
-```{r join_species_distributions_trends, echo=FALSE}
+```{r join_species_distributions_trends, results='hide', warning=FALSE, message=FALSE}
 st_read("data/processed/TrendSpecies.gpkg") %>%
   group_by(SCINAME) %>%
   summarise(species = SCINAME, geometry = st_union(st_buffer(geom, dist = 0))) %>%
@@ -189,4 +193,3 @@ st_read("data/processed/TrendSpecies.gpkg") %>%
 
 saveRDS(trendspecies, file = "data/processed/trendspecies.RDS")
 ```
-
