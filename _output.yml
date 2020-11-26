@@ -1,0 +1,5 @@
+bookdown::bs4_book:
+  theme:
+    primary: "#274E82"
+  repo: https://github.com/barthoekstra/envirpred
+  df_print: kable

@@ -1,0 +1,12 @@
+book_filename: EnvirPred
+repo: https://github.com/barthoekstra/envirpred
+view: https://github.com/barthoekstra/envirpred/blob/main/%s
+edit: https://github.com/barthoekstra/envirpred/edit/main/%s
+output_dir: docs
+delete_merged_file: true
+new_session: false
+rmd_files:
+- "index.Rmd"
+- "01.GEE-Harmonic-regression.Rmd"
+- "02.Preprocess-bird-trends-distribution-maps.Rmd"
+- "References.Rmd"
