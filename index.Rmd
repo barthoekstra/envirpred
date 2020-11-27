@@ -19,7 +19,7 @@ The entire analysis contained in this book can be reproduced by running the foll
 bookdown::render_book("index.Rmd")
 ```
 
-It may be necessary to install some additional packages to make use the `bs4_book` template for this book.
+It may be necessary to install some additional packages to make use of the `bs4_book` template for this book.
 
 ```{r bookdown_dependencies, eval=FALSE}
 install.packages("remotes")
