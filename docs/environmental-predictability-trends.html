@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>4 Environmental predictability &amp; trends | Environmental predictability &amp; Population trends</title>
+<meta name="author" content="Bart Hoekstra">
+<!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.2"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.5.1/jquery-3.5.1.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link href="libs/bootstrap-4.5.3/bootstrap.min.css" rel="stylesheet">
+<script src="libs/bootstrap-4.5.3/bootstrap.bundle.min.js"></script><script src="libs/bs3compat-0.2.3.9000/tabs.js"></script><script src="libs/bs3compat-0.2.3.9000/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
+<script src="libs/bs4_book-1.0.0/bs4_book.js"></script><script src="libs/accessible-code-block-0.0.1/empty-anchor.js"></script><script src="libs/htmlwidgets-1.5.2/htmlwidgets.js"></script><link href="libs/leaflet-1.3.1/leaflet.css" rel="stylesheet">
+<script src="libs/leaflet-1.3.1/leaflet.js"></script><link href="libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet">
+<script src="libs/Proj4Leaflet-1.0.1/proj4-compressed.js"></script><script src="libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script><link href="libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet">
+<script src="libs/leaflet-binding-2.0.3/leaflet.js"></script><script src="libs/leaflet-providers-1.9.0/leaflet-providers_1.9.0.js"></script><script src="libs/leaflet-providers-plugin-2.0.3/leaflet-providers-plugin.js"></script><script src="https://cdn.jsdelivr.net/autocomplete.js/0/autocomplete.jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/mark.js@8.11.1/dist/mark.min.js"></script><!-- CSS -->
+</head>
+<body data-spy="scroll" data-target="#toc">
+
+<div class="container-fluid">
+<div class="row">
+  <header class="col-sm-12 col-lg-3 sidebar sidebar-book"><a class="sr-only sr-only-focusable" href="#content">Skip to main content</a>
+
+    <div class="d-flex align-items-start justify-content-between">
+      <h1>
+        <a href="index.html" title="Linking environmental predictability to assemblage population trends of Afro-Palearctic migrants">Environmental predictability &amp; Population trends</a>:
+        <small class="text-muted">Linking environmental predictability to assemblage population trends of Afro-Palearctic migrants</small>
+      </h1>
+      <button class="btn btn-outline-primary d-lg-none ml-2 mt-1" type="button" data-toggle="collapse" data-target="#main-nav" aria-expanded="true" aria-controls="main-nav"><i class="fas fa-bars"></i><span class="sr-only">Show table of contents</span></button>
+    </div>
+
+    <div id="main-nav" class="collapse-lg">
+      <form role="search">
+        <input id="search" class="form-control" type="search" placeholder="Search" aria-label="Search">
+</form>
+
+      <nav aria-label="Table of contents"><h2>Table of contents</h2>
+        <ul class="book-toc list-unstyled">
+<li><a class="" href="index.html">Introduction</a></li>
+<li><a class="" href="gee-harmonic-regression.html"><span class="header-section-number">1</span> GEE: Harmonic Regression</a></li>
+<li><a class="" href="preprocess-bird-trends-and-distribution-maps.html"><span class="header-section-number">2</span> Preprocess bird trends and distribution maps</a></li>
+<li><a class="" href="species-assemblage-trends.html"><span class="header-section-number">3</span> Species assemblage trends</a></li>
+<li><a class="active" href="environmental-predictability-trends.html"><span class="header-section-number">4</span> Environmental predictability &amp; trends</a></li>
+<li class="book-part">Other</li>
+<li><a class="" href="references.html"><span class="header-section-number">5</span> References</a></li>
+</ul>
+
+        <div class="book-extra">
+          <p><a id="book-repo" href="https://github.com/barthoekstra/envirpred">View book source <i class="fab fa-github"></i></a></p>
+        </div>
+      </nav>
+</div>
+  </header><main class="col-sm-12 col-md-9 col-lg-7" id="content"><div id="environmental-predictability-trends" class="section level1">
+<h1>
+<span class="header-section-number">4</span> Environmental predictability &amp; trends<a class="anchor" aria-label="anchor" href="#environmental-predictability-trends"><i class="fas fa-link"></i></a>
+</h1>
+<p>We applied harmonic regression to datasets containing the following variables:</p>
+<ol style="list-style-type: decimal">
+<li>
+<code>NDVI</code> <em>Normalized Difference Vegetation Index</em> from the <a href="https://developers.google.com/earth-engine/datasets/catalog/NASA_GIMMS_3GV0">GIMMS NDVI from AVHRR Sensors 3rd Generation</a> dataset</li>
+<li>
+<code>AET</code> <em>Actual Evapotranspiration</em> from the <a href="https://developers.google.com/earth-engine/datasets/catalog/IDAHO_EPSCOR_TERRACLIMATE">TerraClimate</a> dataset</li>
+<li>
+<code>PR</code> <em>Precipitation accumulation</em> from the <a href="https://developers.google.com/earth-engine/datasets/catalog/IDAHO_EPSCOR_TERRACLIMATE">TerraClimate</a> dataset</li>
+<li>
+<code>TMMX</code> <em>Maximum temperature</em> from the <a href="https://developers.google.com/earth-engine/datasets/catalog/IDAHO_EPSCOR_TERRACLIMATE">TerraClimate</a> dataset</li>
+<li>
+<code>TMMN</code> <em>Minimum temperature</em> from the <a href="https://developers.google.com/earth-engine/datasets/catalog/IDAHO_EPSCOR_TERRACLIMATE">TerraClimate</a> dataset</li>
+</ol>
+<p>All datasets contain monthly aggregates.</p>
+<div id="combine-environmental-datasets-and-trend-datasets" class="section level2">
+<h2>
+<span class="header-section-number">4.1</span> Combine environmental datasets and trend datasets<a class="anchor" aria-label="anchor" href="#combine-environmental-datasets-and-trend-datasets"><i class="fas fa-link"></i></a>
+</h2>
+<p>We need to combine the predictors (environmental factors) and response (assemblage trends) to a single dataset before modelling. We will also limit the data spatially by the outline of the African continent (including Madagascar).</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">africa_outline</span> <span class="op">&lt;-</span> <span class="fu">st_read</span><span class="op">(</span><span class="st">"data/raw/Africa.gpkg"</span><span class="op">)</span>
+
+<span class="va">load_raster</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">rasterpath</span>, <span class="va">bandnames</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/stack.html">stack</a></span><span class="op">(</span><span class="va">rasterpath</span><span class="op">)</span>
+  <span class="va">band_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">r</span><span class="op">)</span> <span class="op">%in%</span> <span class="va">bandnames</span><span class="op">)</span>
+  <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="va">band_ids</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu">raster</span><span class="op">(</span><span class="va">rasterpath</span>, band <span class="op">=</span> <span class="va">x</span><span class="op">)</span><span class="op">)</span>
+<span class="op">}</span>
+
+<span class="va">ndvi</span> <span class="op">&lt;-</span> <span class="fu">load_raster</span><span class="op">(</span><span class="st">"data/raw/gee/ndvi_1.tif"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"residuals"</span>, <span class="st">"slope"</span><span class="op">)</span><span class="op">)</span>
+<span class="va">pr</span> <span class="op">&lt;-</span> <span class="fu">load_raster</span><span class="op">(</span><span class="st">"data/raw/gee/pr_1.tif"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"residuals"</span>, <span class="st">"slope"</span><span class="op">)</span><span class="op">)</span>
+<span class="va">aet</span> <span class="op">&lt;-</span> <span class="fu">load_raster</span><span class="op">(</span><span class="st">"data/raw/gee/aet_1.tif"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"residuals"</span>, <span class="st">"slope"</span><span class="op">)</span><span class="op">)</span>
+<span class="va">tmmn</span> <span class="op">&lt;-</span> <span class="fu">load_raster</span><span class="op">(</span><span class="st">"data/raw/gee/tmmn_1.tif"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"residuals"</span>, <span class="st">"slope"</span><span class="op">)</span><span class="op">)</span>
+<span class="va">tmmx</span> <span class="op">&lt;-</span> <span class="fu">load_raster</span><span class="op">(</span><span class="st">"data/raw/gee/tmmx_1.tif"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"residuals"</span>, <span class="st">"slope"</span><span class="op">)</span><span class="op">)</span>
+
+<span class="va">trend_long_assemblage</span> <span class="op">&lt;-</span> <span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html">raster</a></span><span class="op">(</span><span class="st">"data/processed/trend_long_assemblage.tif"</span><span class="op">)</span>
+<span class="va">trend_short_assemblage</span> <span class="op">&lt;-</span> <span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html">raster</a></span><span class="op">(</span><span class="st">"data/processed/trend_short_assemblage.tif"</span><span class="op">)</span>
+<span class="va">trend_long_counts</span> <span class="op">&lt;-</span> <span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html">raster</a></span><span class="op">(</span><span class="st">"data/processed/trend_long_counts.tif"</span><span class="op">)</span>
+<span class="va">trend_short_counts</span> <span class="op">&lt;-</span> <span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html">raster</a></span><span class="op">(</span><span class="st">"data/processed/trend_short_counts.tif"</span><span class="op">)</span>
+
+<span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">brick</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">ndvi</span>, <span class="va">pr</span>, <span class="va">aet</span>, <span class="va">tmmn</span>, <span class="va">tmmx</span>, <span class="va">trend_long_assemblage</span>, <span class="va">trend_short_assemblage</span>, <span class="va">trend_long_counts</span>, <span class="va">trend_short_counts</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"ndvi_resid"</span>, <span class="st">"ndvi_trend"</span>, <span class="st">"pr_resid"</span>, <span class="st">"pr_trend"</span>, <span class="st">"aet_resid"</span>, <span class="st">"aet_trend"</span>, 
+                 <span class="st">"tmmn_resid"</span>, <span class="st">"tmmn_trend"</span>, <span class="st">"tmmx_resid"</span>, <span class="st">"tmmx_trend"</span>, <span class="st">"trend_long"</span>, <span class="st">"trend_short"</span>, <span class="st">"count_long"</span>, <span class="st">"count_short"</span><span class="op">)</span>
+
+<span class="va">data_stars</span> <span class="op">&lt;-</span> <span class="fu">st_as_stars</span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">[</span><span class="va">africa</span><span class="op">]</span></code></pre></div>
+<pre><code>## although coordinates are longitude/latitude, st_intersects assumes that they are planar</code></pre>
+<pre><code>## Reading layer `Africa-Dissolved' from data source `/mnt/envirpred/raw/Africa.gpkg' using driver `GPKG'
+## Simple feature collection with 1 feature and 2 fields
+## geometry type:  MULTIPOLYGON
+## dimension:      XY
+## bbox:           xmin: -25.3618 ymin: -50.01889 xmax: 77.60327 ymax: 37.55986
+## CRS:            4326</code></pre>
+<p>To confirm that worked, let’s plot the output.</p>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">data_stars</span><span class="op">)</span></code></pre></div>
+<div class="inline-figure"><img src="EnvirPred_files/figure-html/plot_stars_data-1.png" width="100%"></div>
+</div>
+<div id="save-modeling-dataset" class="section level2">
+<h2>
+<span class="header-section-number">4.2</span> Save modeling dataset<a class="anchor" aria-label="anchor" href="#save-modeling-dataset"><i class="fas fa-link"></i></a>
+</h2>
+<p>We will now save the <code>stars</code> brick and a dataframe for modeling.</p>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">data_stars</span>, file <span class="op">=</span> <span class="st">"data/processed/data_stars.RDS"</span><span class="op">)</span>
+
+<span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">data_stars</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">`colnames&lt;-`</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="st">"y"</span>, <span class="st">"variable"</span>, <span class="st">"value"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">pivot_wider</span><span class="op">(</span>names_from <span class="op">=</span> <span class="va">variable</span>, values_from <span class="op">=</span> <span class="va">value</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">drop_na</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu"><a href="https://rdrr.io/r/base/identity.html">identity</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">data</span>
+
+<span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">data</span>, file <span class="op">=</span> <span class="st">"data/processed/data.RDS"</span><span class="op">)</span></code></pre></div>
+
+</div>
+</div>
+
+
+
+  <div class="chapter-nav">
+<div class="prev"><a href="species-assemblage-trends.html"><span class="header-section-number">3</span> Species assemblage trends</a></div>
+<div class="next"><a href="references.html"><span class="header-section-number">5</span> References</a></div>
+</div></main><div class="col-md-3 col-lg-2 d-none d-md-block sidebar sidebar-chapter">
+    <nav id="toc" data-toggle="toc" aria-label="On this page"><h2>On this page</h2>
+      <ul class="nav navbar-nav">
+<li><a class="nav-link" href="#environmental-predictability-trends"><span class="header-section-number">4</span> Environmental predictability &amp; trends</a></li>
+<li><a class="nav-link" href="#combine-environmental-datasets-and-trend-datasets"><span class="header-section-number">4.1</span> Combine environmental datasets and trend datasets</a></li>
+<li><a class="nav-link" href="#save-modeling-dataset"><span class="header-section-number">4.2</span> Save modeling dataset</a></li>
+</ul>
+
+      <div class="book-extra">
+        <ul class="list-unstyled">
+<li><a id="book-source" href="https://github.com/barthoekstra/envirpred/blob/master/04.Environmental-predictability-trends.Rmd">View source <i class="fab fa-github"></i></a></li>
+          <li><a id="book-edit" href="https://github.com/barthoekstra/envirpred/edit/master/04.Environmental-predictability-trends.Rmd">Edit this page <i class="fab fa-github"></i></a></li>
+        </ul>
+</div>
+    </nav>
+</div>
+
+</div>
+</div> <!-- .container -->
+
+<footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>"<strong>Environmental predictability &amp; Population trends</strong>: Linking environmental predictability to assemblage population trends of Afro-Palearctic migrants" was written by Bart Hoekstra. </p>
+  </div>
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>This book was built by the <a class="text-light" href="https://bookdown.org">bookdown</a> R package.</p>
+  </div>
+
+</div></div>
+</footer>
+</body>
+</html>

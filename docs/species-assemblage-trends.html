@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>3 Species assemblage trends | Environmental predictability &amp; Population trends</title>
+<meta name="author" content="Bart Hoekstra">
+<!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.2"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.5.1/jquery-3.5.1.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link href="libs/bootstrap-4.5.3/bootstrap.min.css" rel="stylesheet">
+<script src="libs/bootstrap-4.5.3/bootstrap.bundle.min.js"></script><script src="libs/bs3compat-0.2.3.9000/tabs.js"></script><script src="libs/bs3compat-0.2.3.9000/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
+<script src="libs/bs4_book-1.0.0/bs4_book.js"></script><script src="libs/accessible-code-block-0.0.1/empty-anchor.js"></script><script src="libs/htmlwidgets-1.5.2/htmlwidgets.js"></script><link href="libs/leaflet-1.3.1/leaflet.css" rel="stylesheet">
+<script src="libs/leaflet-1.3.1/leaflet.js"></script><link href="libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet">
+<script src="libs/Proj4Leaflet-1.0.1/proj4-compressed.js"></script><script src="libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script><link href="libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet">
+<script src="libs/leaflet-binding-2.0.3/leaflet.js"></script><script src="libs/leaflet-providers-1.9.0/leaflet-providers_1.9.0.js"></script><script src="libs/leaflet-providers-plugin-2.0.3/leaflet-providers-plugin.js"></script><script src="https://cdn.jsdelivr.net/autocomplete.js/0/autocomplete.jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/mark.js@8.11.1/dist/mark.min.js"></script><!-- CSS -->
+</head>
+<body data-spy="scroll" data-target="#toc">
+
+<div class="container-fluid">
+<div class="row">
+  <header class="col-sm-12 col-lg-3 sidebar sidebar-book"><a class="sr-only sr-only-focusable" href="#content">Skip to main content</a>
+
+    <div class="d-flex align-items-start justify-content-between">
+      <h1>
+        <a href="index.html" title="Linking environmental predictability to assemblage population trends of Afro-Palearctic migrants">Environmental predictability &amp; Population trends</a>:
+        <small class="text-muted">Linking environmental predictability to assemblage population trends of Afro-Palearctic migrants</small>
+      </h1>
+      <button class="btn btn-outline-primary d-lg-none ml-2 mt-1" type="button" data-toggle="collapse" data-target="#main-nav" aria-expanded="true" aria-controls="main-nav"><i class="fas fa-bars"></i><span class="sr-only">Show table of contents</span></button>
+    </div>
+
+    <div id="main-nav" class="collapse-lg">
+      <form role="search">
+        <input id="search" class="form-control" type="search" placeholder="Search" aria-label="Search">
+</form>
+
+      <nav aria-label="Table of contents"><h2>Table of contents</h2>
+        <ul class="book-toc list-unstyled">
+<li><a class="" href="index.html">Introduction</a></li>
+<li><a class="" href="gee-harmonic-regression.html"><span class="header-section-number">1</span> GEE: Harmonic Regression</a></li>
+<li><a class="" href="preprocess-bird-trends-and-distribution-maps.html"><span class="header-section-number">2</span> Preprocess bird trends and distribution maps</a></li>
+<li><a class="active" href="species-assemblage-trends.html"><span class="header-section-number">3</span> Species assemblage trends</a></li>
+<li><a class="" href="environmental-predictability-trends.html"><span class="header-section-number">4</span> Environmental predictability &amp; trends</a></li>
+<li class="book-part">Other</li>
+<li><a class="" href="references.html"><span class="header-section-number">5</span> References</a></li>
+</ul>
+
+        <div class="book-extra">
+          <p><a id="book-repo" href="https://github.com/barthoekstra/envirpred">View book source <i class="fab fa-github"></i></a></p>
+        </div>
+      </nav>
+</div>
+  </header><main class="col-sm-12 col-md-9 col-lg-7" id="content"><div id="species-assemblage-trends" class="section level1">
+<h1>
+<span class="header-section-number">3</span> Species assemblage trends<a class="anchor" aria-label="anchor" href="#species-assemblage-trends"><i class="fas fa-link"></i></a>
+</h1>
+<p>In this study we follow the methodology of Beresford et al. <span class="citation"><sup><a href="references.html#ref-beresford2018" role="doc-biblioref">3</a></sup></span> and calculate an assemblage trend across our entire study area. If we assume environmental factors in wintering areas (in this case Africa) play some role towards influencing species trends, areas where assemblage trends (the product of individual species trends) are higher are more likely to provide beneficial environmental factors and vice versa.</p>
+<div id="calculate-assemblage-trends" class="section level2">
+<h2>
+<span class="header-section-number">3.1</span> Calculate assemblage trends<a class="anchor" aria-label="anchor" href="#calculate-assemblage-trends"><i class="fas fa-link"></i></a>
+</h2>
+<p>We calculate long- and short-term assemblage trends based on the PECBMS long-term and short-term trends. We use the raster of <code>NDVI</code> predictability as a template to project these values onto. Additionally, we will calculate the number of species that occur within these assemblages.</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">trendspecies</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/trendspecies.RDS"</span><span class="op">)</span>
+
+<span class="va">trend_long_raster</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="op">)</span>
+<span class="va">trend_short_raster</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="op">)</span>
+
+<span class="va">template_raster</span> <span class="op">&lt;-</span> <span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html">raster</a></span><span class="op">(</span><span class="st">"data/raw/gee/ndvi_1.tif"</span><span class="op">)</span>
+
+<span class="co"># Rasterize distribution maps of individual species and assign trend to pixel values</span>
+<span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">trendspecies</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">trend_long_raster</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">fasterize</span><span class="op">(</span><span class="va">trendspecies</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span>, raster <span class="op">=</span> <span class="va">template_raster</span>, field <span class="op">=</span> <span class="st">"trend_long"</span><span class="op">)</span>
+  <span class="va">trend_short_raster</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">fasterize</span><span class="op">(</span><span class="va">trendspecies</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span>, raster <span class="op">=</span> <span class="va">template_raster</span>, field <span class="op">=</span> <span class="st">"trend_short"</span><span class="op">)</span>
+<span class="op">}</span>
+
+<span class="co"># Turn list of rasters into raster bricks for calculations</span>
+<span class="va">trend_long_raster</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/warning.html">suppressWarnings</a></span><span class="op">(</span><span class="fu">brick</span><span class="op">(</span><span class="va">trend_long_raster</span><span class="op">)</span><span class="op">)</span>
+<span class="va">trend_short_raster</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/warning.html">suppressWarnings</a></span><span class="op">(</span><span class="fu">brick</span><span class="op">(</span><span class="va">trend_short_raster</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">trend_long_raster</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">trendspecies</span><span class="op">[</span>, <span class="st">"species"</span><span class="op">]</span><span class="op">$</span><span class="va">species</span>
+<span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">trend_short_raster</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">trendspecies</span><span class="op">[</span>, <span class="st">"species"</span><span class="op">]</span><span class="op">$</span><span class="va">species</span>
+
+<span class="co"># Calculate assemblage trend</span>
+<span class="va">trend_long_assemblage</span> <span class="op">&lt;-</span> <span class="fu">calc</span><span class="op">(</span><span class="va">trend_long_raster</span>, <span class="va">mean</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+<span class="va">trend_short_assemblage</span> <span class="op">&lt;-</span> <span class="fu">calc</span><span class="op">(</span><span class="va">trend_short_raster</span>, <span class="va">mean</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+
+<span class="co"># Reclassify trends to NA or 1</span>
+<span class="va">trend_long_counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/warning.html">suppressWarnings</a></span><span class="op">(</span><span class="fu">reclassify</span><span class="op">(</span><span class="va">trend_long_raster</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="cn">Inf</span>, <span class="cn">Inf</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+<span class="va">trend_short_counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/warning.html">suppressWarnings</a></span><span class="op">(</span><span class="fu">reclassify</span><span class="op">(</span><span class="va">trend_short_raster</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="cn">Inf</span>, <span class="cn">Inf</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+
+<span class="co"># Calculate number of species that make up an assemblage</span>
+<span class="va">trend_long_counts</span> <span class="op">&lt;-</span> <span class="fu">calc</span><span class="op">(</span><span class="va">trend_long_counts</span>, <span class="va">sum</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+<span class="va">trend_short_counts</span> <span class="op">&lt;-</span> <span class="fu">calc</span><span class="op">(</span><span class="va">trend_short_counts</span>, <span class="va">sum</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+
+<span class="co"># Write rasters to files</span>
+<span class="fu">writeRaster</span><span class="op">(</span><span class="va">trend_long_assemblage</span>, file <span class="op">=</span> <span class="st">"data/processed/trend_long_assemblage.tif"</span>, overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+<span class="fu">writeRaster</span><span class="op">(</span><span class="va">trend_short_assemblage</span>, file <span class="op">=</span> <span class="st">"data/processed/trend_short_assemblage.tif"</span>, overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+<span class="fu">writeRaster</span><span class="op">(</span><span class="va">trend_long_counts</span>, file <span class="op">=</span> <span class="st">"data/processed/trend_long_counts.tif"</span>, overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+<span class="fu">writeRaster</span><span class="op">(</span><span class="va">trend_short_counts</span>, file <span class="op">=</span> <span class="st">"data/processed/trend_short_counts.tif"</span>, overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+</div>
+<div id="plot-assemblage-trends" class="section level2">
+<h2>
+<span class="header-section-number">3.2</span> Plot assemblage trends<a class="anchor" aria-label="anchor" href="#plot-assemblage-trends"><i class="fas fa-link"></i></a>
+</h2>
+<p>Let’s make a quick plot of the assemblage trends side by side</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">trend_long_assemblage</span>, main <span class="op">=</span> <span class="st">"Long-term assemblage trend"</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">trend_short_assemblage</span>, main <span class="op">=</span> <span class="st">"Short-term assemblage trend"</span><span class="op">)</span></code></pre></div>
+<div class="inline-figure">
+<img src="EnvirPred_files/figure-html/plot_assemblage_trends-1.png" width="100%">
+And a similar plot for the number of species that the assemblages consist of.</div>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">trend_long_counts</span>, main <span class="op">=</span> <span class="st">"# spp. in long-term assemblage"</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">trend_short_counts</span>, main <span class="op">=</span> <span class="st">"# spp. in short-term assemblage"</span><span class="op">)</span></code></pre></div>
+<div class="inline-figure"><img src="EnvirPred_files/figure-html/plot_assemblage_compositions-1.png" width="100%"></div>
+
+</div>
+</div>
+  <div class="chapter-nav">
+<div class="prev"><a href="preprocess-bird-trends-and-distribution-maps.html"><span class="header-section-number">2</span> Preprocess bird trends and distribution maps</a></div>
+<div class="next"><a href="environmental-predictability-trends.html"><span class="header-section-number">4</span> Environmental predictability &amp; trends</a></div>
+</div></main><div class="col-md-3 col-lg-2 d-none d-md-block sidebar sidebar-chapter">
+    <nav id="toc" data-toggle="toc" aria-label="On this page"><h2>On this page</h2>
+      <ul class="nav navbar-nav">
+<li><a class="nav-link" href="#species-assemblage-trends"><span class="header-section-number">3</span> Species assemblage trends</a></li>
+<li><a class="nav-link" href="#calculate-assemblage-trends"><span class="header-section-number">3.1</span> Calculate assemblage trends</a></li>
+<li><a class="nav-link" href="#plot-assemblage-trends"><span class="header-section-number">3.2</span> Plot assemblage trends</a></li>
+</ul>
+
+      <div class="book-extra">
+        <ul class="list-unstyled">
+<li><a id="book-source" href="https://github.com/barthoekstra/envirpred/blob/master/03.Assemblage-trends.Rmd">View source <i class="fab fa-github"></i></a></li>
+          <li><a id="book-edit" href="https://github.com/barthoekstra/envirpred/edit/master/03.Assemblage-trends.Rmd">Edit this page <i class="fab fa-github"></i></a></li>
+        </ul>
+</div>
+    </nav>
+</div>
+
+</div>
+</div> <!-- .container -->
+
+<footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>"<strong>Environmental predictability &amp; Population trends</strong>: Linking environmental predictability to assemblage population trends of Afro-Palearctic migrants" was written by Bart Hoekstra. </p>
+  </div>
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>This book was built by the <a class="text-light" href="https://bookdown.org">bookdown</a> R package.</p>
+  </div>
+
+</div></div>
+</footer>
+</body>
+</html>
