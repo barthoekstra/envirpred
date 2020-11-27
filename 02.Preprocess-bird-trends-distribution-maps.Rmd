@@ -142,7 +142,7 @@ species %>%
 
 Once again, we see which species are not matched and tweak these manually to match with the BirdLife dataset.
 
-```{r}
+```{r display_mismatched_species_again}
 species %>%
   filter(is.na(family_birdlife)) %>%
   head()
@@ -199,7 +199,7 @@ saveRDS(trendspecies, file = "data/processed/trendspecies.RDS")
 Finally the following species have now been included in this analysis, based on their distribution ranges and migratory behavior.
 
 ```{r species_included}
-trendspecies %>% 
+readRDS("data/processed/trendspecies.RDS") %>% 
   st_drop_geometry() %>%
   ungroup() %>%
   dplyr::select(species, common_name_birdlife) %>%
