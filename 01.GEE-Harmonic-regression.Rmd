@@ -4,8 +4,7 @@ In this project we want to explore to what degree environmental predictability c
 
 To be able to run this harmonic time series analysis on a fine-scale across the full extent of wintering ranges of these birds, we use the [Google Earth Engine](https://earthengine.google.com) (GEE).
 
-## Processing environment
-```{r setup_rgee_environment}
+```{r setup_rgee_environment, include=FALSE}
 library(rgee)
 library(sf)
 library(leaflet)
