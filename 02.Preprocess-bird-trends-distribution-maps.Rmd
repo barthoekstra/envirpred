@@ -183,7 +183,7 @@ ogr2ogr("data/raw/birdlife/BOTW.gpkg", "data/processed/TrendSpecies.gpkg", sql =
 
 We can now join these datasets again and save them for upcoming analysis steps.
 
-```{r join_species_distributions_trends, results='hide', warning=FALSE, message=FALSE}
+```{r join_species_distributions_trends, results='hide', warning=FALSE, message=FALSE, eval=FALSE}
 st_read("data/processed/TrendSpecies.gpkg") %>%
   group_by(SCINAME) %>%
   summarise(species = SCINAME, geometry = st_union(st_buffer(geom, dist = 0))) %>%
@@ -192,4 +192,16 @@ st_read("data/processed/TrendSpecies.gpkg") %>%
   identity() -> trendspecies
 
 saveRDS(trendspecies, file = "data/processed/trendspecies.RDS")
+```
+
+## Species included in the analysis
+
+Finally the following species have now been included in this analysis, based on their distribution ranges and migratory behavior.
+
+```{r species_included}
+trendspecies %>% 
+  st_drop_geometry() %>%
+  ungroup() %>%
+  dplyr::select(species, common_name_birdlife) %>%
+  rename(`Scientific name` = species, `Common name (BirdLife)` = common_name_birdlife)
 ```
