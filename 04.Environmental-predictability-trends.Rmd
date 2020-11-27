@@ -1,0 +1,68 @@
+# Environmental predictability & trends
+
+We applied harmonic regression to datasets containing the following variables:
+
+1. `NDVI` *Normalized Difference Vegetation Index* from the [GIMMS NDVI from AVHRR Sensors 3rd Generation](https://developers.google.com/earth-engine/datasets/catalog/NASA_GIMMS_3GV0) dataset
+1. `AET` *Actual Evapotranspiration* from the [TerraClimate](https://developers.google.com/earth-engine/datasets/catalog/IDAHO_EPSCOR_TERRACLIMATE) dataset
+1. `PR` *Precipitation accumulation* from the [TerraClimate](https://developers.google.com/earth-engine/datasets/catalog/IDAHO_EPSCOR_TERRACLIMATE) dataset
+1. `TMMX` *Maximum temperature* from the [TerraClimate](https://developers.google.com/earth-engine/datasets/catalog/IDAHO_EPSCOR_TERRACLIMATE) dataset
+1. `TMMN` *Minimum temperature* from the [TerraClimate](https://developers.google.com/earth-engine/datasets/catalog/IDAHO_EPSCOR_TERRACLIMATE) dataset
+
+All datasets contain monthly aggregates.
+
+```{r setup_envpred_preprocessing_environment, include=FALSE}
+library(stars)
+```
+
+## Combine environmental datasets and trend datasets
+
+We need to combine the predictors (environmental factors) and response (assemblage trends) to a single dataset before modelling. We will also limit the data spatially by the outline of the African continent (including Madagascar).
+
+```{r combine_environmental_and_trend_datasets, results='hold'}
+africa_outline <- st_read("data/raw/Africa.gpkg")
+
+load_raster <- function(rasterpath, bandnames) {
+  r <- stack(rasterpath)
+  band_ids <- which(names(r) %in% bandnames)
+  lapply(band_ids, function(x) raster(rasterpath, band = x))
+}
+
+ndvi <- load_raster("data/raw/gee/ndvi_1.tif", c("residuals", "slope"))
+pr <- load_raster("data/raw/gee/pr_1.tif", c("residuals", "slope"))
+aet <- load_raster("data/raw/gee/aet_1.tif", c("residuals", "slope"))
+tmmn <- load_raster("data/raw/gee/tmmn_1.tif", c("residuals", "slope"))
+tmmx <- load_raster("data/raw/gee/tmmx_1.tif", c("residuals", "slope"))
+
+trend_long_assemblage <- raster::raster("data/processed/trend_long_assemblage.tif")
+trend_short_assemblage <- raster::raster("data/processed/trend_short_assemblage.tif")
+trend_long_counts <- raster::raster("data/processed/trend_long_counts.tif")
+trend_short_counts <- raster::raster("data/processed/trend_short_counts.tif")
+
+data <- brick(c(ndvi, pr, aet, tmmn, tmmx, trend_long_assemblage, trend_short_assemblage, trend_long_counts, trend_short_counts))
+names(data) <- c("ndvi_resid", "ndvi_trend", "pr_resid", "pr_trend", "aet_resid", "aet_trend", 
+                 "tmmn_resid", "tmmn_trend", "tmmx_resid", "tmmx_trend", "trend_long", "trend_short", "count_long", "count_short")
+
+data_stars <- st_as_stars(data)[africa]
+```
+
+To confirm that worked, let's plot the output.
+
+```{r plot_stars_data, out.width='100%'}
+plot(data_stars)
+```
+
+## Save modeling dataset
+
+We will now save the `stars` brick and a dataframe for modeling.
+
+```{r}
+saveRDS(data_stars, file = "data/processed/data_stars.RDS")
+
+as.data.frame(data_stars) %>%
+  `colnames<-`(c("x", "y", "variable", "value")) %>%
+  pivot_wider(names_from = variable, values_from = value) %>%
+  drop_na() %>%
+  identity() -> data
+
+saveRDS(data, file = "data/processed/data.RDS")
+```

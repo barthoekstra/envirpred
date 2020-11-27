@@ -9,4 +9,6 @@ rmd_files:
 - "index.Rmd"
 - "01.GEE-Harmonic-regression.Rmd"
 - "02.Preprocess-bird-trends-distribution-maps.Rmd"
+- "03.Assemblage-trends.Rmd"
+- "04.Environmental-predictability-trends.Rmd"
 - "References.Rmd"
