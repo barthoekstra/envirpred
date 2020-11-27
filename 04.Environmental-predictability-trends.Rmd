@@ -55,7 +55,7 @@ plot(data_stars)
 
 We will now save the `stars` brick and a dataframe for modeling.
 
-```{r}
+```{r save_modeling_datasets}
 saveRDS(data_stars, file = "data/processed/data_stars.RDS")
 
 as.data.frame(data_stars) %>%
