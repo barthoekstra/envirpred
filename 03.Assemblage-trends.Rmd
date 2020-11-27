@@ -63,6 +63,6 @@ And a similar plot for the number of species that the assemblages consist of.
 
 ```{r plot_assemblage_compositions, out.width = '100%'}
 par(mfrow = c(1, 2))
-plot(trend_long_counts, main = "# species in long-term assemblage")
-plot(trend_short_counts, main = "# species in short-term assemblage")
+plot(trend_long_counts, main = "# spp. in long-term assemblage")
+plot(trend_short_counts, main = "# spp. in short-term assemblage")
 ```
