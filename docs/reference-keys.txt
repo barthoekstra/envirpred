@@ -9,4 +9,5 @@ loading-species-traits
 select-migratory-species
 match-names-to-birdlife-taxonomy
 querying-distribution-maps
+species-included-in-the-analysis
 references
