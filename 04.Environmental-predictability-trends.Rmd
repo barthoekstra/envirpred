@@ -42,7 +42,7 @@ data <- brick(c(ndvi, pr, aet, tmmn, tmmx, trend_long_assemblage, trend_short_as
 names(data) <- c("ndvi_resid", "ndvi_trend", "pr_resid", "pr_trend", "aet_resid", "aet_trend", 
                  "tmmn_resid", "tmmn_trend", "tmmx_resid", "tmmx_trend", "trend_long", "trend_short", "count_long", "count_short")
 
-data_stars <- st_as_stars(data)[africa]
+data_stars <- st_as_stars(data)[africa_outline]
 ```
 
 To confirm that worked, let's plot the output.
