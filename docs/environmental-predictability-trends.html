@@ -96,7 +96,7 @@
 <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"ndvi_resid"</span>, <span class="st">"ndvi_trend"</span>, <span class="st">"pr_resid"</span>, <span class="st">"pr_trend"</span>, <span class="st">"aet_resid"</span>, <span class="st">"aet_trend"</span>, 
                  <span class="st">"tmmn_resid"</span>, <span class="st">"tmmn_trend"</span>, <span class="st">"tmmx_resid"</span>, <span class="st">"tmmx_trend"</span>, <span class="st">"trend_long"</span>, <span class="st">"trend_short"</span>, <span class="st">"count_long"</span>, <span class="st">"count_short"</span><span class="op">)</span>
 
-<span class="va">data_stars</span> <span class="op">&lt;-</span> <span class="fu">st_as_stars</span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">[</span><span class="va">africa</span><span class="op">]</span></code></pre></div>
+<span class="va">data_stars</span> <span class="op">&lt;-</span> <span class="fu">st_as_stars</span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">[</span><span class="va">africa_outline</span><span class="op">]</span></code></pre></div>
 <pre><code>## although coordinates are longitude/latitude, st_intersects assumes that they are planar</code></pre>
 <pre><code>## Reading layer `Africa-Dissolved' from data source `/mnt/envirpred/raw/Africa.gpkg' using driver `GPKG'
 ## Simple feature collection with 1 feature and 2 fields
@@ -107,7 +107,7 @@
 <p>To confirm that worked, let’s plot the output.</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">data_stars</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="EnvirPred_files/figure-html/plot_stars_data-1.png" width="100%"></div>
+<div class="inline-figure"><img src="envirpred_files/figure-html/plot_stars_data-1.png" width="100%"></div>
 </div>
 <div id="save-modeling-dataset" class="section level2">
 <h2>
