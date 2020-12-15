@@ -1,0 +1,113 @@
+# Ecoregions & Biomes
+
+Environmental long-term trends and predictability may have a difference influence on assemblage trends across different ecoregions and biomes. One can, for example, imagine that in arid regions the predictability of precipitation is a more important predictor of assemblage trend than it is for regions that see much more precipitation annually, regardless of how predictable that happens to be.
+
+To account for that possible variation, we download [a dataset with ecoregions and biomes](http://ecoregions2017.appspot.com/), and add these to our dataset.
+
+```{r ecoregions_biomes_processing_environment, include=FALSE}
+library(raster)
+library(fasterize)
+library(sf)
+library(tidyverse)
+```
+
+```{r}
+template_raster <- raster::raster("data/raw/gee/ndvi_1.tif")
+africa <- st_read("data/raw/Africa.gpkg")
+
+ecoregions <- st_read("data/raw/ecoregions2017/Ecoregions2017.shp") %>%
+  select(ECO_NAME, BIOME_NAME, REALM) %>%
+  st_crop(africa)
+
+saveRDS(ecoregions, file = "data/processed/ecoregions.RDS")
+```
+
+We now rasterize the realms, biomes and ecoregions to later add them to the `stars` object created in previous chapters.
+
+```{r}
+ecoregions <- readRDS("data/processed/ecoregions.RDS")
+
+r_realms <- fasterize(st_collection_extract(ecoregions, type = "POLYGON"), template_raster, by = "REALM")
+r_biomes <- fasterize(st_collection_extract(ecoregions, type = "POLYGON"), template_raster, by = "BIOME_NAME")
+r_ecoregions <- fasterize(st_collection_extract(ecoregions, type = "POLYGON"), template_raster, by = "ECO_NAME")
+```
+
+Let's see if that worked as intended.
+
+```{r}
+plot(r_realms, 1:2)
+```
+
+The previous steps result in some `RasterBrick` layers that only contain NAs, which we should throw out to reduce memory footprint of these datasets. While we're at it, we save the rasterized polygons to a GeoTIFF file.
+
+```{r}
+empty_raster <- function(r) {
+  nr_NAs <- cellStats(is.na(r), sum)
+  if (ncell(r) == nr_NAs) { TRUE } 
+  else { FALSE }
+}
+
+empty_layers <- function(b) {
+  idx <- c()
+  for (i in 1:nlayers(b)) {
+    if (empty_raster(b[[i]])) {
+      idx <- c(idx, TRUE)
+    } else {
+      idx <- c(idx, FALSE)
+    }
+  }
+  idx
+}
+
+r_realms <- suppressWarnings(subset(r_realms, which(!empty_layers(r_realms))))
+r_biomes <- suppressWarnings(subset(r_biomes, which(!empty_layers(r_biomes))))
+r_ecoregions <- suppressWarnings(subset(r_ecoregions, which(!empty_layers(r_ecoregions))))
+
+writeRaster(r_realms, filename = "data/processed/realms.tif", overwrite = TRUE, format = "GTiff")
+writeRaster(r_biomes, filename = "data/processed/biomes.tif", overwrite = TRUE, format = "GTiff")
+writeRaster(r_ecoregions, filename = "data/processed/ecoregions.tif", overwrite = TRUE, format = "GTiff")
+```
+
+Rasterizing the ecoregion polygons removes 'elegant' names of the corresponding areas, so we save a lookup table to convert them should that be necessary later on.
+
+```{r}
+name_lookup <- function(r_names, sf_names, suffix) {
+  r_names <- data.frame(name = r_names, stringsAsFactors = FALSE)
+  sf_names <- data.frame(orig_name = as.character(droplevels(sf_names)), stringsAsFactors = FALSE)
+  sf_names$name <- str_replace_all(sf_names$orig_name, c(" " = ".", "&" = ".", "," = ".", "-" = "."))
+  
+  raster_name <- paste0("raster_name", suffix)
+  orig_name <- paste0("orig_name", suffix)
+  
+  df <- left_join(r_names, sf_names, by = "name")
+  colnames(df) <- c(raster_name, orig_name)
+  df
+}
+
+ecoregs <- name_lookup(names(r_ecoregions), ecoregions$ECO_NAME, "_ecoreg")
+realms <- name_lookup(names(r_realms), ecoregions$REALM, "_realm")
+biomes <- name_lookup(names(r_biomes), ecoregions$BIOME_NAME, "_biome")
+
+lut <- list(names(r_ecoregions), ecoregs, names(r_realms), realms, names(r_biomes), biomes)
+names(lut) <- c("ecoregions", "lut_ecoregions", "realms", "lut_realms", "biomes", "lut_biomes")
+saveRDS(lut, file = "data/processed/ecoregions_lut.RDS")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
