@@ -227,9 +227,6 @@ rgee_harmonic_regression <- function(dataset, dependent, harmonics = 1L, aoi,
     addBands(amplitudes)$
     addBands(linearTrendCoefficients)
   
-  # out <- ee_as_stars(envirpred, region = aoi$geometry()$bounds(), via = "drive", 
-  #                    scale = resolution, dsn = dsn)
-  
   out <- ee_as_stars(envirpred, region = aoi$geometry(), via = "drive", scale = resolution,
                      dsn = dsn)
   
