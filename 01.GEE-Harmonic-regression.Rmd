@@ -42,34 +42,34 @@ aet2 <- rgee_harmonic_regression(dataset = "IDAHO_EPSCOR/TERRACLIMATE", dependen
                                  aoi = aoi, resolution = res, dsn = "data/raw/gee/aet_2.tif",
                                  refdataset = "NASA/GIMMS/3GV0")
 pet1 <- rgee_harmonic_regression(dataset = "IDAHO_EPSCOR/TERRACLIMATE", dependent = "pet", harmonics = 1,
-                                 aoi = aoi, resolution = res, dsn = "data/raw/gee/pet_1.tif"
+                                 aoi = aoi, resolution = res, dsn = "data/raw/gee/pet_1.tif",
                                  refdataset = "NASA/GIMMS/3GV0")
 pet2 <- rgee_harmonic_regression(dataset = "IDAHO_EPSCOR/TERRACLIMATE", dependent = "pet", harmonics = 2,
-                                 aoi = aoi, resolution = res, dsn = "data/raw/gee/pet_2.tif"
+                                 aoi = aoi, resolution = res, dsn = "data/raw/gee/pet_2.tif",
                                  refdataset = "NASA/GIMMS/3GV0")
 pr1 <- rgee_harmonic_regression(dataset = "IDAHO_EPSCOR/TERRACLIMATE", dependent = "pr", harmonics = 1,
-                                aoi = aoi, resolution = res, dsn = "data/raw/gee/pr_1.tif"
+                                aoi = aoi, resolution = res, dsn = "data/raw/gee/pr_1.tif",
                                 refdataset = "NASA/GIMMS/3GV0")
 pr2 <- rgee_harmonic_regression(dataset = "IDAHO_EPSCOR/TERRACLIMATE", dependent = "pr", harmonics = 2,
-                                aoi = aoi, resolution = res, dsn = "data/raw/gee/pr_2.tif"
+                                aoi = aoi, resolution = res, dsn = "data/raw/gee/pr_2.tif",
                                 refdataset = "NASA/GIMMS/3GV0")
 tmmn1 <- rgee_harmonic_regression(dataset = "IDAHO_EPSCOR/TERRACLIMATE", dependent = "tmmn", harmonics = 1,
-                                  aoi = aoi, resolution = res, dsn = "data/raw/gee/tmmn_1.tif"
+                                  aoi = aoi, resolution = res, dsn = "data/raw/gee/tmmn_1.tif",
                                   refdataset = "NASA/GIMMS/3GV0")
 tmmn2 <- rgee_harmonic_regression(dataset = "IDAHO_EPSCOR/TERRACLIMATE", dependent = "tmmn", harmonics = 2,
-                                  aoi = aoi, resolution = res, dsn = "data/raw/gee/tmmn_2.tif"
+                                  aoi = aoi, resolution = res, dsn = "data/raw/gee/tmmn_2.tif",
                                   refdataset = "NASA/GIMMS/3GV0")
 tmmx1 <- rgee_harmonic_regression(dataset = "IDAHO_EPSCOR/TERRACLIMATE", dependent = "tmmx", harmonics = 1,
-                                  aoi = aoi, resolution = res, dsn = "data/raw/gee/tmmx_1.tif"
+                                  aoi = aoi, resolution = res, dsn = "data/raw/gee/tmmx_1.tif",
                                   refdataset = "NASA/GIMMS/3GV0")
 tmmx2 <- rgee_harmonic_regression(dataset = "IDAHO_EPSCOR/TERRACLIMATE", dependent = "tmmx", harmonics = 2,
-                                  aoi = aoi, resolution = res, dsn = "data/raw/gee/tmmx_2.tif"
+                                  aoi = aoi, resolution = res, dsn = "data/raw/gee/tmmx_2.tif",
                                   refdataset = "NASA/GIMMS/3GV0")
-def1 <- rgee_harmonic_regression(dataset = "IDAHO_EPSCOR/TERRACLIMATE", dependent = "tmmx", harmonics = 1,
-                                 aoi = aoi, resolution = res, dsn = "data/raw/gee/def_1.tif"
+def1 <- rgee_harmonic_regression(dataset = "IDAHO_EPSCOR/TERRACLIMATE", dependent = "def", harmonics = 1,
+                                 aoi = aoi, resolution = res, dsn = "data/raw/gee/def_1.tif",
                                  refdataset = "NASA/GIMMS/3GV0")
-def2 <- rgee_harmonic_regression(dataset = "IDAHO_EPSCOR/TERRACLIMATE", dependent = "tmmx", harmonics = 2,
-                                 aoi = aoi, resolution = res, dsn = "data/raw/gee/def_2.tif"
+def2 <- rgee_harmonic_regression(dataset = "IDAHO_EPSCOR/TERRACLIMATE", dependent = "def", harmonics = 2,
+                                 aoi = aoi, resolution = res, dsn = "data/raw/gee/def_2.tif",
                                  refdataset = "NASA/GIMMS/3GV0")
 ```
 
