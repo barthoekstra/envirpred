@@ -11,7 +11,7 @@ library(sf)
 library(tidyverse)
 ```
 
-```{r}
+```{r load_ecoregions, results='hold'}
 template_raster <- raster::raster("data/raw/gee/ndvi_1.tif")
 africa <- st_read("data/raw/Africa.gpkg")
 
@@ -24,7 +24,7 @@ saveRDS(ecoregions, file = "data/processed/ecoregions.RDS")
 
 We now rasterize the realms, biomes and ecoregions to later add them to the `stars` object created in previous chapters.
 
-```{r}
+```{r rasterize_ecoregions}
 ecoregions <- readRDS("data/processed/ecoregions.RDS")
 
 r_realms <- fasterize(st_collection_extract(ecoregions, type = "POLYGON"), template_raster, by = "REALM")
@@ -34,13 +34,13 @@ r_ecoregions <- fasterize(st_collection_extract(ecoregions, type = "POLYGON"), t
 
 Let's see if that worked as intended.
 
-```{r}
+```{r plot_ecoregions_realms}
 plot(r_realms, 1:2)
 ```
 
 The previous steps result in some `RasterBrick` layers that only contain NAs, which we should throw out to reduce memory footprint of these datasets. While we're at it, we save the rasterized polygons to a GeoTIFF file.
 
-```{r}
+```{r cleanup_rasterized_ecoregions, results='hold'}
 empty_raster <- function(r) {
   nr_NAs <- cellStats(is.na(r), sum)
   if (ncell(r) == nr_NAs) { TRUE } 
@@ -70,7 +70,7 @@ writeRaster(r_ecoregions, filename = "data/processed/ecoregions.tif", overwrite 
 
 Rasterizing the ecoregion polygons removes 'elegant' names of the corresponding areas, so we save a lookup table to convert them should that be necessary later on.
 
-```{r}
+```{r create_ecoregion_lookup_table, results='hold'}
 name_lookup <- function(r_names, sf_names, suffix) {
   r_names <- data.frame(name = r_names, stringsAsFactors = FALSE)
   sf_names <- data.frame(orig_name = as.character(droplevels(sf_names)), stringsAsFactors = FALSE)
@@ -92,22 +92,4 @@ lut <- list(names(r_ecoregions), ecoregs, names(r_realms), realms, names(r_biome
 names(lut) <- c("ecoregions", "lut_ecoregions", "realms", "lut_realms", "biomes", "lut_biomes")
 saveRDS(lut, file = "data/processed/ecoregions_lut.RDS")
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
