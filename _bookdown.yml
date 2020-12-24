@@ -11,5 +11,7 @@ rmd_files:
 - "01.GEE-Harmonic-regression.Rmd"
 - "02.Preprocess-bird-trends-distribution-maps.Rmd"
 - "03.Assemblage-trends.Rmd"
-- "04.Environmental-predictability-trends.Rmd"
+- "04.Ecoregions-and-biomes.Rmd"
+- "05.Environmental-predictability-trends.Rmd"
+- "06.Global-model.Rmd"
 - "References.Rmd"
