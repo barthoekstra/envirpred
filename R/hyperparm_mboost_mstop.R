@@ -1,7 +1,6 @@
 library(mboost)
 library(tidyverse)
 
-data <- readRDS("data/processed/data.RDS")
 model <- readRDS("data/processed/models/mod_resids.RDS")
 outname <- "cvm_resids"
 
