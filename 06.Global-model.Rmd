@@ -28,7 +28,7 @@ We first assess correlations among predictors. As we intend to compare models us
 
 ### Pearson's correlation matrix
 
-```{r pearson_correlation_matrix, out.width=100, results='hold'}
+```{r pearson_correlation_matrix, out.width='100%', results='hold'}
 unused_predictors <- c("trend_long", "trend_short", "count_long", "count_short",
                        "def", "tmmx", "tmmn", "aet", "pet", "pr", "ndvi", "x", "y",
                        lut$ecoregions, lut$biomes, lut$realms)
@@ -66,7 +66,7 @@ We continue to see strong correlation between `pr_resid` and `ndvi_resid`, but a
 
 While we're at it, it's useful to make a pairplot of all predictor variables.
 
-```{r data_pairplot, out.width=100, results='hold'}
+```{r data_pairplot, out.width='100%', results='hold'}
 data %>%
   slice_sample(n = 1000) -> data_tiny
 
@@ -179,7 +179,7 @@ We can now finally start to model long-term assemblage trends using a `r nrow_su
 
 Exploratory modeling showed that model errors are largest in the Sahara. As only few species included in our assemblage trends inhabit this area, the assemblage trend is also least reliable (i.e. it is composed of population trends of few species). It thus makes sense to exclude these areas. We set a minimum number of species that contribute to an assemblage trend to `>5` and limit our analysis strictly to the areas south of the Sahara, which is the `Afrotropic` realm in our ecoregion dataset. To illustrate this, let's plot the number of species that are included in the assemblage trends.
 
-```{r filter_dataset_by_species_count, results='hold', out.width=100}
+```{r filter_dataset_by_species_count, results='hold', out.width='100%'}
 set.seed(42)
 data %>%
   slice_sample(n = nrow_subsample) %>% 
@@ -267,7 +267,7 @@ saveRDS(cvm_resids, file = "data/processed/models/cvm_resids.RDS")
 
 We can load the results and plot the outputs.
 
-```{r plot_cvm_results, results='hold', out.width=100}
+```{r plot_cvm_results, results='hold', out.width='100%'}
 cvm_trends <- readRDS("data/processed/models/cvm_trends.RDS")
 cvm_resids <- readRDS("data/processed/models/cvm_resids.RDS")
 
@@ -296,7 +296,7 @@ We can see that most cross-validated models seem to show stagnating model improv
 
 A quick plot of model residuals will show there is strong spatial autocorrelation in the residuals, violating the independence assumption of regression modelling.
 
-```{r plot_residual_spatial_autocorrelation, out.width=100, results='hold'}
+```{r plot_residual_spatial_autocorrelation, out.width='100%', results='hold'}
 if (!exists("mod_trends")) mod_trends <- readRDS("data/processed/models/mod_trends.RDS")
 if (!exists("mod_resids")) mod_resids <- readRDS("data/processed/models/mod_resids.RDS")
 data_subset$norac_trends <- resid(mod_trends)
@@ -348,7 +348,7 @@ saveRDS(mod_resids_rac, file = "data/processed/models/mod_resids_rac.RDS")
 
 And now let's reassess residual autocorrelation from our retrained model. If all went well, that should be visibly and substantially less than before.
 
-```{r plot_residual_spatial_autocorrelation_after_rac, out.width=100, results='hold'}
+```{r plot_residual_spatial_autocorrelation_after_rac, out.width='100%', results='hold'}
 if (!exists("mod_trends_rac")) mod_trends_rac <- readRDS("data/processed/models/mod_trends_rac.RDS")
 if (!exists("mod_resids_rac")) mod_resids_rac <- readRDS("data/processed/models/mod_resids_rac.RDS")
 data_subset$rac_trends <- resid(mod_trends_rac)
@@ -389,7 +389,7 @@ saveRDS(spc_rac_resids, file = "data/processed/models/spc_rac_resids.RDS")
 
 And we can now plot the RSAC correlograms.
 
-```{r plot_rsac, results='hold', out.width=100}
+```{r plot_rsac, results='hold', out.width='100%'}
 if (!exists("spc_norac_trends")) spc_norac_trends <- readRDS("data/processed/models/spc_norac_trends.RDS")
 if (!exists("spc_norac_resids")) spc_norac_resids <- readRDS("data/processed/models/spc_norac_resids.RDS")
 if (!exists("spc_rac_trends")) spc_rac_trends <- readRDS("data/processed/models/spc_rac_trends.RDS")
@@ -431,14 +431,14 @@ We can quantify the importance of variables within our model using the `varimp` 
 
 ##### Trends models
 
-```{r varimp_trends, results='hold', out.width=100}
+```{r varimp_trends, results='hold', out.width='100%'}
 plot(varimp(mod_trends), main = "Varimp Trends mdl")
 plot(varimp(mod_trends_rac), main = "Varimp Trends RAC mdl")
 ```
 
 ##### Predictability models
 
-```{r varimp_resids, results='hold', out.width=100}
+```{r varimp_resids, results='hold', out.width='100%'}
 plot(varimp(mod_resids), main = "Varimp Predictability mdl")
 plot(varimp(mod_resids_rac), main = "Varimp Predictability RAC mdl")
 ```
@@ -449,7 +449,7 @@ And, finally, we can have a look at the modelled effects of predictors on long-t
 
 ##### Partial effects original models
 
-```{r partial_effects_simple_original, out.width=100}
+```{r partial_effects_simple_original, out.width='100%'}
 par(mfrow = c(2, 3))
 plot(mod_trends)
 
@@ -459,7 +459,7 @@ plot(mod_resids)
 
 ##### Partial effects RAC models
 
-```{r partial_effects_simple_rac, out.width=100}
+```{r partial_effects_simple_rac, out.width='100%'}
 par(mfrow = c(2, 3))
 plot(mod_trends_rac)
 
