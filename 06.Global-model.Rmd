@@ -1,0 +1,469 @@
+# Global model
+
+In previous chapters we have prepared a dataset for modelling, which we can now start to use.
+
+```{r setup_global_modeling_environment, include=FALSE}
+library(tidyverse)
+library(ggstatsplot)
+library(GGally)
+library(mlr3)
+library(mlr3learners)
+library(mlr3extralearners)
+library(mlr3spatiotempcv)
+library(mlr3pipelines)
+library(mlr3tuning)
+library(mlr3viz)
+library(paradox)
+library(mboost)
+library(patchwork)
+library(spdep)
+library(Metrics)
+data <- readRDS("data/processed/data.RDS")
+lut <- readRDS("data/processed/ecoregions_lut.RDS")
+```
+
+## Correlation among predictors
+
+We first assess correlations among predictors. As we intend to compare models using environmental predictability with those of long-term trends we separate the correlation matrices for both.
+
+### Pearson's correlation matrix
+
+```{r pearson_correlation_matrix, out.width=100, results='hold'}
+unused_predictors <- c("trend_long", "trend_short", "count_long", "count_short",
+                       "def", "tmmx", "tmmn", "aet", "pet", "pr", "ndvi", "x", "y",
+                       lut$ecoregions, lut$biomes, lut$realms)
+predictors <- colnames(data)[!colnames(data) %in% unused_predictors]
+predictors_trends <- colnames(dplyr::select(data, ends_with("_trend")))
+predictors_resids <- colnames(dplyr::select(data, ends_with("_resid")))
+
+ggcorrmat(data, cor.vars = all_of(predictors_trends), type = "parametric")
+ggcorrmat(data, cor.vars = all_of(predictors_resids), type = "parametric")
+```
+
+This indicates environmental residuals are generally correlated more strongly than long-term trends. Of the covariates, `def`, `tmmx` and `tmmn` are most strongly correlated with each other or other variables. We can reduce correlation for temperature measures by calculating the average temperature from both `tmmx` and `tmmn` and will remove `def` from our modeling dataset.
+
+```{r set_final_predictors}
+data %>%
+  rowwise() %>%
+  mutate(tm_trend = mean(c(tmmx_trend, tmmn_trend)),
+         tm_resid = mean(c(tmmx_resid, tmmn_resid))) %>%
+  ungroup() %>%
+  identity() -> data
+predictors_trends <- c(predictors_trends[!predictors_trends %in% c("tmmx_trend", "tmmn_trend", "def_trend")], "tm_trend")
+predictors_resids <- c(predictors_resids[!predictors_resids %in% c("tmmx_resid", "tmmn_resid", "def_resid")], "tm_resid")
+```
+
+And we calculate a new correlation matrix.
+
+```{r calculate_new_correlation_matrix, results='hold'}
+ggcorrmat(data, cor.vars = all_of(predictors_trends), type = "parametric")
+ggcorrmat(data, cor.vars = all_of(predictors_resids), type = "parametric")
+```
+
+We continue to see strong correlation between `pr_resid` and `ndvi_resid`, but as both original variables (`ndvi` and `pr`) are effectively uncorrelated in `ndvi_trend` and `pr_trend` and we want the trends and predictability model to be comparable, we keep both in.
+
+## Pairplot
+
+While we're at it, it's useful to make a pairplot of all predictor variables.
+
+```{r data_pairplot, out.width=100, results='hold'}
+data %>%
+  slice_sample(n = 1000) -> data_tiny
+
+ggpairs(data_tiny, columns = all_of(c(predictors_trends, "trend_long")), progress = FALSE)
+ggpairs(data_tiny, columns = all_of(c(predictors_resids, "trend_long")), progress = FALSE)
+```
+
+## Optimal dataset size
+
+The current dataset contains `r nrow(data)` rows of data, which is quite large for fast and efficient ML workflows. We will first determine how the performance of a few suitable learners depends on dataset size and then determine an optimal balance between model performance and dataset size. In other words, we determine at what point increasing the dataset size (the resampled fraction) does not improve the model performance substantially anymore. Rather than optimizing this in several steps, we will tune the hyperparameter `subsample.frac` by constructing a `GraphLearner` objects in an `mlr3` pipeline which tunes dataset size. The following chunk implements this procedure. As it may take very long to run, it's more convenient to run it only when strictly necessary from the `R/hyperparm_subsample_frac.R` file. As we can use this procedure to test suitable ML learners, we use `mboost::gamboost`, `gbm::gbm` and `xgboost::xgboost` learners in our `GraphLearner`.
+
+```{r optimize_dataset_size, eval=FALSE}
+task <- TaskRegrST$new(id = "data", backend = data, target = "trend_long", extra_args = list(coordinate_names = c("x", "y")))
+task$select(all_of(predictors))
+
+learners <- list(
+  lrn("regr.gamboost", id = "gamboost"),
+  lrn("regr.gbm", id = "gbm"),
+  lrn("regr.xgboost", id = "xgboost")
+)
+learners_ids <- sapply(learners, function(x) x$id)
+
+gr_subsample <- po("subsample") %>>%
+  po("branch", options = learners_ids) %>>%
+  gunion(lapply(learners, po)) %>>%
+  po("unbranch")
+
+grlrn_subsample <- GraphLearner$new(gr_subsample)
+
+min_nrows <- 100
+max_nrows <- 50000
+
+min_nrows_s <- log10(min_nrows) / log10(2)
+max_nrow_s <- log10(max_nrows) / log10(2)
+
+ps_subsample <- ParamSet$new(list(
+  ParamDbl$new("subsample.frac", lower = min_nrows_s, upper = max_nrow_s),
+  ParamFct$new("branch.selection", levels = learners_ids)
+))
+
+# Distribution of subsample.frac in grid can be visualised as follows
+# x <- seq(from = min_nrows_s, to = max_nrow_s, length.out = 20)
+# y <- 2^x
+# plot(x, y)
+# Beware: division by nrow(data) has to be hard-coded in the function below, somehow...
+
+ps_subsample$trafo <- function(x, param_set) {
+  x$subsample.frac <- (2^x$subsample.frac) / 314868
+  return(x)
+}
+
+resample_inner <- rsmp("cv", folds = 5)
+resample_outer <- rsmp("cv", folds = 5)
+measure <- msr("regr.rmse")
+terminator <- trm("none")
+tuner <- tnr("grid_search", resolution = 20)
+
+at <- AutoTuner$new(
+  learner = grlrn_subsample,
+  resampling = resample_inner,
+  measure = measure,
+  search_space = ps_subsample,
+  terminator = terminator,
+  tuner = tuner,
+  store_tuning_instance = TRUE,
+  store_benchmark_result = TRUE
+)
+
+future::plan("multisession", workers = 3)
+rr <- resample(task = task, learner = at, resampling = resample_outer, store_models = TRUE)
+
+saveRDS(as.data.table(rr), file = "data/processed/rr_dataset_size.RDS")
+
+rr_data <- bind_rows(lapply(rr$learners, function(x) x$model$tuning_instance$archive$data()))
+saveRDS(rr_data, file = "data/processed/rr_dataset_size_df.RDS")
+```
+
+We can now plot the results of the previous workflow and see how cross-validated model performance depends on the subsampled size of the training dataset.
+
+```{r}
+if (!exists("rr_data")) rr_data <- readRDS("data/processed/rr_dataset_size_df.RDS")
+
+rr_data %>%
+  group_by(branch.selection, subsample.frac) %>%
+  summarise(mean_rmse = mean(regr.rmse),
+            q05 = quantile(regr.rmse, 0.05),
+            q95 = quantile(regr.rmse, 0.95),
+            .groups = "drop_last") %>%
+  ungroup() %>%
+  mutate(nrows = 2^subsample.frac) %>%
+  rename(Learner = branch.selection) %>%
+  ggplot(aes(color = Learner, fill = Learner)) +
+  geom_path(aes(x = nrows, y = mean_rmse)) +
+  geom_ribbon(aes(x = nrows, ymin = q05, ymax = q95), alpha = 0.5) +
+  scale_x_continuous(trans = "log10", breaks = c(100, 500, 1000, 5000, 10000, 50000)) +
+  labs(x = "Subsample size (# rows)", y = "Model RMSE")
+```
+
+It is clear beyond 10,000 rows performance only continues to improve marginally for untuned `xgboost` learners and model improvement for the other learners has clearly hit a plateau. So, we can stick to resampling 10,000 rows from the `r nrow(data)` rows in the original dataframe for our continued statistical modelling. Additionally, untuned `gbm` seems to perform best, so that's the model we'll continue using. To be fair, given the strong algorithmic similarity between `gbm` and `xgboost`, this difference is probably mostly a consequence of default parameter values in `mlr3`, but given the popularity of `gbm` in ecology vs. `xgboost`, it makes sense to continue with `gbm`.
+
+```{r set_subsample_size}
+nrow_subsample <- 10000
+```
+
+## Modeling assemblage trends
+
+We can now finally start to model long-term assemblage trends using a `r nrow_subsample`-row subsample of the original dataset. We use a `gamboost` model as it strikes a balance between predictive accuracy and interpretability, without introducing a lot of 'jaggedness' of boosted regression trees (e.g. from `gbm` and `xgboost`) that hamper interpretability to those unfamiliar with the data.
+
+### Data filtering
+
+Exploratory modeling showed that model errors are largest in the Sahara. As only few species included in our assemblage trends inhabit this area, the assemblage trend is also least reliable (i.e. it is composed of population trends of few species). It thus makes sense to exclude these areas. We set a minimum number of species that contribute to an assemblage trend to `>5` and limit our analysis strictly to the areas south of the Sahara, which is the `Afrotropic` realm in our ecoregion dataset. To illustrate this, let's plot the number of species that are included in the assemblage trends.
+
+```{r filter_dataset_by_species_count, results='hold', out.width=100}
+set.seed(42)
+data %>%
+  slice_sample(n = nrow_subsample) %>% 
+  mutate(included = if_else((count_long > 5 & Afrotropic == 1), 1, 0, 0)) %>%
+  as.data.frame() -> data_subset
+
+xlim <- c(-20, 60)
+ylim <- c(-40, 40)
+clim <- c(min(data_subset$count_long), max(data_subset$count_long))
+
+ggplot(data_subset, aes(x = x, y = y, color = count_long)) +
+  geom_point() +
+  scale_color_viridis_c(limits = clim) +
+  labs(subtitle = "Original data",
+       x = "Longitude", y = "Latitude", color = "# species") +
+  theme(legend.position = "bottom") +
+  coord_fixed(xlim = xlim, ylim = ylim) -> original
+
+data_subset %>%
+  filter(included == 1) %>%
+  ggplot(aes(x = x, y = y, color = count_long)) +
+  geom_point() +
+  scale_color_viridis_c(limits = clim) +
+  labs(subtitle = "Filtered data",
+       x = "Longitude", y = "Latitude", color = "# species") +
+  theme(legend.position = "bottom") +
+  coord_fixed(xlim = xlim, ylim = ylim) -> filtered
+
+original + filtered + plot_annotation(title = "Species in long-term assemblage trend") +
+  plot_layout(guides = "collect") & theme(legend.position = "bottom")
+```
+
+### Training boosted GAMs
+
+The training of boosted GAMs (implemented in `mboost`) will go as follows:
+
+1. We train models predicting long term assemblage trends using long-term (linear) trends in environmental predictors and environmental predictability (model residuals from harmonic regression).
+1. We then determine the optimal number of boosting iterations using 10-fold cross-validation, as implemented in the `cvrisk` function, varying the number of boosts between 250 and 30000.
+1. We calculate the autocovariate of the residuals to correct for (strong) effects of spatial autocorrelation [@crase2012], which violates the independence assumption of regression.
+1. We retrain the model but now whilst including the residual autocovariate as a parameter.
+1. We, once again, determine the optimal number of boosting iterations on the new models. Most likely this does not differ much from the previous optimum, but it may be a bit lower because of faster convergence due to lower spatial autocorrelation.
+
+Let's start with training the models.
+
+```{r train_initial_gamboost_models}
+set.seed(42)
+data %>%
+  filter(count_long > 5,
+         Afrotropic == 1) %>%
+  slice_sample(n = nrow_subsample) %>%
+  as.data.frame() -> data_subset
+
+saveRDS(data_subset, file = "data/processed/data_subset.RDS")
+
+model_formula <- function(predictors, response, rac = TRUE) {
+  formula <- as.formula(paste0(response, " ~ ", paste0("bbs(", predictors, ")", collapse = " + ")))
+  return(formula)
+}
+
+formula_trends <- model_formula(predictors_trends, "trend_long")
+formula_resids <- model_formula(predictors_resids, "trend_long")
+
+ctrl <- boost_control(trace = FALSE, mstop = 10000)
+mod_trends <- gamboost(formula_trends[[1]], data = data_subset, family = Gaussian(), control = ctrl)
+mod_resids <- gamboost(formula_resids[[1]], data = data_subset, family = Gaussian(), control = ctrl)
+
+saveRDS(mod_trends, file = "data/processed/models/mod_trends.RDS")
+saveRDS(mod_resids, file = "data/processed/models/mod_resids.RDS")
+```
+
+#### Determine the optimal number of boosting iterations
+
+Having trained the models, we can now determine the optimal number of boosting iterations. As this is a time-consuming process, the chunk below does not run by default and it's probably best to run this cross-validation procedure separately through the dedicated `R/hyperparm_mboost_mstop.R` script.
+
+```{r determine_optimal_number_of_boosts, eval=FALSE}
+grid <- seq(from = 250, to = 30000, by = 250)
+cv10f_trends <- cv(model.weights(mod_trends), type = "kfold")
+cvm_trends <- cvrisk(mod_trends, folds = cv10f_trends, grid = grid)
+saveRDS(cvm_trends, file = "data/processed/models/cvm_trends.RDS")
+
+cv10f_resids <- cv(model.weights(mod_resids), type = "kfold")
+cvm_resids <- cvrisk(mod_resids, folds = cv10f_resids, grid = grid)
+saveRDS(cvm_resids, file = "data/processed/models/cvm_resids.RDS")
+```
+
+We can load the results and plot the outputs.
+
+```{r plot_cvm_results, results='hold', out.width=100}
+cvm_trends <- readRDS("data/processed/models/cvm_trends.RDS")
+cvm_resids <- readRDS("data/processed/models/cvm_resids.RDS")
+
+plot_cvm <- function(cvm, plot_id = "") {
+  m <- cvm
+  class(m) <- NULL
+  as.data.frame(m) %>%
+    rownames_to_column(var = "fold") %>%
+    pivot_longer(-c(fold), names_to = "boosts", values_to = "risk") %>%
+    mutate(boosts = as.numeric(boosts),
+           fold = as.factor(fold)) %>%
+    identity() %>%
+    ggplot(aes(x = boosts, y = risk, group = fold, color = fold)) +
+      geom_line() +
+      labs(title = paste0(attr(cvm, "type"), ": ", plot_id), x = "boosts (mstop)", y = attr(cvm, "risk"))
+}
+plot_cvm_trends <- plot_cvm(cvm_trends, "trends")
+plot_cvm_resids <- plot_cvm(cvm_resids, "resids")
+
+plot_cvm_trends + plot_cvm_resids + plot_layout(guides = "collect") & theme(legend.position = "bottom")
+```
+
+We can see that most cross-validated models seem to show stagnating model improvement beyond 10000 boosts, while an optimum is mostly not reached before 30000 boosts. Given the stagnating improvement, limited compute time and no need to optimize predictive performance ad infinitum, we limit the number of boosts to 10000.
+
+#### Correct for spatial autocorrelation
+
+A quick plot of model residuals will show there is strong spatial autocorrelation in the residuals, violating the independence assumption of regression modelling.
+
+```{r plot_residual_spatial_autocorrelation, out.width=100, results='hold'}
+if (!exists("mod_trends")) mod_trends <- readRDS("data/processed/models/mod_trends.RDS")
+if (!exists("mod_resids")) mod_resids <- readRDS("data/processed/models/mod_resids.RDS")
+data_subset$norac_trends <- resid(mod_trends)
+data_subset$norac_resids <- resid(mod_resids)
+
+data_subset %>%
+  select(x, y, norac_trends, norac_resids) %>%
+  rename(c(Predictability = norac_resids, Trends = norac_trends)) %>%
+  pivot_longer(-c(x, y), names_to = "model", values_to = "residuals") %>%
+  ggplot(aes(x = x, y = y, color = residuals)) +
+  geom_point() +
+  scale_color_gradient2() +
+  coord_fixed() +
+  facet_wrap(vars(model)) +
+  labs(title = "Spatial pattern of model residuals", x = "Longitude", y = "Latitude", color = "Residual")
+```
+
+There's no need to even quantify spatial autocorrelation (SAC) in residuals here, as it's so obvious. We will correct for it using the residual autocovariate method introduced by Crase et al. [-@crase2012]. We calculate the autocovariate of the residuals using a neighborhood radius of 100 kilometers. **This radius could be optimized to reflect actual SAC distances in our dataset, but for now it seems sufficient to dramatically reduce residual SAC.**
+
+```{r calculate_autocovariate_of_residuals}
+neighborhood_dist <- 100  # Kilometers if longlat = TRUE
+acov_trends <- autocov_dist(resid(mod_trends), as.matrix(cbind(data_subset$x, data_subset$y)), longlat = TRUE, 
+                            nbs = neighborhood_dist, zero.policy = TRUE)
+acov_resids <- autocov_dist(resid(mod_resids), as.matrix(cbind(data_subset$x, data_subset$y)), longlat = TRUE,
+                            nbs = neighborhood_dist, zero.policy = TRUE)
+```
+
+The chunk above may throw some warnings if some points are not within `r neighborhood_dist` kilometers from other points, but that will most certainly not be many points in our dataset, so we can accept that some of these autocovariates are not as accurate as others.
+
+Now we will add the calculated autocovariates of residuals to our earlier dataset and retrain the models.
+
+```{r retrain_model_with_residual_autocovariate}
+data_subset$autocov_trends <- acov_trends
+data_subset$autocov_resids <- acov_resids
+
+formula_rac <- function(formula, var) {
+  as.formula(paste0(paste(formula[2], formula[3], sep = " ~ "), " + bbs(", var, ")"))
+}
+
+formula_trends <- formula_rac(formula_trends, "autocov_trends")
+formula_resids <- formula_rac(formula_resids, "autocov_resids")
+
+ctrl <- boost_control(trace = FALSE, mstop = 10000)
+mod_trends_rac <- gamboost(formula_trends, data = data_subset, family = Gaussian(), control = ctrl)
+mod_resids_rac <- gamboost(formula_resids, data = data_subset, family = Gaussian(), control = ctrl)
+saveRDS(mod_trends_rac, file = "data/processed/models/mod_trends_rac.RDS")
+saveRDS(mod_resids_rac, file = "data/processed/models/mod_resids_rac.RDS")
+```
+
+And now let's reassess residual autocorrelation from our retrained model. If all went well, that should be visibly and substantially less than before.
+
+```{r plot_residual_spatial_autocorrelation_after_rac, out.width=100, results='hold'}
+if (!exists("mod_trends_rac")) mod_trends_rac <- readRDS("data/processed/models/mod_trends_rac.RDS")
+if (!exists("mod_resids_rac")) mod_resids_rac <- readRDS("data/processed/models/mod_resids_rac.RDS")
+data_subset$rac_trends <- resid(mod_trends_rac)
+data_subset$rac_resids <- resid(mod_resids_rac)
+
+data_subset %>%
+  select(x, y, rac_trends, rac_resids) %>%
+  rename(c(Predictability = rac_resids, Trends = rac_trends)) %>%
+  pivot_longer(-c(x, y), names_to = "model", values_to = "residuals") %>%
+  ggplot(aes(x = x, y = y, color = residuals)) +
+  geom_point() +
+  scale_color_gradient2() +
+  coord_fixed() +
+  facet_wrap(vars(model)) +
+  labs(title = "Spatial pattern of model residuals", subtitle = "after including residual autocovariates",
+       x = "Longitude", y = "Latitude", color = "Residual")
+```
+That is *much* better!
+
+#### Quantifying residual autocorrelation
+
+Now is a good moment to quantify residual autocorrelation (RSAC) in our model. We do so by calculating Moran's I across a number of distance classes (8) using the `sp.correlogram` function from the `spdep` package. As this is computationally very intensive, we run this calculation once in the chunk below and save the results for fast plotting during knitting of this document.
+
+```{r calculate_rsac, eval=FALSE}
+nclass <- 8  # Number of distance classes
+neighbors <- dnearneigh(as.matrix(cbind(data_subset$x, data_subset$y)), d1 = 0, d2 = neighborhood_dist, longlat = TRUE)
+
+spc_norac_trends <- sp.correlogram(neighbors, data_subset$norac_trends, order = nclass, method = "I", zero.policy = TRUE)
+spc_norac_resids <- sp.correlogram(neighbors, data_subset$norac_resids, order = nclass, method = "I", zero.policy = TRUE)
+spc_rac_trends <- sp.correlogram(neighbors, data_subset$rac_trends, order = nclass, method = "I", zero.policy = TRUE)
+spc_rac_resids <- sp.correlogram(neighbors, data_subset$rac_resids, order = nclass, method = "I", zero.policy = TRUE)
+
+saveRDS(spc_norac_trends, file = "data/processed/models/spc_norac_trends.RDS")
+saveRDS(spc_norac_resids, file = "data/processed/models/spc_norac_resids.RDS")
+saveRDS(spc_rac_trends, file = "data/processed/models/spc_rac_trends.RDS")
+saveRDS(spc_rac_resids, file = "data/processed/models/spc_rac_resids.RDS")
+```
+
+And we can now plot the RSAC correlograms.
+
+```{r plot_rsac, results='hold', out.width=100}
+if (!exists("spc_norac_trends")) spc_norac_trends <- readRDS("data/processed/models/spc_norac_trends.RDS")
+if (!exists("spc_norac_resids")) spc_norac_resids <- readRDS("data/processed/models/spc_norac_resids.RDS")
+if (!exists("spc_rac_trends")) spc_rac_trends <- readRDS("data/processed/models/spc_rac_trends.RDS")
+if (!exists("spc_rac_resids")) spc_rac_resids <- readRDS("data/processed/models/spc_rac_resids.RDS")
+
+par(mfrow = c(2, 2))
+plot(spc_norac_trends, main = "RSAC Trends mdl")
+plot(spc_norac_resids, main = "RSAC Predictability mdl")
+plot(spc_rac_trends, main = "RSAC Trends RAC mdl")
+plot(spc_rac_resids, main = "RSAC Predictability RAC mdl")
+```
+
+Adding the autocovariate of residuals seems to have helped a lot to counter residual spatial autocorrelation. **It's possible this can be improved further by tweaking the radius of the neighborhood over which the autocovariate is calculated, but that's some tweaking we can do later.**
+
+### Model outputs
+
+#### Model performance
+
+To keep it simple, we stick to good ol' RMSE and % of deviance explained to compare the performance of all these models.
+
+```{r model_performance_metrics}
+perf_metrics <- function(actual, models) {
+  rmse <- lapply(models, function(x) rmse(actual, predict(x)))
+  deviance_explained <- lapply(models, function(x) (1 - (tail(risk(x), 1) / head(risk(x), 1))) * 100)
+  m <- rbind(rmse, deviance_explained)
+  mode(m) <- "numeric"
+  m
+}
+
+pm <- as.data.frame(perf_metrics(data_subset$trend_long, list(mod_trends, mod_resids, mod_trends_rac, mod_resids_rac)))
+colnames(pm) <- c("mod_trends", "mod_resids", "mod_trends_rac", "mod_resids_rac")
+rownames(pm) <- c("RMSE", "% Deviance explained")
+pm
+```
+
+#### Variable importance
+
+We can quantify the importance of variables within our model using the `varimp` function of the `mboost` package. This returns variable importance, a measure of the total improvement to model deviance a variable is responsible for. This is weighted by the number of times a predictor is selected in the boosted models.
+
+##### Trends models
+
+```{r varimp_trends, results='hold', out.width=100}
+plot(varimp(mod_trends), main = "Varimp Trends mdl")
+plot(varimp(mod_trends_rac), main = "Varimp Trends RAC mdl")
+```
+
+##### Predictability models
+
+```{r varimp_resids, results='hold', out.width=100}
+plot(varimp(mod_resids), main = "Varimp Predictability mdl")
+plot(varimp(mod_resids_rac), main = "Varimp Predictability RAC mdl")
+```
+
+#### Partial/Marginal Effects
+
+And, finally, we can have a look at the modelled effects of predictors on long-term assemblage trends. We first compare the output of the original models.
+
+##### Partial effects original models
+
+```{r partial_effects_simple_original, out.width=100}
+par(mfrow = c(2, 3))
+plot(mod_trends)
+
+par(mfrow = c(2, 3))
+plot(mod_resids)
+```
+
+##### Partial effects RAC models
+
+```{r partial_effects_simple_rac, out.width=100}
+par(mfrow = c(2, 3))
+plot(mod_trends_rac)
+
+par(mfrow = c(2, 3))
+plot(mod_resids_rac)
+```
+
