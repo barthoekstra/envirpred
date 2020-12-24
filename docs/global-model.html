@@ -74,10 +74,10 @@
 <span class="va">predictors_resids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">data</span>, <span class="fu">ends_with</span><span class="op">(</span><span class="st">"_resid"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
 
 <span class="fu">ggcorrmat</span><span class="op">(</span><span class="va">data</span>, cor.vars <span class="op">=</span> <span class="fu">all_of</span><span class="op">(</span><span class="va">predictors_trends</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"parametric"</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="envirpred_files/figure-html/pearson_correlation_matrix-1.png" width="100"></div>
+<div class="inline-figure"><img src="envirpred_files/figure-html/pearson_correlation_matrix-1.png" width="100%"></div>
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggcorrmat</span><span class="op">(</span><span class="va">data</span>, cor.vars <span class="op">=</span> <span class="fu">all_of</span><span class="op">(</span><span class="va">predictors_resids</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"parametric"</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="envirpred_files/figure-html/pearson_correlation_matrix-2.png" width="100"></div>
+<div class="inline-figure"><img src="envirpred_files/figure-html/pearson_correlation_matrix-2.png" width="100%"></div>
 <p>This indicates environmental residuals are generally correlated more strongly than long-term trends. Of the covariates, <code>def</code>, <code>tmmx</code> and <code>tmmn</code> are most strongly correlated with each other or other variables. We can reduce correlation for temperature measures by calculating the average temperature from both <code>tmmx</code> and <code>tmmn</code> and will remove <code>def</code> from our modeling dataset.</p>
 <div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">data</span> <span class="op">%&gt;%</span>
@@ -108,10 +108,10 @@
   <span class="fu">slice_sample</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">data_tiny</span>
 
 <span class="fu">ggpairs</span><span class="op">(</span><span class="va">data_tiny</span>, columns <span class="op">=</span> <span class="fu">all_of</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">predictors_trends</span>, <span class="st">"trend_long"</span><span class="op">)</span><span class="op">)</span>, progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="envirpred_files/figure-html/data_pairplot-1.png" width="100"></div>
+<div class="inline-figure"><img src="envirpred_files/figure-html/data_pairplot-1.png" width="100%"></div>
 <div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggpairs</span><span class="op">(</span><span class="va">data_tiny</span>, columns <span class="op">=</span> <span class="fu">all_of</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">predictors_resids</span>, <span class="st">"trend_long"</span><span class="op">)</span><span class="op">)</span>, progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="envirpred_files/figure-html/data_pairplot-2.png" width="100"></div>
+<div class="inline-figure"><img src="envirpred_files/figure-html/data_pairplot-2.png" width="100%"></div>
 </div>
 <div id="optimal-dataset-size" class="section level2">
 <h2>
@@ -246,7 +246,7 @@
 
 <span class="va">original</span> <span class="op">+</span> <span class="va">filtered</span> <span class="op">+</span> <span class="fu">plot_annotation</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Species in long-term assemblage trend"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">plot_layout</span><span class="op">(</span>guides <span class="op">=</span> <span class="st">"collect"</span><span class="op">)</span> <span class="op">&amp;</span> <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="envirpred_files/figure-html/filter_dataset_by_species_count-1.png" width="100"></div>
+<div class="inline-figure"><img src="envirpred_files/figure-html/filter_dataset_by_species_count-1.png" width="100%"></div>
 </div>
 <div id="training-boosted-gams" class="section level3">
 <h3>
@@ -321,7 +321,7 @@
 <span class="va">plot_cvm_resids</span> <span class="op">&lt;-</span> <span class="fu">plot_cvm</span><span class="op">(</span><span class="va">cvm_resids</span>, <span class="st">"resids"</span><span class="op">)</span>
 
 <span class="va">plot_cvm_trends</span> <span class="op">+</span> <span class="va">plot_cvm_resids</span> <span class="op">+</span> <span class="fu">plot_layout</span><span class="op">(</span>guides <span class="op">=</span> <span class="st">"collect"</span><span class="op">)</span> <span class="op">&amp;</span> <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="envirpred_files/figure-html/plot_cvm_results-1.png" width="100"></div>
+<div class="inline-figure"><img src="envirpred_files/figure-html/plot_cvm_results-1.png" width="100%"></div>
 <p>We can see that most cross-validated models seem to show stagnating model improvement beyond 10000 boosts, while an optimum is mostly not reached before 30000 boosts. Given the stagnating improvement, limited compute time and no need to optimize predictive performance ad infinitum, we limit the number of boosts to 10000.</p>
 </div>
 <div id="correct-for-spatial-autocorrelation" class="section level4">
@@ -345,7 +345,7 @@
   <span class="fu">coord_fixed</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">facet_wrap</span><span class="op">(</span><span class="fu">vars</span><span class="op">(</span><span class="va">model</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Spatial pattern of model residuals"</span>, x <span class="op">=</span> <span class="st">"Longitude"</span>, y <span class="op">=</span> <span class="st">"Latitude"</span>, color <span class="op">=</span> <span class="st">"Residual"</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="envirpred_files/figure-html/plot_residual_spatial_autocorrelation-1.png" width="100"></div>
+<div class="inline-figure"><img src="envirpred_files/figure-html/plot_residual_spatial_autocorrelation-1.png" width="100%"></div>
 <p>There’s no need to even quantify spatial autocorrelation (SAC) in residuals here, as it’s so obvious. We will correct for it using the residual autocovariate method introduced by Crase et al. <span class="citation"><sup><a href="references.html#ref-crase2012" role="doc-biblioref">4</a></sup></span>. We calculate the autocovariate of the residuals using a neighborhood radius of 100 kilometers. <strong>This radius could be optimized to reflect actual SAC distances in our dataset, but for now it seems sufficient to dramatically reduce residual SAC.</strong></p>
 <div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">neighborhood_dist</span> <span class="op">&lt;-</span> <span class="fl">100</span>  <span class="co"># Kilometers if longlat = TRUE</span>
@@ -399,7 +399,7 @@
   <span class="fu">facet_wrap</span><span class="op">(</span><span class="fu">vars</span><span class="op">(</span><span class="va">model</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Spatial pattern of model residuals"</span>, subtitle <span class="op">=</span> <span class="st">"after including residual autocovariates"</span>,
        x <span class="op">=</span> <span class="st">"Longitude"</span>, y <span class="op">=</span> <span class="st">"Latitude"</span>, color <span class="op">=</span> <span class="st">"Residual"</span><span class="op">)</span></code></pre></div>
-<p><img src="envirpred_files/figure-html/plot_residual_spatial_autocorrelation_after_rac-1.png" width="100">
+<p><img src="envirpred_files/figure-html/plot_residual_spatial_autocorrelation_after_rac-1.png" width="100%">
 That is <em>much</em> better!</p>
 </div>
 <div id="quantifying-residual-autocorrelation" class="section level4">
@@ -432,7 +432,7 @@ That is <em>much</em> better!</p>
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">spc_norac_resids</span>, main <span class="op">=</span> <span class="st">"RSAC Predictability mdl"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">spc_rac_trends</span>, main <span class="op">=</span> <span class="st">"RSAC Trends RAC mdl"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">spc_rac_resids</span>, main <span class="op">=</span> <span class="st">"RSAC Predictability RAC mdl"</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="envirpred_files/figure-html/plot_rsac-1.png" width="100"></div>
+<div class="inline-figure"><img src="envirpred_files/figure-html/plot_rsac-1.png" width="100%"></div>
 <p>Adding the autocovariate of residuals seems to have helped a lot to counter residual spatial autocorrelation. <strong>It’s possible this can be improved further by tweaking the radius of the neighborhood over which the autocovariate is calculated, but that’s some tweaking we can do later.</strong></p>
 </div>
 </div>
@@ -497,10 +497,10 @@ That is <em>much</em> better!</p>
 </h5>
 <div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="fu">varimp</span><span class="op">(</span><span class="va">mod_trends</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Varimp Trends mdl"</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="envirpred_files/figure-html/varimp_trends-1.png" width="100"></div>
+<div class="inline-figure"><img src="envirpred_files/figure-html/varimp_trends-1.png" width="100%"></div>
 <div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="fu">varimp</span><span class="op">(</span><span class="va">mod_trends_rac</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Varimp Trends RAC mdl"</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="envirpred_files/figure-html/varimp_trends-2.png" width="100"></div>
+<div class="inline-figure"><img src="envirpred_files/figure-html/varimp_trends-2.png" width="100%"></div>
 </div>
 <div id="predictability-models" class="section level5">
 <h5>
@@ -508,10 +508,10 @@ That is <em>much</em> better!</p>
 </h5>
 <div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="fu">varimp</span><span class="op">(</span><span class="va">mod_resids</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Varimp Predictability mdl"</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="envirpred_files/figure-html/varimp_resids-1.png" width="100"></div>
+<div class="inline-figure"><img src="envirpred_files/figure-html/varimp_resids-1.png" width="100%"></div>
 <div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="fu">varimp</span><span class="op">(</span><span class="va">mod_resids_rac</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Varimp Predictability RAC mdl"</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="envirpred_files/figure-html/varimp_resids-2.png" width="100"></div>
+<div class="inline-figure"><img src="envirpred_files/figure-html/varimp_resids-2.png" width="100%"></div>
 </div>
 </div>
 <div id="partialmarginal-effects" class="section level4">
@@ -528,10 +528,10 @@ That is <em>much</em> better!</p>
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_trends</span><span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="envirpred_files/figure-html/partial_effects_simple_original-1.png" width="100"></div>
+<div class="inline-figure"><img src="envirpred_files/figure-html/partial_effects_simple_original-1.png" width="100%"></div>
 <div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_resids</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="envirpred_files/figure-html/partial_effects_simple_original-2.png" width="100"></div>
+<div class="inline-figure"><img src="envirpred_files/figure-html/partial_effects_simple_original-2.png" width="100%"></div>
 </div>
 <div id="partial-effects-rac-models" class="section level5">
 <h5>
@@ -540,11 +540,11 @@ That is <em>much</em> better!</p>
 <div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_trends_rac</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="envirpred_files/figure-html/partial_effects_simple_rac-1.png" width="100"></div>
+<div class="inline-figure"><img src="envirpred_files/figure-html/partial_effects_simple_rac-1.png" width="100%"></div>
 <div class="sourceCode" id="cb69"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_resids_rac</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="envirpred_files/figure-html/partial_effects_simple_rac-2.png" width="100"></div>
+<div class="inline-figure"><img src="envirpred_files/figure-html/partial_effects_simple_rac-2.png" width="100%"></div>
 
 </div>
 </div>
