@@ -16,7 +16,7 @@ template_raster <- raster::raster("data/raw/gee/ndvi_1.tif")
 africa <- st_read("data/raw/Africa.gpkg")
 
 ecoregions <- st_read("data/raw/ecoregions2017/Ecoregions2017.shp") %>%
-  select(ECO_NAME, BIOME_NAME, REALM) %>%
+  dplyr::select(ECO_NAME, BIOME_NAME, REALM) %>%
   st_crop(africa)
 
 saveRDS(ecoregions, file = "data/processed/ecoregions.RDS")

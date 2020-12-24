@@ -146,7 +146,7 @@ saveRDS(rr_data, file = "data/processed/rr_dataset_size_df.RDS")
 
 We can now plot the results of the previous workflow and see how cross-validated model performance depends on the subsampled size of the training dataset.
 
-```{r}
+```{r plot_model_rmse_subsample_size}
 if (!exists("rr_data")) rr_data <- readRDS("data/processed/rr_dataset_size_df.RDS")
 
 rr_data %>%
@@ -243,8 +243,8 @@ formula_trends <- model_formula(predictors_trends, "trend_long")
 formula_resids <- model_formula(predictors_resids, "trend_long")
 
 ctrl <- boost_control(trace = FALSE, mstop = 10000)
-mod_trends <- gamboost(formula_trends[[1]], data = data_subset, family = Gaussian(), control = ctrl)
-mod_resids <- gamboost(formula_resids[[1]], data = data_subset, family = Gaussian(), control = ctrl)
+mod_trends <- gamboost(formula_trends, data = data_subset, family = Gaussian(), control = ctrl)
+mod_resids <- gamboost(formula_resids, data = data_subset, family = Gaussian(), control = ctrl)
 
 saveRDS(mod_trends, file = "data/processed/models/mod_trends.RDS")
 saveRDS(mod_resids, file = "data/processed/models/mod_resids.RDS")
@@ -303,7 +303,7 @@ data_subset$norac_trends <- resid(mod_trends)
 data_subset$norac_resids <- resid(mod_resids)
 
 data_subset %>%
-  select(x, y, norac_trends, norac_resids) %>%
+  dplyr::select(x, y, norac_trends, norac_resids) %>%
   rename(c(Predictability = norac_resids, Trends = norac_trends)) %>%
   pivot_longer(-c(x, y), names_to = "model", values_to = "residuals") %>%
   ggplot(aes(x = x, y = y, color = residuals)) +
@@ -355,7 +355,7 @@ data_subset$rac_trends <- resid(mod_trends_rac)
 data_subset$rac_resids <- resid(mod_resids_rac)
 
 data_subset %>%
-  select(x, y, rac_trends, rac_resids) %>%
+  dplyr::select(x, y, rac_trends, rac_resids) %>%
   rename(c(Predictability = rac_resids, Trends = rac_trends)) %>%
   pivot_longer(-c(x, y), names_to = "model", values_to = "residuals") %>%
   ggplot(aes(x = x, y = y, color = residuals)) +
