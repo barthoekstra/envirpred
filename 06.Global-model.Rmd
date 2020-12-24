@@ -366,7 +366,52 @@ data_subset %>%
   labs(title = "Spatial pattern of model residuals", subtitle = "after including residual autocovariates",
        x = "Longitude", y = "Latitude", color = "Residual")
 ```
+
 That is *much* better!
+
+#### Determine the optimal number of boosting iterations of RAC model
+
+Once again, we should make sure the number of boosts used (10000) is 'optimal' in our newly trained model. As before, it's probably best to run this using the dedicated file in `R/hyperparm_mboost_mstop.R`, but the chunk below can do it as well.
+
+```{r determine_optimal_number_of_boosts_rac_model, eval=FALSE}
+grid <- seq(from = 250, to = 30000, by = 250)
+cv10f_trends_rac <- cv(model.weights(mod_trends_rac), type = "kfold")
+saveRDS(cv10f_trends_rac, file = "data/processed/models/cv10f_trends_rac.RDS")
+cvm_trends_rac <- cvrisk(mod_trends_rac, folds = cv10f_trends_rac, grid = grid)
+saveRDS(cvm_trends_rac, file = "data/processed/models/cvm_trends_rac.RDS")
+
+cv10f_resids_rac <- cv(model.weights(mod_resids_rac), type = "kfold")
+saveRDS(cv10f_resids_rac, file = "data/processed/models/cv10f_resids_rac.RDS")
+cvm_resids_rac <- cvrisk(mod_resids_rac, folds = cv10f_resids_rac, grid = grid)
+saveRDS(cvm_resids_rac, file = "data/processed/models/cvm_resids_rac.RDS")
+```
+
+We can load these results as well and plot the outputs.
+
+```{r plot_cvm_results_rac_models, results='hold', out.width='100%'}
+cvm_trends_rac <- readRDS("data/processed/models/cvm_trends_rac.RDS")
+cvm_resids_rac <- readRDS("data/processed/models/cvm_resids_rac.RDS")
+
+plot_cvm <- function(cvm, plot_id = "") {
+  m <- cvm
+  class(m) <- NULL
+  as.data.frame(m) %>%
+    rownames_to_column(var = "fold") %>%
+    pivot_longer(-c(fold), names_to = "boosts", values_to = "risk") %>%
+    mutate(boosts = as.numeric(boosts),
+           fold = as.factor(fold)) %>%
+    identity() %>%
+    ggplot(aes(x = boosts, y = risk, group = fold, color = fold)) +
+      geom_line() +
+      labs(title = paste0(attr(cvm, "type"), ": ", plot_id), x = "boosts (mstop)", y = attr(cvm, "risk"))
+}
+plot_cvm_trends_rac <- plot_cvm(cvm_trends_rac, "trends")
+plot_cvm_resids_rac <- plot_cvm(cvm_resids_rac, "resids")
+
+plot_cvm_trends_rac + plot_cvm_resids_rac + plot_layout(guides = "collect") & theme(legend.position = "bottom")
+```
+
+Although model improvement did not stagnate as fast in this model, stopping boosting iterations at 10000 boosts again continues to remain reasonable. We could increase it to 20000, but that would (probably) at least double the time required for bootstrapping to quantify model uncertainty in further steps. As predictive performance is not the ultimate goal of this analysis, that trade-off is fine.
 
 #### Quantifying residual autocorrelation
 
