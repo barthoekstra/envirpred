@@ -14,4 +14,5 @@ rmd_files:
 - "04.Ecoregions-and-biomes.Rmd"
 - "05.Environmental-predictability-trends.Rmd"
 - "06.Model-assemblage-trends.Rmd"
+- "07.Quantify-model-uncertainty.Rmd"
 - "References.Rmd"
