@@ -13,5 +13,5 @@ rmd_files:
 - "03.Assemblage-trends.Rmd"
 - "04.Ecoregions-and-biomes.Rmd"
 - "05.Environmental-predictability-trends.Rmd"
-- "06.Global-model.Rmd"
+- "06.Model-assemblage-trends.Rmd"
 - "References.Rmd"
