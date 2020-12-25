@@ -1,4 +1,6 @@
-# Global model
+# (PART) Analysis {-}
+
+# Model assemblage trends
 
 In previous chapters we have prepared a dataset for modelling, which we can now start to use.
 
@@ -165,7 +167,7 @@ rr_data %>%
   labs(x = "Subsample size (# rows)", y = "Model RMSE")
 ```
 
-It is clear beyond 10,000 rows performance only continues to improve marginally for untuned `xgboost` learners and model improvement for the other learners has clearly hit a plateau. So, we can stick to resampling 10,000 rows from the `r nrow(data)` rows in the original dataframe for our continued statistical modelling. Additionally, untuned `gbm` seems to perform best, so that's the model we'll continue using. To be fair, given the strong algorithmic similarity between `gbm` and `xgboost`, this difference is probably mostly a consequence of default parameter values in `mlr3`, but given the popularity of `gbm` in ecology vs. `xgboost`, it makes sense to continue with `gbm`.
+It is clear beyond 10,000 rows performance only continues to improve marginally for untuned `xgboost` learners and model improvement for the other learners has clearly hit a plateau. So, we can stick to resampling 10,000 rows from the `r nrow(data)` rows in the original dataframe for our continued statistical modelling.
 
 ```{r set_subsample_size}
 nrow_subsample <- 10000
@@ -220,7 +222,7 @@ The training of boosted GAMs (implemented in `mboost`) will go as follows:
 1. We then determine the optimal number of boosting iterations using 10-fold cross-validation, as implemented in the `cvrisk` function, varying the number of boosts between 250 and 30000.
 1. We calculate the autocovariate of the residuals to correct for (strong) effects of spatial autocorrelation [@crase2012], which violates the independence assumption of regression.
 1. We retrain the model but now whilst including the residual autocovariate as a parameter.
-1. We, once again, determine the optimal number of boosting iterations on the new models. Most likely this does not differ much from the previous optimum, but it may be a bit lower because of faster convergence due to lower spatial autocorrelation.
+1. We, once again, determine the optimal number of boosting iterations on the new models. Most likely this does not differ substantially from the previous optimum, but it is good to make sure that is the case.
 
 Let's start with training the models.
 
