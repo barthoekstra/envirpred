@@ -1,3 +1,5 @@
+# (PART) Data Preparation {-}
+
 # GEE: Harmonic Regression
 
 In this project we want to explore to what degree environmental predictability can explain species declines among sub-Saharan migrant songbirds. We define environmental predictability as the degree to which a simple harmonic regression model can fit the seasonal changes of environmental variables in the wintering areas of these sub-Saharan migrants.
