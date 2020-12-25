@@ -36,12 +36,14 @@
       <nav aria-label="Table of contents"><h2>Table of contents</h2>
         <ul class="book-toc list-unstyled">
 <li><a class="" href="index.html">Introduction</a></li>
+<li class="book-part">Data Preparation</li>
 <li><a class="active" href="gee-harmonic-regression.html"><span class="header-section-number">1</span> GEE: Harmonic Regression</a></li>
 <li><a class="" href="preprocess-bird-trends-and-distribution-maps.html"><span class="header-section-number">2</span> Preprocess bird trends and distribution maps</a></li>
 <li><a class="" href="species-assemblage-trends.html"><span class="header-section-number">3</span> Species assemblage trends</a></li>
 <li><a class="" href="ecoregions-biomes.html"><span class="header-section-number">4</span> Ecoregions &amp; Biomes</a></li>
 <li><a class="" href="environmental-predictability-trends.html"><span class="header-section-number">5</span> Environmental predictability &amp; trends</a></li>
-<li><a class="" href="global-model.html"><span class="header-section-number">6</span> Global model</a></li>
+<li class="book-part">Analysis</li>
+<li><a class="" href="model-assemblage-trends.html"><span class="header-section-number">6</span> Model assemblage trends</a></li>
 <li class="book-part">Other</li>
 <li><a class="" href="references.html"><span class="header-section-number">7</span> References</a></li>
 </ul>
@@ -67,8 +69,8 @@
 <span class="fu">leaflet</span><span class="op">(</span><span class="va">aoi</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu">addProviderTiles</span><span class="op">(</span><span class="st">"CartoDB.Positron"</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu">addPolygons</span><span class="op">(</span>color <span class="op">=</span> <span class="st">"black"</span><span class="op">)</span></code></pre></div>
-<div id="htmlwidget-5469b714fe73bf07d848" style="width:672px;height:480px;" class="leaflet html-widget"></div>
-<script type="application/json" data-for="htmlwidget-5469b714fe73bf07d848">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addProviderTiles","args":["CartoDB.Positron",null,null,{"errorTileUrl":"","noWrap":false,"detectRetina":false}]},{"method":"addPolygons","args":[[[[{"lng":[-19.7806825253499,61.0786924746501,61.0786924746501,-19.7806825253499,-19.7806825253499],"lat":[-36.3622269211034,-36.3622269211034,71.8380113698745,71.8380113698745,-36.3622269211034]}]]],null,null,{"interactive":true,"className":"","stroke":true,"color":"black","weight":5,"opacity":0.5,"fill":true,"fillColor":"black","fillOpacity":0.2,"smoothFactor":1,"noClip":false},null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"limits":{"lat":[-36.3622269211034,71.8380113698745],"lng":[-19.7806825253499,61.0786924746501]}},"evals":[],"jsHooks":[]}</script><p>Obviously that area spans much more than just Africa, but for our interpretation of results (and possible future expansion of the analysis to include breeding areas), this is more beneficial.</p>
+<div id="htmlwidget-e0b009c83604eca0445b" style="width:672px;height:480px;" class="leaflet html-widget"></div>
+<script type="application/json" data-for="htmlwidget-e0b009c83604eca0445b">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addProviderTiles","args":["CartoDB.Positron",null,null,{"errorTileUrl":"","noWrap":false,"detectRetina":false}]},{"method":"addPolygons","args":[[[[{"lng":[-19.7806825253499,61.0786924746501,61.0786924746501,-19.7806825253499,-19.7806825253499],"lat":[-36.3622269211034,-36.3622269211034,71.8380113698745,71.8380113698745,-36.3622269211034]}]]],null,null,{"interactive":true,"className":"","stroke":true,"color":"black","weight":5,"opacity":0.5,"fill":true,"fillColor":"black","fillOpacity":0.2,"smoothFactor":1,"noClip":false},null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"limits":{"lat":[-36.3622269211034,71.8380113698745],"lng":[-19.7806825253499,61.0786924746501]}},"evals":[],"jsHooks":[]}</script><p>Obviously that area spans much more than just Africa, but for our interpretation of results (and possible future expansion of the analysis to include breeding areas), this is more beneficial.</p>
 <p>We can now run the harmonic regression on GEE and generate GeoTIFFs for each of the analyses. As we are particularly interested in <code>NDVI</code> we use the temporal range of the <code>NASA/GIMMS/3GV0</code> dataset (in GEE) to determine the time frame over which to run the analysis.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/source.html">source</a></span><span class="op">(</span><span class="st">"R/rgee_harmonic_regression.R"</span><span class="op">)</span>

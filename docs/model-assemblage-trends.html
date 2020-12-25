@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>6 Global model | Environmental predictability &amp; Population trends</title>
+<title>6 Model assemblage trends | Environmental predictability &amp; Population trends</title>
 <meta name="author" content="Bart Hoekstra">
 <!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.2"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.5.1/jquery-3.5.1.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="libs/bootstrap-4.5.3/bootstrap.min.css" rel="stylesheet">
@@ -36,12 +36,14 @@
       <nav aria-label="Table of contents"><h2>Table of contents</h2>
         <ul class="book-toc list-unstyled">
 <li><a class="" href="index.html">Introduction</a></li>
+<li class="book-part">Data Preparation</li>
 <li><a class="" href="gee-harmonic-regression.html"><span class="header-section-number">1</span> GEE: Harmonic Regression</a></li>
 <li><a class="" href="preprocess-bird-trends-and-distribution-maps.html"><span class="header-section-number">2</span> Preprocess bird trends and distribution maps</a></li>
 <li><a class="" href="species-assemblage-trends.html"><span class="header-section-number">3</span> Species assemblage trends</a></li>
 <li><a class="" href="ecoregions-biomes.html"><span class="header-section-number">4</span> Ecoregions &amp; Biomes</a></li>
 <li><a class="" href="environmental-predictability-trends.html"><span class="header-section-number">5</span> Environmental predictability &amp; trends</a></li>
-<li><a class="active" href="global-model.html"><span class="header-section-number">6</span> Global model</a></li>
+<li class="book-part">Analysis</li>
+<li><a class="active" href="model-assemblage-trends.html"><span class="header-section-number">6</span> Model assemblage trends</a></li>
 <li class="book-part">Other</li>
 <li><a class="" href="references.html"><span class="header-section-number">7</span> References</a></li>
 </ul>
@@ -51,9 +53,9 @@
         </div>
       </nav>
 </div>
-  </header><main class="col-sm-12 col-md-9 col-lg-7" id="content"><div id="global-model" class="section level1">
+  </header><main class="col-sm-12 col-md-9 col-lg-7" id="content"><div id="model-assemblage-trends" class="section level1">
 <h1>
-<span class="header-section-number">6</span> Global model<a class="anchor" aria-label="anchor" href="#global-model"><i class="fas fa-link"></i></a>
+<span class="header-section-number">6</span> Model assemblage trends<a class="anchor" aria-label="anchor" href="#model-assemblage-trends"><i class="fas fa-link"></i></a>
 </h1>
 <p>In previous chapters we have prepared a dataset for modelling, which we can now start to use.</p>
 <div id="correlation-among-predictors" class="section level2">
@@ -201,7 +203,7 @@
   <span class="fu">scale_x_continuous</span><span class="op">(</span>trans <span class="op">=</span> <span class="st">"log10"</span>, breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">500</span>, <span class="fl">1000</span>, <span class="fl">5000</span>, <span class="fl">10000</span>, <span class="fl">50000</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Subsample size (# rows)"</span>, y <span class="op">=</span> <span class="st">"Model RMSE"</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="envirpred_files/figure-html/plot_model_rmse_subsample_size-1.png" width="672"></div>
-<p>It is clear beyond 10,000 rows performance only continues to improve marginally for untuned <code>xgboost</code> learners and model improvement for the other learners has clearly hit a plateau. So, we can stick to resampling 10,000 rows from the 314868 rows in the original dataframe for our continued statistical modelling. Additionally, untuned <code>gbm</code> seems to perform best, so that’s the model we’ll continue using. To be fair, given the strong algorithmic similarity between <code>gbm</code> and <code>xgboost</code>, this difference is probably mostly a consequence of default parameter values in <code>mlr3</code>, but given the popularity of <code>gbm</code> in ecology vs. <code>xgboost</code>, it makes sense to continue with <code>gbm</code>.</p>
+<p>It is clear beyond 10,000 rows performance only continues to improve marginally for untuned <code>xgboost</code> learners and model improvement for the other learners has clearly hit a plateau. So, we can stick to resampling 10,000 rows from the 314868 rows in the original dataframe for our continued statistical modelling.</p>
 <div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">nrow_subsample</span> <span class="op">&lt;-</span> <span class="fl">10000</span></code></pre></div>
 </div>
@@ -258,7 +260,7 @@
 <li>We then determine the optimal number of boosting iterations using 10-fold cross-validation, as implemented in the <code>cvrisk</code> function, varying the number of boosts between 250 and 30000.</li>
 <li>We calculate the autocovariate of the residuals to correct for (strong) effects of spatial autocorrelation,<span class="citation"><sup><a href="references.html#ref-crase2012" role="doc-biblioref">4</a></sup></span> which violates the independence assumption of regression.</li>
 <li>We retrain the model but now whilst including the residual autocovariate as a parameter.</li>
-<li>We, once again, determine the optimal number of boosting iterations on the new models. Most likely this does not differ much from the previous optimum, but it may be a bit lower because of faster convergence due to lower spatial autocorrelation.</li>
+<li>We, once again, determine the optimal number of boosting iterations on the new models. Most likely this does not differ substantially from the previous optimum, but it is good to make sure that is the case.</li>
 </ol>
 <p>Let’s start with training the models.</p>
 <div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
@@ -399,15 +401,56 @@
   <span class="fu">facet_wrap</span><span class="op">(</span><span class="fu">vars</span><span class="op">(</span><span class="va">model</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Spatial pattern of model residuals"</span>, subtitle <span class="op">=</span> <span class="st">"after including residual autocovariates"</span>,
        x <span class="op">=</span> <span class="st">"Longitude"</span>, y <span class="op">=</span> <span class="st">"Latitude"</span>, color <span class="op">=</span> <span class="st">"Residual"</span><span class="op">)</span></code></pre></div>
-<p><img src="envirpred_files/figure-html/plot_residual_spatial_autocorrelation_after_rac-1.png" width="100%">
-That is <em>much</em> better!</p>
+<div class="inline-figure"><img src="envirpred_files/figure-html/plot_residual_spatial_autocorrelation_after_rac-1.png" width="100%"></div>
+<p>That is <em>much</em> better!</p>
+</div>
+<div id="determine-the-optimal-number-of-boosting-iterations-of-rac-model" class="section level4">
+<h4>
+<span class="header-section-number">6.4.2.3</span> Determine the optimal number of boosting iterations of RAC model<a class="anchor" aria-label="anchor" href="#determine-the-optimal-number-of-boosting-iterations-of-rac-model"><i class="fas fa-link"></i></a>
+</h4>
+<p>Once again, we should make sure the number of boosts used (10000) is ‘optimal’ in our newly trained model. As before, it’s probably best to run this using the dedicated file in <code>R/hyperparm_mboost_mstop.R</code>, but the chunk below can do it as well.</p>
+<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span>from <span class="op">=</span> <span class="fl">250</span>, to <span class="op">=</span> <span class="fl">30000</span>, by <span class="op">=</span> <span class="fl">250</span><span class="op">)</span>
+<span class="va">cv10f_trends_rac</span> <span class="op">&lt;-</span> <span class="fu">cv</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/model.extract.html">model.weights</a></span><span class="op">(</span><span class="va">mod_trends_rac</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"kfold"</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">cv10f_trends_rac</span>, file <span class="op">=</span> <span class="st">"data/processed/models/cv10f_trends_rac.RDS"</span><span class="op">)</span>
+<span class="va">cvm_trends_rac</span> <span class="op">&lt;-</span> <span class="fu">cvrisk</span><span class="op">(</span><span class="va">mod_trends_rac</span>, folds <span class="op">=</span> <span class="va">cv10f_trends_rac</span>, grid <span class="op">=</span> <span class="va">grid</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">cvm_trends_rac</span>, file <span class="op">=</span> <span class="st">"data/processed/models/cvm_trends_rac.RDS"</span><span class="op">)</span>
+
+<span class="va">cv10f_resids_rac</span> <span class="op">&lt;-</span> <span class="fu">cv</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/model.extract.html">model.weights</a></span><span class="op">(</span><span class="va">mod_resids_rac</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"kfold"</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">cv10f_resids_rac</span>, file <span class="op">=</span> <span class="st">"data/processed/models/cv10f_resids_rac.RDS"</span><span class="op">)</span>
+<span class="va">cvm_resids_rac</span> <span class="op">&lt;-</span> <span class="fu">cvrisk</span><span class="op">(</span><span class="va">mod_resids_rac</span>, folds <span class="op">=</span> <span class="va">cv10f_resids_rac</span>, grid <span class="op">=</span> <span class="va">grid</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">cvm_resids_rac</span>, file <span class="op">=</span> <span class="st">"data/processed/models/cvm_resids_rac.RDS"</span><span class="op">)</span></code></pre></div>
+<p>We can load these results as well and plot the outputs.</p>
+<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">cvm_trends_rac</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/cvm_trends_rac.RDS"</span><span class="op">)</span>
+<span class="va">cvm_resids_rac</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/cvm_resids_rac.RDS"</span><span class="op">)</span>
+
+<span class="va">plot_cvm</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">cvm</span>, <span class="va">plot_id</span> <span class="op">=</span> <span class="st">""</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">m</span> <span class="op">&lt;-</span> <span class="va">cvm</span>
+  <span class="fu"><a href="https://rdrr.io/r/base/class.html">class</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="cn">NULL</span>
+  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span> <span class="op">%&gt;%</span>
+    <span class="fu">rownames_to_column</span><span class="op">(</span>var <span class="op">=</span> <span class="st">"fold"</span><span class="op">)</span> <span class="op">%&gt;%</span>
+    <span class="fu">pivot_longer</span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">fold</span><span class="op">)</span>, names_to <span class="op">=</span> <span class="st">"boosts"</span>, values_to <span class="op">=</span> <span class="st">"risk"</span><span class="op">)</span> <span class="op">%&gt;%</span>
+    <span class="fu">mutate</span><span class="op">(</span>boosts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="va">boosts</span><span class="op">)</span>,
+           fold <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">as.factor</a></span><span class="op">(</span><span class="va">fold</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+    <span class="fu"><a href="https://rdrr.io/r/base/identity.html">identity</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
+    <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">boosts</span>, y <span class="op">=</span> <span class="va">risk</span>, group <span class="op">=</span> <span class="va">fold</span>, color <span class="op">=</span> <span class="va">fold</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+      <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+      <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attr.html">attr</a></span><span class="op">(</span><span class="va">cvm</span>, <span class="st">"type"</span><span class="op">)</span>, <span class="st">": "</span>, <span class="va">plot_id</span><span class="op">)</span>, x <span class="op">=</span> <span class="st">"boosts (mstop)"</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html">attr</a></span><span class="op">(</span><span class="va">cvm</span>, <span class="st">"risk"</span><span class="op">)</span><span class="op">)</span>
+<span class="op">}</span>
+<span class="va">plot_cvm_trends_rac</span> <span class="op">&lt;-</span> <span class="fu">plot_cvm</span><span class="op">(</span><span class="va">cvm_trends_rac</span>, <span class="st">"trends"</span><span class="op">)</span>
+<span class="va">plot_cvm_resids_rac</span> <span class="op">&lt;-</span> <span class="fu">plot_cvm</span><span class="op">(</span><span class="va">cvm_resids_rac</span>, <span class="st">"resids"</span><span class="op">)</span>
+
+<span class="va">plot_cvm_trends_rac</span> <span class="op">+</span> <span class="va">plot_cvm_resids_rac</span> <span class="op">+</span> <span class="fu">plot_layout</span><span class="op">(</span>guides <span class="op">=</span> <span class="st">"collect"</span><span class="op">)</span> <span class="op">&amp;</span> <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></code></pre></div>
+<div class="inline-figure"><img src="envirpred_files/figure-html/plot_cvm_results_rac_models-1.png" width="100%"></div>
+<p>Although model improvement did not stagnate as fast in this model, stopping boosting iterations at 10000 boosts again continues to remain reasonable. We could increase it to 20000, but that would (probably) at least double the time required for bootstrapping to quantify model uncertainty in further steps. As predictive performance is not the ultimate goal of this analysis, that trade-off is fine.</p>
 </div>
 <div id="quantifying-residual-autocorrelation" class="section level4">
 <h4>
-<span class="header-section-number">6.4.2.3</span> Quantifying residual autocorrelation<a class="anchor" aria-label="anchor" href="#quantifying-residual-autocorrelation"><i class="fas fa-link"></i></a>
+<span class="header-section-number">6.4.2.4</span> Quantifying residual autocorrelation<a class="anchor" aria-label="anchor" href="#quantifying-residual-autocorrelation"><i class="fas fa-link"></i></a>
 </h4>
 <p>Now is a good moment to quantify residual autocorrelation (RSAC) in our model. We do so by calculating Moran’s I across a number of distance classes (8) using the <code>sp.correlogram</code> function from the <code>spdep</code> package. As this is computationally very intensive, we run this calculation once in the chunk below and save the results for fast plotting during knitting of this document.</p>
-<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">nclass</span> <span class="op">&lt;-</span> <span class="fl">8</span>  <span class="co"># Number of distance classes</span>
 <span class="va">neighbors</span> <span class="op">&lt;-</span> <span class="fu">dnearneigh</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="va">data_subset</span><span class="op">$</span><span class="va">x</span>, <span class="va">data_subset</span><span class="op">$</span><span class="va">y</span><span class="op">)</span><span class="op">)</span>, d1 <span class="op">=</span> <span class="fl">0</span>, d2 <span class="op">=</span> <span class="va">neighborhood_dist</span>, longlat <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 
@@ -421,7 +464,7 @@ That is <em>much</em> better!</p>
 <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">spc_rac_trends</span>, file <span class="op">=</span> <span class="st">"data/processed/models/spc_rac_trends.RDS"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">spc_rac_resids</span>, file <span class="op">=</span> <span class="st">"data/processed/models/spc_rac_resids.RDS"</span><span class="op">)</span></code></pre></div>
 <p>And we can now plot the RSAC correlograms.</p>
-<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"spc_norac_trends"</span><span class="op">)</span><span class="op">)</span> <span class="va">spc_norac_trends</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/spc_norac_trends.RDS"</span><span class="op">)</span>
 <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"spc_norac_resids"</span><span class="op">)</span><span class="op">)</span> <span class="va">spc_norac_resids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/spc_norac_resids.RDS"</span><span class="op">)</span>
 <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"spc_rac_trends"</span><span class="op">)</span><span class="op">)</span> <span class="va">spc_rac_trends</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/spc_rac_trends.RDS"</span><span class="op">)</span>
@@ -445,7 +488,7 @@ That is <em>much</em> better!</p>
 <span class="header-section-number">6.4.3.1</span> Model performance<a class="anchor" aria-label="anchor" href="#model-performance"><i class="fas fa-link"></i></a>
 </h4>
 <p>To keep it simple, we stick to good ol’ RMSE and % of deviance explained to compare the performance of all these models.</p>
-<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">perf_metrics</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">actual</span>, <span class="va">models</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">rmse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="va">models</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu">rmse</span><span class="op">(</span><span class="va">actual</span>, <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
   <span class="va">deviance_explained</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="va">models</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">tail</a></span><span class="op">(</span><span class="fu">risk</span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu">risk</span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span><span class="op">)</span>
@@ -495,10 +538,10 @@ That is <em>much</em> better!</p>
 <h5>
 <span class="header-section-number">6.4.3.2.1</span> Trends models<a class="anchor" aria-label="anchor" href="#trends-models"><i class="fas fa-link"></i></a>
 </h5>
-<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="fu">varimp</span><span class="op">(</span><span class="va">mod_trends</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Varimp Trends mdl"</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="envirpred_files/figure-html/varimp_trends-1.png" width="100%"></div>
-<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="fu">varimp</span><span class="op">(</span><span class="va">mod_trends_rac</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Varimp Trends RAC mdl"</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="envirpred_files/figure-html/varimp_trends-2.png" width="100%"></div>
 </div>
@@ -506,10 +549,10 @@ That is <em>much</em> better!</p>
 <h5>
 <span class="header-section-number">6.4.3.2.2</span> Predictability models<a class="anchor" aria-label="anchor" href="#predictability-models"><i class="fas fa-link"></i></a>
 </h5>
-<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="fu">varimp</span><span class="op">(</span><span class="va">mod_resids</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Varimp Predictability mdl"</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="envirpred_files/figure-html/varimp_resids-1.png" width="100%"></div>
-<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="fu">varimp</span><span class="op">(</span><span class="va">mod_resids_rac</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Varimp Predictability RAC mdl"</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="envirpred_files/figure-html/varimp_resids-2.png" width="100%"></div>
 </div>
@@ -523,13 +566,13 @@ That is <em>much</em> better!</p>
 <h5>
 <span class="header-section-number">6.4.3.3.1</span> Partial effects original models<a class="anchor" aria-label="anchor" href="#partial-effects-original-models"><i class="fas fa-link"></i></a>
 </h5>
-<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_trends</span><span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="envirpred_files/figure-html/partial_effects_simple_original-1.png" width="100%"></div>
-<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_resids</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="envirpred_files/figure-html/partial_effects_simple_original-2.png" width="100%"></div>
 </div>
@@ -537,11 +580,11 @@ That is <em>much</em> better!</p>
 <h5>
 <span class="header-section-number">6.4.3.3.2</span> Partial effects RAC models<a class="anchor" aria-label="anchor" href="#partial-effects-rac-models"><i class="fas fa-link"></i></a>
 </h5>
-<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_trends_rac</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="envirpred_files/figure-html/partial_effects_simple_rac-1.png" width="100%"></div>
-<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_resids_rac</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="envirpred_files/figure-html/partial_effects_simple_rac-2.png" width="100%"></div>
@@ -560,7 +603,7 @@ That is <em>much</em> better!</p>
 </div></main><div class="col-md-3 col-lg-2 d-none d-md-block sidebar sidebar-chapter">
     <nav id="toc" data-toggle="toc" aria-label="On this page"><h2>On this page</h2>
       <ul class="nav navbar-nav">
-<li><a class="nav-link" href="#global-model"><span class="header-section-number">6</span> Global model</a></li>
+<li><a class="nav-link" href="#model-assemblage-trends"><span class="header-section-number">6</span> Model assemblage trends</a></li>
 <li>
 <a class="nav-link" href="#correlation-among-predictors"><span class="header-section-number">6.1</span> Correlation among predictors</a><ul class="nav navbar-nav"><li><a class="nav-link" href="#pearsons-correlation-matrix"><span class="header-section-number">6.1.1</span> Pearson’s correlation matrix</a></li></ul>
 </li>
@@ -577,8 +620,8 @@ That is <em>much</em> better!</p>
 
       <div class="book-extra">
         <ul class="list-unstyled">
-<li><a id="book-source" href="https://github.com/barthoekstra/envirpred/blob/master/06.Global-model.Rmd">View source <i class="fab fa-github"></i></a></li>
-          <li><a id="book-edit" href="https://github.com/barthoekstra/envirpred/edit/master/06.Global-model.Rmd">Edit this page <i class="fab fa-github"></i></a></li>
+<li><a id="book-source" href="https://github.com/barthoekstra/envirpred/blob/master/06.Model-assemblage-trends.Rmd">View source <i class="fab fa-github"></i></a></li>
+          <li><a id="book-edit" href="https://github.com/barthoekstra/envirpred/edit/master/06.Model-assemblage-trends.Rmd">Edit this page <i class="fab fa-github"></i></a></li>
         </ul>
 </div>
     </nav>

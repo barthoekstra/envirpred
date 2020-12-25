@@ -16,7 +16,7 @@ ecoregions-biomes
 environmental-predictability-trends
 combine-environmental-datasets-trend-datasets-and-ecoregions
 save-modeling-dataset
-global-model
+model-assemblage-trends
 correlation-among-predictors
 pearsons-correlation-matrix
 pairplot
@@ -26,6 +26,7 @@ data-filtering
 training-boosted-gams
 determine-the-optimal-number-of-boosting-iterations
 correct-for-spatial-autocorrelation
+determine-the-optimal-number-of-boosting-iterations-of-rac-model
 quantifying-residual-autocorrelation
 model-outputs
 model-performance
