@@ -41,16 +41,17 @@ plot(r_realms, 1:2)
 The previous steps result in some `RasterBrick` layers that only contain NAs, which we should throw out to reduce memory footprint of these datasets. While we're at it, we save the rasterized polygons to a GeoTIFF file.
 
 ```{r cleanup_rasterized_ecoregions, results='hold'}
-empty_raster <- function(r) {
-  nr_NAs <- cellStats(is.na(r), sum)
-  if (ncell(r) == nr_NAs) { TRUE } 
+check_raster <- function(r, mincells = NULL) {
+  if (is.null(mincells)) mincells <- 1
+  nr_nonNAs <- cellStats(!is.na(r), sum)
+  if (nr_nonNAs < mincells) { TRUE }
   else { FALSE }
 }
 
-empty_layers <- function(b) {
+check_layers <- function(b, mincells = NULL) {
   idx <- c()
   for (i in 1:nlayers(b)) {
-    if (empty_raster(b[[i]])) {
+    if (check_raster(b[[i]], mincells)) {
       idx <- c(idx, TRUE)
     } else {
       idx <- c(idx, FALSE)
@@ -59,9 +60,9 @@ empty_layers <- function(b) {
   idx
 }
 
-r_realms <- suppressWarnings(subset(r_realms, which(!empty_layers(r_realms))))
-r_biomes <- suppressWarnings(subset(r_biomes, which(!empty_layers(r_biomes))))
-r_ecoregions <- suppressWarnings(subset(r_ecoregions, which(!empty_layers(r_ecoregions))))
+r_realms <- suppressWarnings(subset(r_realms, which(!check_layers(r_realms))))
+r_biomes <- suppressWarnings(subset(r_biomes, which(!check_layers(r_biomes))))
+r_ecoregions <- suppressWarnings(subset(r_ecoregions, which(!check_layers(r_ecoregions, 10000))))
 
 writeRaster(r_realms, filename = "data/processed/realms.tif", overwrite = TRUE, format = "GTiff")
 writeRaster(r_biomes, filename = "data/processed/biomes.tif", overwrite = TRUE, format = "GTiff")
