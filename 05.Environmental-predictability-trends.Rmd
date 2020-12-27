@@ -43,6 +43,7 @@ tmmx <- load_raster("data/raw/gee/tmmx_1.tif", c("tmmx_original", "residuals", "
 def <- load_raster("data/raw/gee/def_1.tif", c("def_original", "residuals", "slope"))
 realms <- load_raster("data/processed/realms.tif", NULL)
 biomes <- load_raster("data/processed/biomes.tif", NULL)
+ecoregions <- load_raster("data/processed/ecoregions.tif", NULL)
 
 trend_long_assemblage <- raster::raster("data/processed/trend_long_assemblage.tif")
 trend_short_assemblage <- raster::raster("data/processed/trend_short_assemblage.tif")
@@ -52,10 +53,10 @@ trend_short_counts <- raster::raster("data/processed/trend_short_counts.tif")
 bandnames <- c("ndvi", "ndvi_resid", "ndvi_trend", "pr", "pr_resid", "pr_trend", "pet", "pet_resid", "pet_trend", 
                "aet", "aet_resid","aet_trend", "tmmn", "tmmn_resid", "tmmn_trend", "tmmx", "tmmx_resid", "tmmx_trend", 
                "def", "def_resid", "def_trend", "trend_long", "trend_short", "count_long", "count_short",
-               lut$realms, lut$biomes)
+               lut$realms, lut$biomes, lut$ecoregions)
 
 data <- suppressWarnings(brick(c(ndvi, pr, pet, aet, tmmn, tmmx, def, trend_long_assemblage, trend_short_assemblage, 
-                                 trend_long_counts, trend_short_counts, realms, biomes)))
+                                 trend_long_counts, trend_short_counts, realms, biomes, ecoregions)))
 names(data) <- bandnames
 
 data_stars <- st_as_stars(data)[africa_outline] %>%
