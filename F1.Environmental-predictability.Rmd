@@ -11,7 +11,7 @@ library(raster)
 library(sf)
 ```
 
-```{r load_data_set_plotting_params}
+```{r load_data_and_set_plotting_params}
 data_stars <- readRDS("data/processed/data_stars.RDS")
 
 as.data.frame(data_stars) %>%
@@ -19,6 +19,7 @@ as.data.frame(data_stars) %>%
   pivot_wider(names_from = variable, values_from = value) %>%
   mutate(tm_resid = rowMeans(dplyr::select(., tmmn_resid, tmmx_resid)),
          tm_trend = rowMeans(dplyr::select(., tmmn_trend, tmmx_trend))) %>%
+  as.data.frame() %>%
   identity() -> data
 
 africa <- st_read("data/raw/Africa.gpkg")
@@ -31,57 +32,54 @@ range01 <- function(x, ...){(x - min(x, ...)) / (max(x, ...) - min(x, ...))}
 
 ## Environmental long-term trends
 
-```{r plot_environmental_trends_params, warning=FALSE, results='hold', out.width='100%'}
-xlims <- c(-20, 50)
-ylims <- c(-40, 40)
-xbreaks <- c(-20, 0, 20, 40)
-range01 <- function(x, ...){(x - min(x, ...)) / (max(x, ...) - min(x, ...))}
+**Color scales are mapped to (ie limited by) 1% and 99% quantiles, but for now I seem unable to calculate this on the fly in `ggplot` so these values are hard-coded and should be changed manually when the dataset changes.**
 
-ggplot() +
+```{r plot_environmental_trends_params, warning=FALSE, results='hold', out.width='100%'}
+ggplot(data) +
   geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
-  geom_raster(aes(x = x, y = y, fill = ndvi_trend), data = data) +
-  scale_fill_continuous_diverging(limits = quantile(data["ndvi_trend"], c(0.025, 0.975), na.rm = TRUE), oob = scales::squish,
-                                  na.value = NA, palette = "Blue-Red 3") +
+  geom_raster(aes(x = x, y = y, fill = ndvi_trend)) +
+  scale_fill_continuous_diverging(limits = c(-0.0002917907, 0.0004510269), 
+                                  oob = scales::squish, na.value = NA, palette = "Blue-Red 3") +
   coord_sf(xlim = xlims, ylim = ylims) +
   scale_x_continuous(breaks = xbreaks) +
   theme_bw() +
   labs(x = "Lon", y = "Lat", fill = "NDVI") -> ndvi
 
-ggplot() +
+ggplot(data) +
   geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
-  geom_raster(aes(x = x, y = y, fill = pr_trend), data = data) +
-  scale_fill_continuous_diverging(limits = quantile(data["pr_trend"], c(0.025, 0.975), na.rm = TRUE), oob = scales::squish,
-                                  na.value = NA, palette = "Blue-Red 3") +
+  geom_raster(aes(x = x, y = y, fill = pr_trend)) +
+  scale_fill_continuous_diverging(limits = c(-0.1588118, 0.3441482), 
+                                  oob = scales::squish, na.value = NA, palette = "Blue-Red 3") +
   coord_sf(xlim = xlims, ylim = ylims) +
   scale_x_continuous(breaks = xbreaks) +
   theme_bw() +
   labs(x = "Lon", y = "Lat", fill = "Precip.") -> pr
 
-ggplot() +
+ggplot(data) +
   geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
-  geom_raster(aes(x = x, y = y, fill = tm_trend), data = data) +
-  scale_fill_continuous_diverging(limits = quantile(data["tm_trend"], c(0.025, 0.975), na.rm = TRUE), oob = scales::squish,
-                                  na.value = NA, palette = "Blue-Red 3") +
+  geom_raster(aes(x = x, y = y, fill = tm_trend)) +
+  scale_fill_continuous_diverging(limits = c(-0.008640864, 0.092846610), 
+                                  oob = scales::squish, na.value = NA, palette = "Blue-Red 3") +
   coord_sf(xlim = xlims, ylim = ylims) +
   scale_x_continuous(breaks = xbreaks) +
   theme_bw() +
   labs(x = "Lon", y = "Lat", fill = "Temp.") -> tm
 
-ggplot() +
+ggplot(data) +
   geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
-  geom_raster(aes(x = x, y = y, fill = pet_trend), data = data) +
-  scale_fill_continuous_diverging(limits = quantile(data["pet_trend"], c(0.025, 0.975), na.rm = TRUE), oob = scales::squish,
-                                  na.value = NA, palette = "Blue-Red 3") +
+  geom_raster(aes(x = x, y = y, fill = pet_trend)) +
+  scale_fill_continuous_diverging(limits = c(-0.6805905, 0.8102751), 
+                                  oob = scales::squish, na.value = NA, palette = "Blue-Red 3") +
   coord_sf(xlim = xlims, ylim = ylims) +
   scale_x_continuous(breaks = xbreaks) +
   theme_bw() +
   labs(x = "Lon", y = "Lat", fill = "Potevap.") -> pet
 
-ggplot() +
+ggplot(data) +
   geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
-  geom_raster(aes(x = x, y = y, fill = aet_trend), data = data) +
-  scale_fill_continuous_diverging(limits = quantile(data["aet_trend"], c(0.025, 0.975), na.rm = TRUE), oob = scales::squish,
-                                  na.value = NA, palette = "Blue-Red 3") +
+  geom_raster(aes(x = x, y = y, fill = aet_trend)) +
+  scale_fill_continuous_diverging(limits = c(-0.5677155, 0.9933489), 
+                                  oob = scales::squish, na.value = NA, palette = "Blue-Red 3") +
   coord_sf(xlim = xlims, ylim = ylims) +
   scale_x_continuous(breaks = xbreaks) +
   theme_bw() +
@@ -94,6 +92,8 @@ ggsave(filename = "data/processed/plots/environmental_trends.pdf", device = "pdf
 ```
 
 ## Environmental predictability
+
+**Color scales are mapped to (ie limited by) 1% and 99% quantiles, but for now I seem unable to calculate this on the fly in `ggplot` so these values are hard-coded and should be changed manually when the dataset changes.**
 
 ```{r plot_environmental_predictability_params, warning=FALSE, results='hold', out.width='100%'}
 total_unpred <- function(data) {
@@ -108,8 +108,8 @@ data["total"] <- total_unpred(data)
 ggplot() +
   geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
   geom_raster(aes(x = x, y = y, fill = ndvi_resid), data = data) +
-  scale_fill_continuous_sequential(limits = quantile(data["ndvi_resid"], c(0.025, 0.975), na.rm = TRUE), oob = scales::squish,
-                                   na.value = NA, palette = "Greens") +
+  scale_fill_continuous_sequential(limits = c(0.006920418, 0.123886703), 
+                                   oob = scales::squish, na.value = NA, palette = "Greens") +
   coord_sf(xlim = xlims, ylim = ylims) +
   scale_x_continuous(breaks = xbreaks) +
   theme_bw() +
@@ -118,8 +118,8 @@ ggplot() +
 ggplot() +
   geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
   geom_raster(aes(x = x, y = y, fill = pr_resid), data = data) +
-  scale_fill_continuous_sequential(limits = quantile(data["pr_resid"], c(0.025, 0.975), na.rm = TRUE), oob = scales::squish,
-                                   na.value = NA, palette = "Blues") +
+  scale_fill_continuous_sequential(limits = c(0.1481013, 118.3143118), 
+                                   oob = scales::squish, na.value = NA, palette = "Blues") +
   coord_sf(xlim = xlims, ylim = ylims) +
   scale_x_continuous(breaks = xbreaks) +
   theme_bw() +
@@ -128,8 +128,8 @@ ggplot() +
 ggplot() +
   geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
   geom_raster(aes(x = x, y = y, fill = tm_resid), data = data) +
-  scale_fill_continuous_sequential(limits = quantile(data["tm_resid"], c(0.025, 0.975), na.rm = TRUE), oob = scales::squish,
-                                   na.value = NA, palette = "Reds") +
+  scale_fill_continuous_sequential(limits = c(5.577115, 22.475821), 
+                                   oob = scales::squish, na.value = NA, palette = "Reds") +
   coord_sf(xlim = xlims, ylim = ylims) +
   scale_x_continuous(breaks = xbreaks) +
   theme_bw() +
@@ -138,8 +138,8 @@ ggplot() +
 ggplot() +
   geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
   geom_raster(aes(x = x, y = y, fill = pet_resid), data = data) +
-  scale_fill_continuous_sequential(limits = quantile(data["pet_resid"], c(0.025, 0.975), na.rm = TRUE), oob = scales::squish,
-                                   na.value = NA, palette = "Oranges") +
+  scale_fill_continuous_sequential(limits = c(69.39295, 244.31387), 
+                                   oob = scales::squish, na.value = NA, palette = "Oranges") +
   coord_sf(xlim = xlims, ylim = ylims) +
   scale_x_continuous(breaks = xbreaks) +
   theme_bw() +
@@ -148,8 +148,8 @@ ggplot() +
 ggplot() +
   geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
   geom_raster(aes(x = x, y = y, fill = aet_resid), data = data) +
-  scale_fill_continuous_sequential(limits = quantile(data["aet_resid"], c(0.025, 0.975), na.rm = TRUE), oob = scales::squish,
-                                   na.value = NA, palette = "Oranges") +
+  scale_fill_continuous_sequential(limits = c(1.212078, 384.816440), 
+                                   oob = scales::squish, na.value = NA, palette = "Oranges") +
   coord_sf(xlim = xlims, ylim = ylims) +
   scale_x_continuous(breaks = xbreaks) +
   theme_bw() +
@@ -158,8 +158,7 @@ ggplot() +
 ggplot() +
   geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
   geom_raster(aes(x = x, y = y, fill = total), data = data) +
-  scale_fill_continuous_sequential(limits = quantile(data["total"], c(0.025, 0.975), na.rm = TRUE), oob = scales::squish,
-                                   na.value = NA, palette = "Viridis") +
+  scale_fill_continuous_sequential(oob = scales::squish, na.value = NA, palette = "Viridis") +
   coord_sf(xlim = xlims, ylim = ylims) +
   scale_x_continuous(breaks = xbreaks) +
   theme_bw() +
