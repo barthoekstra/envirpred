@@ -1,0 +1,17 @@
+# (PART) Analysis: Local model {-}
+
+# Model local assemblage trends
+
+Having identified a strong relationship between assemblage trends and both long-term environmental trends and environmental predictability, we can see how this relation varies spatially.
+
+**Work in progress**
+
+```{r setup_local_modeling_environment, include=FALSE}
+library(tidyverse)
+library(mboost)
+library(patchwork)
+library(spdep)
+library(Metrics)
+data <- readRDS("data/processed/data.RDS")
+lut <- readRDS("data/processed/ecoregions_lut.RDS")
+```
