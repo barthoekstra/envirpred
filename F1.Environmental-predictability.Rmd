@@ -2,7 +2,7 @@
 
 # Environmental predictability
 
-```{r setup_local_modeling_environment, include=FALSE}
+```{r setup_figure1_environment, include=FALSE}
 library(tidyverse)
 library(patchwork)
 library(colorspace)
