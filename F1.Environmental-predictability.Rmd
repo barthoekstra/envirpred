@@ -1,0 +1,173 @@
+# (PART) Figures {-}
+
+# Environmental predictability
+
+```{r setup_local_modeling_environment, include=FALSE}
+library(tidyverse)
+library(patchwork)
+library(colorspace)
+library(stars)
+library(raster)
+library(sf)
+```
+
+```{r load_data_set_plotting_params}
+data_stars <- readRDS("data/processed/data_stars.RDS")
+
+as.data.frame(data_stars) %>%
+  `colnames<-`(c("x", "y", "variable", "value")) %>%
+  pivot_wider(names_from = variable, values_from = value) %>%
+  mutate(tm_resid = rowMeans(dplyr::select(., tmmn_resid, tmmx_resid)),
+         tm_trend = rowMeans(dplyr::select(., tmmn_trend, tmmx_trend))) %>%
+  identity() -> data
+
+africa <- st_read("data/raw/Africa.gpkg")
+
+xlims <- c(-20, 50)
+ylims <- c(-40, 40)
+xbreaks <- c(-20, 0, 20, 40)
+range01 <- function(x, ...){(x - min(x, ...)) / (max(x, ...) - min(x, ...))}
+```
+
+## Environmental long-term trends
+
+```{r plot_environmental_trends_params, warning=FALSE, results='hold', out.width='100%'}
+xlims <- c(-20, 50)
+ylims <- c(-40, 40)
+xbreaks <- c(-20, 0, 20, 40)
+range01 <- function(x, ...){(x - min(x, ...)) / (max(x, ...) - min(x, ...))}
+
+ggplot() +
+  geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
+  geom_raster(aes(x = x, y = y, fill = ndvi_trend), data = data) +
+  scale_fill_continuous_diverging(limits = quantile(data["ndvi_trend"], c(0.025, 0.975), na.rm = TRUE), oob = scales::squish,
+                                  na.value = NA, palette = "Blue-Red 3") +
+  coord_sf(xlim = xlims, ylim = ylims) +
+  scale_x_continuous(breaks = xbreaks) +
+  theme_bw() +
+  labs(x = "Lon", y = "Lat", fill = "NDVI") -> ndvi
+
+ggplot() +
+  geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
+  geom_raster(aes(x = x, y = y, fill = pr_trend), data = data) +
+  scale_fill_continuous_diverging(limits = quantile(data["pr_trend"], c(0.025, 0.975), na.rm = TRUE), oob = scales::squish,
+                                  na.value = NA, palette = "Blue-Red 3") +
+  coord_sf(xlim = xlims, ylim = ylims) +
+  scale_x_continuous(breaks = xbreaks) +
+  theme_bw() +
+  labs(x = "Lon", y = "Lat", fill = "Precip.") -> pr
+
+ggplot() +
+  geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
+  geom_raster(aes(x = x, y = y, fill = tm_trend), data = data) +
+  scale_fill_continuous_diverging(limits = quantile(data["tm_trend"], c(0.025, 0.975), na.rm = TRUE), oob = scales::squish,
+                                  na.value = NA, palette = "Blue-Red 3") +
+  coord_sf(xlim = xlims, ylim = ylims) +
+  scale_x_continuous(breaks = xbreaks) +
+  theme_bw() +
+  labs(x = "Lon", y = "Lat", fill = "Temp.") -> tm
+
+ggplot() +
+  geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
+  geom_raster(aes(x = x, y = y, fill = pet_trend), data = data) +
+  scale_fill_continuous_diverging(limits = quantile(data["pet_trend"], c(0.025, 0.975), na.rm = TRUE), oob = scales::squish,
+                                  na.value = NA, palette = "Blue-Red 3") +
+  coord_sf(xlim = xlims, ylim = ylims) +
+  scale_x_continuous(breaks = xbreaks) +
+  theme_bw() +
+  labs(x = "Lon", y = "Lat", fill = "Potevap.") -> pet
+
+ggplot() +
+  geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
+  geom_raster(aes(x = x, y = y, fill = aet_trend), data = data) +
+  scale_fill_continuous_diverging(limits = quantile(data["aet_trend"], c(0.025, 0.975), na.rm = TRUE), oob = scales::squish,
+                                  na.value = NA, palette = "Blue-Red 3") +
+  coord_sf(xlim = xlims, ylim = ylims) +
+  scale_x_continuous(breaks = xbreaks) +
+  theme_bw() +
+  labs(x = "Lon", y = "Lat", fill = "Actevap.") -> aet
+
+ndvi + pr + tm + pet + aet + plot_layout(ncol = 3) +
+  plot_annotation(title = "Environmental long-term trends", subtitle = "Model trends")
+
+ggsave(filename = "data/processed/plots/environmental_trends.pdf", device = "pdf", width = 12, units = "in")
+```
+
+## Environmental predictability
+
+```{r plot_environmental_predictability_params, warning=FALSE, results='hold', out.width='100%'}
+total_unpred <- function(data) {
+  out <- range01(scale(data["ndvi_resid"]), na.rm = TRUE) + range01(scale(data["pr_resid"]), na.rm = TRUE) +
+    range01(scale(data["tm_resid"]), na.rm = TRUE) + range01(scale(data["pet_resid"]), na.rm = TRUE) +
+    range01(scale(data["aet_resid"]), na.rm = TRUE)
+  as.matrix(out)
+}
+
+data["total"] <- total_unpred(data)
+
+ggplot() +
+  geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
+  geom_raster(aes(x = x, y = y, fill = ndvi_resid), data = data) +
+  scale_fill_continuous_sequential(limits = quantile(data["ndvi_resid"], c(0.025, 0.975), na.rm = TRUE), oob = scales::squish,
+                                   na.value = NA, palette = "Greens") +
+  coord_sf(xlim = xlims, ylim = ylims) +
+  scale_x_continuous(breaks = xbreaks) +
+  theme_bw() +
+  labs(x = "Lon", y = "Lat", fill = "NDVI") -> ndvi
+
+ggplot() +
+  geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
+  geom_raster(aes(x = x, y = y, fill = pr_resid), data = data) +
+  scale_fill_continuous_sequential(limits = quantile(data["pr_resid"], c(0.025, 0.975), na.rm = TRUE), oob = scales::squish,
+                                   na.value = NA, palette = "Blues") +
+  coord_sf(xlim = xlims, ylim = ylims) +
+  scale_x_continuous(breaks = xbreaks) +
+  theme_bw() +
+  labs(x = "Lon", y = "Lat", fill = "Precip.") -> pr
+
+ggplot() +
+  geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
+  geom_raster(aes(x = x, y = y, fill = tm_resid), data = data) +
+  scale_fill_continuous_sequential(limits = quantile(data["tm_resid"], c(0.025, 0.975), na.rm = TRUE), oob = scales::squish,
+                                   na.value = NA, palette = "Reds") +
+  coord_sf(xlim = xlims, ylim = ylims) +
+  scale_x_continuous(breaks = xbreaks) +
+  theme_bw() +
+  labs(x = "Lon", y = "Lat", fill = "Temp.") -> tm
+
+ggplot() +
+  geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
+  geom_raster(aes(x = x, y = y, fill = pet_resid), data = data) +
+  scale_fill_continuous_sequential(limits = quantile(data["pet_resid"], c(0.025, 0.975), na.rm = TRUE), oob = scales::squish,
+                                   na.value = NA, palette = "Oranges") +
+  coord_sf(xlim = xlims, ylim = ylims) +
+  scale_x_continuous(breaks = xbreaks) +
+  theme_bw() +
+  labs(x = "Lon", y = "Lat", fill = "Potevap.") -> pet
+
+ggplot() +
+  geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
+  geom_raster(aes(x = x, y = y, fill = aet_resid), data = data) +
+  scale_fill_continuous_sequential(limits = quantile(data["aet_resid"], c(0.025, 0.975), na.rm = TRUE), oob = scales::squish,
+                                   na.value = NA, palette = "Oranges") +
+  coord_sf(xlim = xlims, ylim = ylims) +
+  scale_x_continuous(breaks = xbreaks) +
+  theme_bw() +
+  labs(x = "Lon", y = "Lat", fill = "Actevap.") -> aet
+
+ggplot() +
+  geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
+  geom_raster(aes(x = x, y = y, fill = total), data = data) +
+  scale_fill_continuous_sequential(limits = quantile(data["total"], c(0.025, 0.975), na.rm = TRUE), oob = scales::squish,
+                                   na.value = NA, palette = "Viridis") +
+  coord_sf(xlim = xlims, ylim = ylims) +
+  scale_x_continuous(breaks = xbreaks) +
+  theme_bw() +
+  labs(x = "Lon", y = "Lat", fill = "Total") -> total
+
+ndvi + pr + tm + pet + aet + total + plot_layout(ncol = 3) +
+  plot_annotation(title = "Environmental predictability", subtitle = "Model RMSE")
+
+ggsave(filename = "data/processed/plots/environmental_predictability.pdf", device = "pdf", width = 12, units = "in")
+```
+
