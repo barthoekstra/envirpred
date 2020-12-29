@@ -42,4 +42,8 @@ bootstrap-uncertainty-analysis
 determine-bootstrap-folds
 run-bootstrap-procedure
 recombine-bootstrapped-results
+model-local-assemblage-trends
+environmental-predictability
+environmental-long-term-trends
+environmental-predictability-1
 references

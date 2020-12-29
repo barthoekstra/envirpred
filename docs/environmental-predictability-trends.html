@@ -42,11 +42,15 @@
 <li><a class="" href="species-assemblage-trends.html"><span class="header-section-number">3</span> Species assemblage trends</a></li>
 <li><a class="" href="ecoregions-biomes.html"><span class="header-section-number">4</span> Ecoregions &amp; Biomes</a></li>
 <li><a class="active" href="environmental-predictability-trends.html"><span class="header-section-number">5</span> Environmental predictability &amp; trends</a></li>
-<li class="book-part">Analysis</li>
+<li class="book-part">Analysis: Global model</li>
 <li><a class="" href="model-assemblage-trends.html"><span class="header-section-number">6</span> Model assemblage trends</a></li>
 <li><a class="" href="quantify-model-uncertainty.html"><span class="header-section-number">7</span> Quantify model uncertainty</a></li>
+<li class="book-part">Analysis: Local model</li>
+<li><a class="" href="model-local-assemblage-trends.html"><span class="header-section-number">8</span> Model local assemblage trends</a></li>
+<li class="book-part">Figures</li>
+<li><a class="" href="environmental-predictability.html"><span class="header-section-number">9</span> Environmental predictability</a></li>
 <li class="book-part">Other</li>
-<li><a class="" href="references.html"><span class="header-section-number">8</span> References</a></li>
+<li><a class="" href="references.html"><span class="header-section-number">10</span> References</a></li>
 </ul>
 
         <div class="book-extra">
@@ -100,6 +104,7 @@
 <span class="va">def</span> <span class="op">&lt;-</span> <span class="fu">load_raster</span><span class="op">(</span><span class="st">"data/raw/gee/def_1.tif"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"def_original"</span>, <span class="st">"residuals"</span>, <span class="st">"slope"</span><span class="op">)</span><span class="op">)</span>
 <span class="va">realms</span> <span class="op">&lt;-</span> <span class="fu">load_raster</span><span class="op">(</span><span class="st">"data/processed/realms.tif"</span>, <span class="cn">NULL</span><span class="op">)</span>
 <span class="va">biomes</span> <span class="op">&lt;-</span> <span class="fu">load_raster</span><span class="op">(</span><span class="st">"data/processed/biomes.tif"</span>, <span class="cn">NULL</span><span class="op">)</span>
+<span class="va">ecoregions</span> <span class="op">&lt;-</span> <span class="fu">load_raster</span><span class="op">(</span><span class="st">"data/processed/ecoregions.tif"</span>, <span class="cn">NULL</span><span class="op">)</span>
 
 <span class="va">trend_long_assemblage</span> <span class="op">&lt;-</span> <span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html">raster</a></span><span class="op">(</span><span class="st">"data/processed/trend_long_assemblage.tif"</span><span class="op">)</span>
 <span class="va">trend_short_assemblage</span> <span class="op">&lt;-</span> <span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html">raster</a></span><span class="op">(</span><span class="st">"data/processed/trend_short_assemblage.tif"</span><span class="op">)</span>
@@ -109,10 +114,10 @@
 <span class="va">bandnames</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"ndvi"</span>, <span class="st">"ndvi_resid"</span>, <span class="st">"ndvi_trend"</span>, <span class="st">"pr"</span>, <span class="st">"pr_resid"</span>, <span class="st">"pr_trend"</span>, <span class="st">"pet"</span>, <span class="st">"pet_resid"</span>, <span class="st">"pet_trend"</span>, 
                <span class="st">"aet"</span>, <span class="st">"aet_resid"</span>,<span class="st">"aet_trend"</span>, <span class="st">"tmmn"</span>, <span class="st">"tmmn_resid"</span>, <span class="st">"tmmn_trend"</span>, <span class="st">"tmmx"</span>, <span class="st">"tmmx_resid"</span>, <span class="st">"tmmx_trend"</span>, 
                <span class="st">"def"</span>, <span class="st">"def_resid"</span>, <span class="st">"def_trend"</span>, <span class="st">"trend_long"</span>, <span class="st">"trend_short"</span>, <span class="st">"count_long"</span>, <span class="st">"count_short"</span>,
-               <span class="va">lut</span><span class="op">$</span><span class="va">realms</span>, <span class="va">lut</span><span class="op">$</span><span class="va">biomes</span><span class="op">)</span>
+               <span class="va">lut</span><span class="op">$</span><span class="va">realms</span>, <span class="va">lut</span><span class="op">$</span><span class="va">biomes</span>, <span class="va">lut</span><span class="op">$</span><span class="va">ecoregions</span><span class="op">)</span>
 
 <span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/warning.html">suppressWarnings</a></span><span class="op">(</span><span class="fu">brick</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">ndvi</span>, <span class="va">pr</span>, <span class="va">pet</span>, <span class="va">aet</span>, <span class="va">tmmn</span>, <span class="va">tmmx</span>, <span class="va">def</span>, <span class="va">trend_long_assemblage</span>, <span class="va">trend_short_assemblage</span>, 
-                                 <span class="va">trend_long_counts</span>, <span class="va">trend_short_counts</span>, <span class="va">realms</span>, <span class="va">biomes</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+                                 <span class="va">trend_long_counts</span>, <span class="va">trend_short_counts</span>, <span class="va">realms</span>, <span class="va">biomes</span>, <span class="va">ecoregions</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">bandnames</span>
 
 <span class="va">data_stars</span> <span class="op">&lt;-</span> <span class="fu">st_as_stars</span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">[</span><span class="va">africa_outline</span><span class="op">]</span> <span class="op">%&gt;%</span>
