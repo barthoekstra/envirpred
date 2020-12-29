@@ -15,4 +15,6 @@ rmd_files:
 - "05.Environmental-predictability-trends.Rmd"
 - "06.Model-assemblage-trends.Rmd"
 - "07.Quantify-model-uncertainty.Rmd"
+- "08.Model-local-assemblage-trends.Rmd"
+- "F1.Environmental-predictability.Rmd"
 - "References.Rmd"
