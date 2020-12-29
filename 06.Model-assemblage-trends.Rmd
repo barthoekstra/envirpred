@@ -1,4 +1,4 @@
-# (PART) Analysis {-}
+# (PART) Analysis: Global model {-}
 
 # Model assemblage trends
 
