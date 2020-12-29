@@ -44,13 +44,6 @@
       "Repository": "CRAN",
       "Hash": "4744be45519d675af66c28478720fce5"
     },
-    "DEoptimR": {
-      "Package": "DEoptimR",
-      "Version": "1.0-8",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "4fdd17df6c1b897cb59bdd9cf6621a43"
-    },
     "DescTools": {
       "Package": "DescTools",
       "Version": "0.99.38",
@@ -72,13 +65,6 @@
       "Repository": "CRAN",
       "Hash": "e84ceec03cceaea17050f58f0ed99923"
     },
-    "FNN": {
-      "Package": "FNN",
-      "Version": "1.1.3",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "b56998fff55e4a4b4860ad6e8c67e0f9"
-    },
     "Formula": {
       "Package": "Formula",
       "Version": "1.2-4",
@@ -92,20 +78,6 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "f767c7f049252543d140b8154fa45a36"
-    },
-    "GWmodel": {
-      "Package": "GWmodel",
-      "Version": "2.2-2",
-      "Source": "GitHub",
-      "Repository": "CRAN",
-      "RemoteType": "github",
-      "RemoteHost": "api.github.com",
-      "RemoteRepo": "GWmodel",
-      "RemoteUsername": "barthoekstra",
-      "RemoteRef": "HEAD",
-      "RemoteSha": "8757772e076b12df8f1d19a0bfb41c015bb1e473",
-      "RemoteSubdir": "GWmodel",
-      "Hash": "a62b0ce20827db1bf2879ef7926a1285"
     },
     "KernSmooth": {
       "Package": "KernSmooth",
@@ -500,10 +472,10 @@
     },
     "colorspace": {
       "Package": "colorspace",
-      "Version": "1.4-1",
+      "Version": "2.0-0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "6b436e95723d1f0e861224dd9b094dfb"
+      "Hash": "abea3384649ef37f60ef51ce002f3547"
     },
     "colourpicker": {
       "Package": "colourpicker",
@@ -813,13 +785,6 @@
       "Repository": "CRAN",
       "Hash": "4ded8b439797f7b1693bd3d238d0106b"
     },
-    "ggpointdensity": {
-      "Package": "ggpointdensity",
-      "Version": "0.1.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "8868788d373ea767189d8a5436416e30"
-    },
     "ggrepel": {
       "Package": "ggrepel",
       "Version": "0.8.2",
@@ -985,13 +950,6 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "9a05be16c7570a2b22f1f8523d5f9329"
-    },
-    "intervals": {
-      "Package": "intervals",
-      "Version": "0.15.2",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "079e6e04c6aafe087aba89f93311d8ba"
     },
     "inum": {
       "Package": "inum",
@@ -1746,13 +1704,6 @@
       "Repository": "CRAN",
       "Hash": "20a0a94af9e8f7040510447763aab3e9"
     },
-    "robustbase": {
-      "Package": "robustbase",
-      "Version": "0.93-6",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "241454e22c9d26b11669b78d06706b41"
-    },
     "rootSolve": {
       "Package": "rootSolve",
       "Version": "1.8.2.1",
@@ -1865,33 +1816,12 @@
       "Repository": "CRAN",
       "Hash": "be5fc9cc13487505381071422d8346e2"
     },
-    "spacetime": {
-      "Package": "spacetime",
-      "Version": "1.2-3",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "c56bf34ead17cdd551eb2e2bf0e4bc74"
-    },
-    "spatialreg": {
-      "Package": "spatialreg",
-      "Version": "1.1-5",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "6b39e7a46cb47ea128892974b6083097"
-    },
     "spdep": {
       "Package": "spdep",
       "Version": "1.1-5",
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "e220c93e8a62be165fb5b56983ca2339"
-    },
-    "spgwr": {
-      "Package": "spgwr",
-      "Version": "0.6-34",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "c029ee169bd26333ce450f495f98b306"
     },
     "stabs": {
       "Package": "stabs",
@@ -2095,13 +2025,6 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "b8acdf8af494d9ec19ccb2481a9b11c2"
-    },
-    "xts": {
-      "Package": "xts",
-      "Version": "0.12.1",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "ca2fd4ad8ef78cca3aa2b30f992798a8"
     },
     "yaml": {
       "Package": "yaml",
