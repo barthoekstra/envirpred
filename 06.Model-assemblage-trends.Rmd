@@ -26,7 +26,7 @@ lut <- readRDS("data/processed/ecoregions_lut.RDS")
 
 ## Correlation among predictors
 
-We first assess correlations among predictors. As we intend to compare models using environmental predictability with those of long-term trends we separate the correlation matrices for both.
+We first assess correlations among predictors. As we also intend to compare models using environmental predictability with those of long-term trends we separate the correlation matrices for both.
 
 ### Pearson's correlation matrix
 
@@ -37,22 +37,24 @@ unused_predictors <- c("trend_long", "trend_short", "count_long", "count_short",
 predictors <- colnames(data)[!colnames(data) %in% unused_predictors]
 predictors_trends <- colnames(dplyr::select(data, ends_with("_trend")))
 predictors_resids <- colnames(dplyr::select(data, ends_with("_resid")))
+predictors_all <- c(predictors_trends, predictors_resids)
 
 ggcorrmat(data, cor.vars = all_of(predictors_trends), type = "parametric")
 ggcorrmat(data, cor.vars = all_of(predictors_resids), type = "parametric")
+ggcorrmat(data, cor.vars = all_of(predictors_all), type = "parametric")
 ```
 
 This indicates environmental residuals are generally correlated more strongly than long-term trends. Of the covariates, `def`, `tmmx` and `tmmn` are most strongly correlated with each other or other variables. We can reduce correlation for temperature measures by calculating the average temperature from both `tmmx` and `tmmn` and will remove `def` from our modeling dataset.
 
 ```{r set_final_predictors}
 data %>%
-  rowwise() %>%
-  mutate(tm_trend = mean(c(tmmx_trend, tmmn_trend)),
-         tm_resid = mean(c(tmmx_resid, tmmn_resid))) %>%
+  mutate(tm_resid = rowMeans(dplyr::select(., tmmn_resid, tmmx_resid)),
+         tm_trend = rowMeans(dplyr::select(., tmmn_trend, tmmx_trend))) %>%
   ungroup() %>%
   identity() -> data
 predictors_trends <- c(predictors_trends[!predictors_trends %in% c("tmmx_trend", "tmmn_trend", "def_trend")], "tm_trend")
 predictors_resids <- c(predictors_resids[!predictors_resids %in% c("tmmx_resid", "tmmn_resid", "def_resid")], "tm_resid")
+predictors_all <- c(predictors_trends, predictors_resids)
 ```
 
 And we calculate a new correlation matrix.
@@ -60,6 +62,7 @@ And we calculate a new correlation matrix.
 ```{r calculate_new_correlation_matrix, results='hold'}
 ggcorrmat(data, cor.vars = all_of(predictors_trends), type = "parametric")
 ggcorrmat(data, cor.vars = all_of(predictors_resids), type = "parametric")
+ggcorrmat(data, cor.vars = all_of(predictors_all), type = "parametric")
 ```
 
 We continue to see strong correlation between `pr_resid` and `ndvi_resid`, but as both original variables (`ndvi` and `pr`) are effectively uncorrelated in `ndvi_trend` and `pr_trend` and we want the trends and predictability model to be comparable, we keep both in.
@@ -236,20 +239,23 @@ data %>%
 
 saveRDS(data_subset, file = "data/processed/data_subset.RDS")
 
-model_formula <- function(predictors, response, rac = TRUE) {
+model_formula <- function(predictors, response) {
   formula <- as.formula(paste0(response, " ~ ", paste0("bbs(", predictors, ")", collapse = " + ")))
   return(formula)
 }
 
 formula_trends <- model_formula(predictors_trends, "trend_long")
 formula_resids <- model_formula(predictors_resids, "trend_long")
+formula_all <- model_formula(predictors_all, "trend_long")
 
 ctrl <- boost_control(trace = FALSE, mstop = 10000)
 mod_trends <- gamboost(formula_trends, data = data_subset, family = Gaussian(), control = ctrl)
 mod_resids <- gamboost(formula_resids, data = data_subset, family = Gaussian(), control = ctrl)
+mod_all <- gamboost(formula_all, data = data_subset, family = Gaussian(), control = ctrl)
 
 saveRDS(mod_trends, file = "data/processed/models/mod_trends.RDS")
 saveRDS(mod_resids, file = "data/processed/models/mod_resids.RDS")
+saveRDS(mod_all, file = "data/processed/models/mod_all.RDS")
 ```
 
 #### Determine the optimal number of boosting iterations
@@ -265,6 +271,10 @@ saveRDS(cvm_trends, file = "data/processed/models/cvm_trends.RDS")
 cv10f_resids <- cv(model.weights(mod_resids), type = "kfold")
 cvm_resids <- cvrisk(mod_resids, folds = cv10f_resids, grid = grid)
 saveRDS(cvm_resids, file = "data/processed/models/cvm_resids.RDS")
+
+cv10f_all <- cv(model.weights(mod_all), type = "kfold")
+cvm_all <- cvrisk(mod_all, folds = cv10f_all, grid = grid)
+saveRDS(cvm_all, file = "data/processed/models/cvm_all.RDS")
 ```
 
 We can load the results and plot the outputs.
@@ -272,6 +282,7 @@ We can load the results and plot the outputs.
 ```{r plot_cvm_results, results='hold', out.width='100%'}
 cvm_trends <- readRDS("data/processed/models/cvm_trends.RDS")
 cvm_resids <- readRDS("data/processed/models/cvm_resids.RDS")
+cvm_all <- readRDS("data/processed/models/cvm_all.RDS")
 
 plot_cvm <- function(cvm, plot_id = "") {
   m <- cvm
@@ -288,8 +299,9 @@ plot_cvm <- function(cvm, plot_id = "") {
 }
 plot_cvm_trends <- plot_cvm(cvm_trends, "trends")
 plot_cvm_resids <- plot_cvm(cvm_resids, "resids")
+plot_cvm_all <- plot_cvm(cvm_all, "all")
 
-plot_cvm_trends + plot_cvm_resids + plot_layout(guides = "collect") & theme(legend.position = "bottom")
+plot_cvm_trends + plot_cvm_resids + plot_cvm_all + plot_layout(guides = "collect") & theme(legend.position = "bottom")
 ```
 
 We can see that most cross-validated models seem to show stagnating model improvement beyond 10000 boosts, while an optimum is mostly not reached before 30000 boosts. Given the stagnating improvement, limited compute time and no need to optimize predictive performance ad infinitum, we limit the number of boosts to 10000.
@@ -301,12 +313,14 @@ A quick plot of model residuals will show there is strong spatial autocorrelatio
 ```{r plot_residual_spatial_autocorrelation, out.width='100%', results='hold'}
 if (!exists("mod_trends")) mod_trends <- readRDS("data/processed/models/mod_trends.RDS")
 if (!exists("mod_resids")) mod_resids <- readRDS("data/processed/models/mod_resids.RDS")
+if (!exists("mod_all")) mod_all <- readRDS("data/processed/models/mod_all.RDS")
 data_subset$norac_trends <- resid(mod_trends)
 data_subset$norac_resids <- resid(mod_resids)
+data_subset$norac_all <- resid(mod_all)
 
 data_subset %>%
-  dplyr::select(x, y, norac_trends, norac_resids) %>%
-  rename(c(Predictability = norac_resids, Trends = norac_trends)) %>%
+  dplyr::select(x, y, norac_trends, norac_resids, norac_all) %>%
+  rename(c(Predictability = norac_resids, Trends = norac_trends, `All predictors` = norac_all)) %>%
   pivot_longer(-c(x, y), names_to = "model", values_to = "residuals") %>%
   ggplot(aes(x = x, y = y, color = residuals)) +
   geom_point() +
@@ -324,6 +338,8 @@ acov_trends <- autocov_dist(resid(mod_trends), as.matrix(cbind(data_subset$x, da
                             nbs = neighborhood_dist, zero.policy = TRUE)
 acov_resids <- autocov_dist(resid(mod_resids), as.matrix(cbind(data_subset$x, data_subset$y)), longlat = TRUE,
                             nbs = neighborhood_dist, zero.policy = TRUE)
+acov_all <- autocov_dist(resid(mod_all), as.matrix(cbind(data_subset$x, data_subset$y)), longlat = TRUE,
+                         nbs = neighborhood_dist, zero.policy = TRUE)
 ```
 
 The chunk above may throw some warnings if some points are not within `r neighborhood_dist` kilometers from other points, but that will most certainly not be many points in our dataset, so we can accept that some of these autocovariates are not as accurate as others.
@@ -333,6 +349,7 @@ Now we will add the calculated autocovariates of residuals to our earlier datase
 ```{r retrain_model_with_residual_autocovariate}
 data_subset$autocov_trends <- acov_trends
 data_subset$autocov_resids <- acov_resids
+data_subset$autocov_all <- acov_all
 
 formula_rac <- function(formula, var) {
   as.formula(paste0(paste(formula[2], formula[3], sep = " ~ "), " + bbs(", var, ")"))
@@ -340,12 +357,15 @@ formula_rac <- function(formula, var) {
 
 formula_trends <- formula_rac(formula_trends, "autocov_trends")
 formula_resids <- formula_rac(formula_resids, "autocov_resids")
+formula_all <- formula_rac(formula_all, "autocov_all")
 
 ctrl <- boost_control(trace = FALSE, mstop = 10000)
 mod_trends_rac <- gamboost(formula_trends, data = data_subset, family = Gaussian(), control = ctrl)
 mod_resids_rac <- gamboost(formula_resids, data = data_subset, family = Gaussian(), control = ctrl)
+mod_all_rac <- gamboost(formula_all, data = data_subset, family = Gaussian(), control = ctrl)
 saveRDS(mod_trends_rac, file = "data/processed/models/mod_trends_rac.RDS")
 saveRDS(mod_resids_rac, file = "data/processed/models/mod_resids_rac.RDS")
+saveRDS(mod_all_rac, file = "data/processed/models/mod_all_rac.RDS")
 ```
 
 And now let's reassess residual autocorrelation from our retrained model. If all went well, that should be visibly and substantially less than before.
@@ -353,12 +373,14 @@ And now let's reassess residual autocorrelation from our retrained model. If all
 ```{r plot_residual_spatial_autocorrelation_after_rac, out.width='100%', results='hold'}
 if (!exists("mod_trends_rac")) mod_trends_rac <- readRDS("data/processed/models/mod_trends_rac.RDS")
 if (!exists("mod_resids_rac")) mod_resids_rac <- readRDS("data/processed/models/mod_resids_rac.RDS")
+if (!exists("mod_all_rac")) mod_all_rac <- readRDS("data/processed/models/mod_all_rac.RDS")
 data_subset$rac_trends <- resid(mod_trends_rac)
 data_subset$rac_resids <- resid(mod_resids_rac)
+data_subset$rac_all <- resid(mod_all_rac)
 
 data_subset %>%
-  dplyr::select(x, y, rac_trends, rac_resids) %>%
-  rename(c(Predictability = rac_resids, Trends = rac_trends)) %>%
+  dplyr::select(x, y, rac_trends, rac_resids, rac_all) %>%
+  rename(c(Predictability = rac_resids, Trends = rac_trends, `All predictors` = rac_all)) %>%
   pivot_longer(-c(x, y), names_to = "model", values_to = "residuals") %>%
   ggplot(aes(x = x, y = y, color = residuals)) +
   geom_point() +
@@ -386,6 +408,11 @@ cv10f_resids_rac <- cv(model.weights(mod_resids_rac), type = "kfold")
 saveRDS(cv10f_resids_rac, file = "data/processed/models/cv10f_resids_rac.RDS")
 cvm_resids_rac <- cvrisk(mod_resids_rac, folds = cv10f_resids_rac, grid = grid)
 saveRDS(cvm_resids_rac, file = "data/processed/models/cvm_resids_rac.RDS")
+
+cv10f_all_rac <- cv(model.weights(mod_all_rac), type = "kfold")
+saveRDS(cv10f_all_rac, file = "data/processed/models/cv10f_all_rac.RDS")
+cvm_all_rac <- cvrisk(mod_all_rac, folds = cv10f_all_rac, grid = grid)
+saveRDS(cvm_all_rac, file = "data/processed/models/cvm_all_rac.RDS")
 ```
 
 We can load these results as well and plot the outputs.
@@ -393,6 +420,7 @@ We can load these results as well and plot the outputs.
 ```{r plot_cvm_results_rac_models, results='hold', out.width='100%'}
 cvm_trends_rac <- readRDS("data/processed/models/cvm_trends_rac.RDS")
 cvm_resids_rac <- readRDS("data/processed/models/cvm_resids_rac.RDS")
+cvm_all_rac <- readRDS("data/processed/models/cvm_all_rac.RDS")
 
 plot_cvm <- function(cvm, plot_id = "") {
   m <- cvm
@@ -409,8 +437,10 @@ plot_cvm <- function(cvm, plot_id = "") {
 }
 plot_cvm_trends_rac <- plot_cvm(cvm_trends_rac, "trends")
 plot_cvm_resids_rac <- plot_cvm(cvm_resids_rac, "resids")
+plot_cvm_all_rac <- plot_cvm(cvm_all_rac, "all")
 
-plot_cvm_trends_rac + plot_cvm_resids_rac + plot_layout(guides = "collect") & theme(legend.position = "bottom")
+plot_cvm_trends_rac + plot_cvm_resids_rac + plot_cvm_all_rac + 
+  plot_layout(guides = "collect") & theme(legend.position = "bottom")
 ```
 
 Although model improvement did not stagnate as fast in this model, stopping boosting iterations at 10000 boosts again continues to remain reasonable. We could increase it to 20000, but that would (probably) at least double the time required for bootstrapping to quantify model uncertainty in further steps. As predictive performance is not the ultimate goal of this analysis, that trade-off is fine.
@@ -425,13 +455,17 @@ neighbors <- dnearneigh(as.matrix(cbind(data_subset$x, data_subset$y)), d1 = 0, 
 
 spc_norac_trends <- sp.correlogram(neighbors, data_subset$norac_trends, order = nclass, method = "I", zero.policy = TRUE)
 spc_norac_resids <- sp.correlogram(neighbors, data_subset$norac_resids, order = nclass, method = "I", zero.policy = TRUE)
+spc_norac_all <- sp.correlogram(neighbors, data_subset$norac_all, order = nclass, method = "I", zero.policy = TRUE)
 spc_rac_trends <- sp.correlogram(neighbors, data_subset$rac_trends, order = nclass, method = "I", zero.policy = TRUE)
 spc_rac_resids <- sp.correlogram(neighbors, data_subset$rac_resids, order = nclass, method = "I", zero.policy = TRUE)
+spc_rac_all <- sp.correlogram(neighbors, data_subset$rac_all, order = nclass, method = "I", zero.policy = TRUE)
 
 saveRDS(spc_norac_trends, file = "data/processed/models/spc_norac_trends.RDS")
 saveRDS(spc_norac_resids, file = "data/processed/models/spc_norac_resids.RDS")
+saveRDS(spc_norac_all, file = "data/processed/models/spc_norac_all.RDS")
 saveRDS(spc_rac_trends, file = "data/processed/models/spc_rac_trends.RDS")
 saveRDS(spc_rac_resids, file = "data/processed/models/spc_rac_resids.RDS")
+saveRDS(spc_rac_all, file = "data/processed/models/spc_rac_all.RDS")
 ```
 
 And we can now plot the RSAC correlograms.
@@ -439,14 +473,18 @@ And we can now plot the RSAC correlograms.
 ```{r plot_rsac, results='hold', out.width='100%'}
 if (!exists("spc_norac_trends")) spc_norac_trends <- readRDS("data/processed/models/spc_norac_trends.RDS")
 if (!exists("spc_norac_resids")) spc_norac_resids <- readRDS("data/processed/models/spc_norac_resids.RDS")
+if (!exists("spc_norac_all")) spc_norac_all <- readRDS("data/processed/models/spc_norac_all.RDS")
 if (!exists("spc_rac_trends")) spc_rac_trends <- readRDS("data/processed/models/spc_rac_trends.RDS")
 if (!exists("spc_rac_resids")) spc_rac_resids <- readRDS("data/processed/models/spc_rac_resids.RDS")
+if (!exists("spc_rac_all")) spc_rac_all <- readRDS("data/processed/models/spc_rac_all.RDS")
 
-par(mfrow = c(2, 2))
+par(mfrow = c(2, 3))
 plot(spc_norac_trends, main = "RSAC Trends mdl")
 plot(spc_norac_resids, main = "RSAC Predictability mdl")
+plot(spc_norac_all, main = "RSAC All preds mdl")
 plot(spc_rac_trends, main = "RSAC Trends RAC mdl")
 plot(spc_rac_resids, main = "RSAC Predictability RAC mdl")
+plot(spc_rac_all, main = "RSAC All preds RAC mdl")
 ```
 
 Adding the autocovariate of residuals seems to have helped a lot to counter residual spatial autocorrelation. **It's possible this can be improved further by tweaking the radius of the neighborhood over which the autocovariate is calculated, but that's some tweaking we can do later.**
@@ -466,8 +504,9 @@ perf_metrics <- function(actual, models) {
   m
 }
 
-pm <- as.data.frame(perf_metrics(data_subset$trend_long, list(mod_trends, mod_resids, mod_trends_rac, mod_resids_rac)))
-colnames(pm) <- c("mod_trends", "mod_resids", "mod_trends_rac", "mod_resids_rac")
+pm <- as.data.frame(perf_metrics(data_subset$trend_long, 
+                                 list(mod_trends, mod_resids, mod_all, mod_trends_rac, mod_resids_rac, mod_all_rac)))
+colnames(pm) <- c("mod_trends", "mod_resids", "mod_all", "mod_trends_rac", "mod_resids_rac", "mod_all_rac")
 rownames(pm) <- c("RMSE", "% Deviance explained")
 pm
 ```
@@ -481,6 +520,7 @@ We can quantify the importance of variables within our model using the `varimp` 
 ```{r varimp_trends, results='hold', out.width='100%'}
 plot(varimp(mod_trends), main = "Varimp Trends mdl")
 plot(varimp(mod_trends_rac), main = "Varimp Trends RAC mdl")
+as.data.frame(varimp(mod_trends_rac)) %>% arrange(desc(reduction))
 ```
 
 ##### Predictability models
@@ -488,7 +528,17 @@ plot(varimp(mod_trends_rac), main = "Varimp Trends RAC mdl")
 ```{r varimp_resids, results='hold', out.width='100%'}
 plot(varimp(mod_resids), main = "Varimp Predictability mdl")
 plot(varimp(mod_resids_rac), main = "Varimp Predictability RAC mdl")
+as.data.frame(varimp(mod_resids_rac)) %>% arrange(desc(reduction))
 ```
+
+##### All predictor models
+
+```{r varimp_all, results='hold', out.width='100%'}
+plot(varimp(mod_all), main = "Varimp All pred mdl")
+plot(varimp(mod_all_rac), main = "Varimp All pred RAC mdl")
+as.data.frame(varimp(mod_all_rac)) %>% arrange(desc(reduction))
+```
+
 
 #### Partial/Marginal Effects
 
@@ -496,7 +546,7 @@ And, finally, we can have a look at the modelled effects of predictors on long-t
 
 ##### Partial effects original models
 
-```{r partial_effects_simple_original, out.width='100%'}
+```{r partial_effects_simple_original, out.width='100%', fig.width=10, fig.height=7}
 par(mfrow = c(2, 3))
 plot(mod_trends)
 
@@ -504,13 +554,22 @@ par(mfrow = c(2, 3))
 plot(mod_resids)
 ```
 
+```{r partial_effects_simple_original_all, out.width='100%', fig.width=10, fig.height=15}
+par(mfrow = c(4, 3))
+plot(mod_all)
+```
+
 ##### Partial effects RAC models
 
-```{r partial_effects_simple_rac, out.width='100%'}
+```{r partial_effects_simple_rac, out.width='100%', fig.width=10, fig.height=7}
 par(mfrow = c(2, 3))
 plot(mod_trends_rac)
 
 par(mfrow = c(2, 3))
 plot(mod_resids_rac)
+```
+```{r partial_effects_simple_rac_all, out.width='100%', fig.width=10, fig.height=15}
+par(mfrow = c(4, 3))
+plot(mod_all_rac)
 ```
 
