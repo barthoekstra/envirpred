@@ -1,3 +1,7 @@
 # (PART) Other {-}
 
+```{r empty_environment, include=FALSE}
+rm(list = ls(all = TRUE))
+```
+
 # References

@@ -3,9 +3,10 @@ repo: https://github.com/barthoekstra/envirpred
 view: https://github.com/barthoekstra/envirpred/blob/main/%s
 edit: https://github.com/barthoekstra/envirpred/edit/main/%s
 output_dir: docs
-delete_merged_file: true
+delete_merged_file: false
 new_session: false
 before_chapter_script: "build_bookdown.R"
+after_chapter_script: "build_bookdown.R"
 rmd_files:
 - "index.Rmd"
 - "01.GEE-Harmonic-regression.Rmd"
