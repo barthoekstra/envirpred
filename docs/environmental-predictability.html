@@ -62,7 +62,7 @@
 <h1>
 <span class="header-section-number">9</span> Environmental predictability<a class="anchor" aria-label="anchor" href="#environmental-predictability"><i class="fas fa-link"></i></a>
 </h1>
-<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb89"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">data_stars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/data_stars.RDS"</span><span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">data_stars</span><span class="op">)</span> <span class="op">%&gt;%</span>
@@ -80,7 +80,7 @@
 ## dimension:      XY
 ## bbox:           xmin: -25.3618 ymin: -50.01889 xmax: 77.60327 ymax: 37.55986
 ## CRS:            4326</code></pre>
-<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb91"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">xlims</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">20</span>, <span class="fl">50</span><span class="op">)</span>
 <span class="va">ylims</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">40</span>, <span class="fl">40</span><span class="op">)</span>
 <span class="va">xbreaks</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">20</span>, <span class="fl">0</span>, <span class="fl">20</span>, <span class="fl">40</span><span class="op">)</span>
@@ -90,7 +90,7 @@
 <span class="header-section-number">9.1</span> Environmental long-term trends<a class="anchor" aria-label="anchor" href="#environmental-long-term-trends"><i class="fas fa-link"></i></a>
 </h2>
 <p><strong>Color scales are mapped to (ie limited by) 1% and 99% quantiles, but for now I seem unable to calculate this on the fly in <code>ggplot</code> so these values are hard-coded and should be changed manually when the dataset changes.</strong></p>
-<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb92"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggplot</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_sf</span><span class="op">(</span>data <span class="op">=</span> <span class="va">africa</span>, colour <span class="op">=</span> <span class="st">"grey"</span>, fill <span class="op">=</span> <span class="cn">NA</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_raster</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">y</span>, fill <span class="op">=</span> <span class="va">ndvi_trend</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
@@ -144,7 +144,7 @@
 <span class="va">ndvi</span> <span class="op">+</span> <span class="va">pr</span> <span class="op">+</span> <span class="va">tm</span> <span class="op">+</span> <span class="va">pet</span> <span class="op">+</span> <span class="va">aet</span> <span class="op">+</span> <span class="fu">plot_layout</span><span class="op">(</span>ncol <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">plot_annotation</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Environmental long-term trends"</span>, subtitle <span class="op">=</span> <span class="st">"Model trends"</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="envirpred_files/figure-html/plot_environmental_trends_params-1.png" width="100%"></div>
-<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb93"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggsave</span><span class="op">(</span>filename <span class="op">=</span> <span class="st">"data/processed/plots/environmental_trends.pdf"</span>, device <span class="op">=</span> <span class="st">"pdf"</span>, width <span class="op">=</span> <span class="fl">12</span>, units <span class="op">=</span> <span class="st">"in"</span><span class="op">)</span></code></pre></div>
 <pre><code>## Saving 12 x 5 in image</code></pre>
 </div>
@@ -153,7 +153,7 @@
 <span class="header-section-number">9.2</span> Environmental predictability<a class="anchor" aria-label="anchor" href="#environmental-predictability-1"><i class="fas fa-link"></i></a>
 </h2>
 <p><strong>Color scales are mapped to (ie limited by) 1% and 99% quantiles, but for now I seem unable to calculate this on the fly in <code>ggplot</code> so these values are hard-coded and should be changed manually when the dataset changes.</strong></p>
-<div class="sourceCode" id="cb84"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb95"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">total_unpred</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">range01</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/scale.html">scale</a></span><span class="op">(</span><span class="va">data</span><span class="op">[</span><span class="st">"ndvi_resid"</span><span class="op">]</span><span class="op">)</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span> <span class="fu">range01</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/scale.html">scale</a></span><span class="op">(</span><span class="va">data</span><span class="op">[</span><span class="st">"pr_resid"</span><span class="op">]</span><span class="op">)</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">range01</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/scale.html">scale</a></span><span class="op">(</span><span class="va">data</span><span class="op">[</span><span class="st">"tm_resid"</span><span class="op">]</span><span class="op">)</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span> <span class="fu">range01</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/scale.html">scale</a></span><span class="op">(</span><span class="va">data</span><span class="op">[</span><span class="st">"pet_resid"</span><span class="op">]</span><span class="op">)</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span>
@@ -225,7 +225,7 @@
 <span class="va">ndvi</span> <span class="op">+</span> <span class="va">pr</span> <span class="op">+</span> <span class="va">tm</span> <span class="op">+</span> <span class="va">pet</span> <span class="op">+</span> <span class="va">aet</span> <span class="op">+</span> <span class="va">total</span> <span class="op">+</span> <span class="fu">plot_layout</span><span class="op">(</span>ncol <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">plot_annotation</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Environmental predictability"</span>, subtitle <span class="op">=</span> <span class="st">"Model RMSE"</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="envirpred_files/figure-html/plot_environmental_predictability_params-1.png" width="100%"></div>
-<div class="sourceCode" id="cb85"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb96"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggsave</span><span class="op">(</span>filename <span class="op">=</span> <span class="st">"data/processed/plots/environmental_predictability.pdf"</span>, device <span class="op">=</span> <span class="st">"pdf"</span>, width <span class="op">=</span> <span class="fl">12</span>, units <span class="op">=</span> <span class="st">"in"</span><span class="op">)</span></code></pre></div>
 <pre><code>## Saving 12 x 5 in image</code></pre>
 

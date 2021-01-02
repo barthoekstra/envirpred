@@ -63,18 +63,9 @@
 <span class="header-section-number">7</span> Quantify model uncertainty<a class="anchor" aria-label="anchor" href="#quantify-model-uncertainty"><i class="fas fa-link"></i></a>
 </h1>
 <p>In the previous chapter we have modelled long-term assemblage trends as a function of linear environmental trends and environmental predictability. Unfortunately using ML learners to model these relationships requires a lengthy bootstrapping procedure to quantify model uncertainty. Luckily, <code>mboost</code> already contains the functions to do so, we just need to make some tweaks to these functions to run this more efficiently.</p>
-<div id="load-constructed-models" class="section level2">
-<h2>
-<span class="header-section-number">7.1</span> Load constructed models<a class="anchor" aria-label="anchor" href="#load-constructed-models"><i class="fas fa-link"></i></a>
-</h2>
-<p>We load the constructed models that include a residual autocovariate term, as these are corrected mostly for the effects of spatial autocorrelation.</p>
-<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">mod_trends</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/mod_trends_rac.RDS"</span><span class="op">)</span>
-<span class="va">mod_resids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/mod_resids_rac.RDS"</span><span class="op">)</span></code></pre></div>
-</div>
 <div id="bootstrap-uncertainty-analysis" class="section level2">
 <h2>
-<span class="header-section-number">7.2</span> Bootstrap uncertainty analysis<a class="anchor" aria-label="anchor" href="#bootstrap-uncertainty-analysis"><i class="fas fa-link"></i></a>
+<span class="header-section-number">7.1</span> Bootstrap uncertainty analysis<a class="anchor" aria-label="anchor" href="#bootstrap-uncertainty-analysis"><i class="fas fa-link"></i></a>
 </h2>
 <p>We use an adapted version <a href="https://barthoekstra.github.io/fireworks/09.Quantifying-model-uncertainty.html">(see more here)</a> of the bootstrapping procedure included in <code>mboost</code> so uncertainty estimates can be quantified efficiently, regardless of the model size or compute power.</p>
 <ol style="list-style-type: decimal">
@@ -85,30 +76,31 @@
 <p>The implemented procedure uses resampling of the model dataset (already a subsample of 10000 rows of the entire dataset) to derive confidence intervals. A more elegant approach would probably to derive the confidence intervals from a repeated resampling of the entire dataset of hundreds of thousands of rows. For now, however, this implementation suffices to give a good indication of model uncertainty.</p>
 <div id="determine-bootstrap-folds" class="section level3">
 <h3>
-<span class="header-section-number">7.2.1</span> Determine bootstrap folds<a class="anchor" aria-label="anchor" href="#determine-bootstrap-folds"><i class="fas fa-link"></i></a>
+<span class="header-section-number">7.1.1</span> Determine bootstrap folds<a class="anchor" aria-label="anchor" href="#determine-bootstrap-folds"><i class="fas fa-link"></i></a>
 </h3>
-<p>We want to judge both constructed models equally, so we use the same bootstrapping folds for both.</p>
-<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">bfolds</span> <span class="op">&lt;-</span> <span class="fl">1000</span>
-<span class="va">weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.extract.html">model.weights</a></span><span class="op">(</span><span class="va">mod_trends</span><span class="op">)</span>
+<p>We want to judge all constructed models equally, so we use the same bootstrapping folds across the models.</p>
+<div class="sourceCode" id="cb83"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/mod_trends_rac.RDS"</span><span class="op">)</span>
+<span class="va">bfolds</span> <span class="op">&lt;-</span> <span class="fl">1000</span>
+<span class="va">weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.extract.html">model.weights</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span>
 <span class="va">folds</span> <span class="op">&lt;-</span> <span class="fu">cv</span><span class="op">(</span><span class="va">weights</span>, B <span class="op">=</span> <span class="va">bfolds</span>, type <span class="op">=</span> <span class="st">"bootstrap"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">folds</span>, <span class="st">"data/processed/models/confints/folds.RDS"</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="run-bootstrap-procedure" class="section level3">
 <h3>
-<span class="header-section-number">7.2.2</span> Run bootstrap procedure<a class="anchor" aria-label="anchor" href="#run-bootstrap-procedure"><i class="fas fa-link"></i></a>
+<span class="header-section-number">7.1.2</span> Run bootstrap procedure<a class="anchor" aria-label="anchor" href="#run-bootstrap-procedure"><i class="fas fa-link"></i></a>
 </h3>
 <p>It is very computationally intensive to run the bootstrapping procedure, so it’s best initiated manually by tweaking settings to the local machine. See the solution implemented in <code>R/mboost_uncertainty_analysis.R</code>. We run this analysis manually and store the results in <code>data/processed/models/confints/</code>.</p>
-<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb84"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/source.html">source</a></span><span class="op">(</span><span class="st">"R/mboost_uncertainty_analysis.R"</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="recombine-bootstrapped-results" class="section level3">
 <h3>
-<span class="header-section-number">7.2.3</span> Recombine bootstrapped results<a class="anchor" aria-label="anchor" href="#recombine-bootstrapped-results"><i class="fas fa-link"></i></a>
+<span class="header-section-number">7.1.3</span> Recombine bootstrapped results<a class="anchor" aria-label="anchor" href="#recombine-bootstrapped-results"><i class="fas fa-link"></i></a>
 </h3>
 <p>Having chunked and parallellized the bootstrapping procedure, we need to stitch the results back together to a single R object that matches the initial implementation in the <code>mboost</code> package.</p>
-<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb85"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">merge_bootci</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">pathpattern</span>, <span class="va">max_n</span>, <span class="va">outfile</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">cis</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">pathpattern</span>, <span class="fl">1</span><span class="op">:</span><span class="va">max_n</span>, <span class="st">".RDS"</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fl">1000</span><span class="op">]</span>, <span class="va">readRDS</span><span class="op">)</span>
   <span class="va">ci_boot_pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="va">cis</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">$</span><span class="va">boot_pred</span><span class="op">)</span>
@@ -127,21 +119,38 @@
 <span class="va">modelci_trends</span> <span class="op">&lt;-</span> <span class="fu">merge_bootci</span><span class="op">(</span><span class="st">"data/processed/models/confints/modelci_trends_rac_"</span>, max_n <span class="op">=</span> <span class="fl">1000</span>,
                                outfile <span class="op">=</span> <span class="st">"data/processed/models/confints/modelci_trends.RDS"</span><span class="op">)</span>
 <span class="va">modelci_resids</span> <span class="op">&lt;-</span> <span class="fu">merge_bootci</span><span class="op">(</span><span class="st">"data/processed/models/confints/modelci_resids_rac_"</span>, max_n <span class="op">=</span> <span class="fl">1000</span>,
-                               outfile <span class="op">=</span> <span class="st">"data/processed/models/confints/modelci_resids.RDS"</span><span class="op">)</span></code></pre></div>
+                               outfile <span class="op">=</span> <span class="st">"data/processed/models/confints/modelci_resids.RDS"</span><span class="op">)</span>
+<span class="va">modelci_all</span> <span class="op">&lt;-</span> <span class="fu">merge_bootci</span><span class="op">(</span><span class="st">"data/processed/models/confints/modelci_all_rac_"</span>, max_n <span class="op">=</span> <span class="fl">1000</span>,
+                            outfile <span class="op">=</span> <span class="st">"data/processed/models/confints/modelci_all.RDS"</span><span class="op">)</span></code></pre></div>
 <p>Let’s confirm that worked by plotting the bootstrapped confidence intervals. First for the <code>trends</code> model.</p>
-<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">vars_trends</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">modelci_trends</span><span class="op">$</span><span class="va">data</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="op">)</span>
+<div class="sourceCode" id="cb86"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"modelci_trends"</span><span class="op">)</span><span class="op">)</span> <span class="va">modelci_trends</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/confints/modelci_trends.RDS"</span><span class="op">)</span>
+
+<span class="va">vars_trends</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">modelci_trends</span><span class="op">$</span><span class="va">data</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="va">vars_trends</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">modelci_trends</span>, which <span class="op">=</span> <span class="va">x</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="envirpred_files/figure-html/plot_mboot_ci_trends-1.png" width="100%">
-And now for the predictability (<code>resids</code>) model.</p>
-<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">vars_resids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">modelci_resids</span><span class="op">$</span><span class="va">data</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="op">)</span>
+For the predictability (<code>resids</code>) model.</p>
+<div class="sourceCode" id="cb87"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/rm.html">rm</a></span><span class="op">(</span><span class="va">modelci_trends</span><span class="op">)</span>
+<span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"modelci_resids"</span><span class="op">)</span><span class="op">)</span> <span class="va">modelci_resids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/confints/modelci_resids.RDS"</span><span class="op">)</span>
+
+<span class="va">vars_resids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">modelci_resids</span><span class="op">$</span><span class="va">data</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="va">vars_resids</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">modelci_resids</span>, which <span class="op">=</span> <span class="va">x</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="envirpred_files/figure-html/plot_mboot_ci_resids-1.png" width="100%"></div>
+<p><img src="envirpred_files/figure-html/plot_mboot_ci_resids-1.png" width="100%">
+And finally for the all-encompassing (<code>all</code>) model.</p>
+<div class="sourceCode" id="cb88"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/rm.html">rm</a></span><span class="op">(</span><span class="va">modelci_resids</span><span class="op">)</span>
+<span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"modelci_all"</span><span class="op">)</span><span class="op">)</span> <span class="va">modelci_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/confints/modelci_all.RDS"</span><span class="op">)</span>
+
+<span class="va">vars_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">modelci_all</span><span class="op">$</span><span class="va">data</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="op">)</span>
+
+<span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="va">vars_all</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">modelci_all</span>, which <span class="op">=</span> <span class="va">x</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<div class="inline-figure"><img src="envirpred_files/figure-html/plot_mboot_ci_all-1.png" width="100%"></div>
 
 </div>
 </div>
@@ -156,12 +165,11 @@ And now for the predictability (<code>resids</code>) model.</p>
     <nav id="toc" data-toggle="toc" aria-label="On this page"><h2>On this page</h2>
       <ul class="nav navbar-nav">
 <li><a class="nav-link" href="#quantify-model-uncertainty"><span class="header-section-number">7</span> Quantify model uncertainty</a></li>
-<li><a class="nav-link" href="#load-constructed-models"><span class="header-section-number">7.1</span> Load constructed models</a></li>
 <li>
-<a class="nav-link" href="#bootstrap-uncertainty-analysis"><span class="header-section-number">7.2</span> Bootstrap uncertainty analysis</a><ul class="nav navbar-nav">
-<li><a class="nav-link" href="#determine-bootstrap-folds"><span class="header-section-number">7.2.1</span> Determine bootstrap folds</a></li>
-<li><a class="nav-link" href="#run-bootstrap-procedure"><span class="header-section-number">7.2.2</span> Run bootstrap procedure</a></li>
-<li><a class="nav-link" href="#recombine-bootstrapped-results"><span class="header-section-number">7.2.3</span> Recombine bootstrapped results</a></li>
+<a class="nav-link" href="#bootstrap-uncertainty-analysis"><span class="header-section-number">7.1</span> Bootstrap uncertainty analysis</a><ul class="nav navbar-nav">
+<li><a class="nav-link" href="#determine-bootstrap-folds"><span class="header-section-number">7.1.1</span> Determine bootstrap folds</a></li>
+<li><a class="nav-link" href="#run-bootstrap-procedure"><span class="header-section-number">7.1.2</span> Run bootstrap procedure</a></li>
+<li><a class="nav-link" href="#recombine-bootstrapped-results"><span class="header-section-number">7.1.3</span> Recombine bootstrapped results</a></li>
 </ul>
 </li>
 </ul>

@@ -67,7 +67,7 @@
 <h2>
 <span class="header-section-number">6.1</span> Correlation among predictors<a class="anchor" aria-label="anchor" href="#correlation-among-predictors"><i class="fas fa-link"></i></a>
 </h2>
-<p>We first assess correlations among predictors. As we intend to compare models using environmental predictability with those of long-term trends we separate the correlation matrices for both.</p>
+<p>We first assess correlations among predictors. As we also intend to compare models using environmental predictability with those of long-term trends we separate the correlation matrices for both.</p>
 <div id="pearsons-correlation-matrix" class="section level3">
 <h3>
 <span class="header-section-number">6.1.1</span> Pearson’s correlation matrix<a class="anchor" aria-label="anchor" href="#pearsons-correlation-matrix"><i class="fas fa-link"></i></a>
@@ -79,29 +79,36 @@
 <span class="va">predictors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">%in%</span> <span class="va">unused_predictors</span><span class="op">]</span>
 <span class="va">predictors_trends</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">data</span>, <span class="fu">ends_with</span><span class="op">(</span><span class="st">"_trend"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
 <span class="va">predictors_resids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">data</span>, <span class="fu">ends_with</span><span class="op">(</span><span class="st">"_resid"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+<span class="va">predictors_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">predictors_trends</span>, <span class="va">predictors_resids</span><span class="op">)</span>
 
 <span class="fu">ggcorrmat</span><span class="op">(</span><span class="va">data</span>, cor.vars <span class="op">=</span> <span class="fu">all_of</span><span class="op">(</span><span class="va">predictors_trends</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"parametric"</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="envirpred_files/figure-html/pearson_correlation_matrix-1.png" width="100%"></div>
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggcorrmat</span><span class="op">(</span><span class="va">data</span>, cor.vars <span class="op">=</span> <span class="fu">all_of</span><span class="op">(</span><span class="va">predictors_resids</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"parametric"</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="envirpred_files/figure-html/pearson_correlation_matrix-2.png" width="100%"></div>
-<p>This indicates environmental residuals are generally correlated more strongly than long-term trends. Of the covariates, <code>def</code>, <code>tmmx</code> and <code>tmmn</code> are most strongly correlated with each other or other variables. We can reduce correlation for temperature measures by calculating the average temperature from both <code>tmmx</code> and <code>tmmn</code> and will remove <code>def</code> from our modeling dataset.</p>
 <div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">ggcorrmat</span><span class="op">(</span><span class="va">data</span>, cor.vars <span class="op">=</span> <span class="fu">all_of</span><span class="op">(</span><span class="va">predictors_all</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"parametric"</span><span class="op">)</span></code></pre></div>
+<div class="inline-figure"><img src="envirpred_files/figure-html/pearson_correlation_matrix-3.png" width="100%"></div>
+<p>This indicates environmental residuals are generally correlated more strongly than long-term trends. Of the covariates, <code>def</code>, <code>tmmx</code> and <code>tmmn</code> are most strongly correlated with each other or other variables. We can reduce correlation for temperature measures by calculating the average temperature from both <code>tmmx</code> and <code>tmmn</code> and will remove <code>def</code> from our modeling dataset.</p>
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">data</span> <span class="op">%&gt;%</span>
-  <span class="fu">rowwise</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu">mutate</span><span class="op">(</span>tm_trend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">tmmx_trend</span>, <span class="va">tmmn_trend</span><span class="op">)</span><span class="op">)</span>,
-         tm_resid <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">tmmx_resid</span>, <span class="va">tmmn_resid</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">mutate</span><span class="op">(</span>tm_resid <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html">rowMeans</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">.</span>, <span class="va">tmmn_resid</span>, <span class="va">tmmx_resid</span><span class="op">)</span><span class="op">)</span>,
+         tm_trend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html">rowMeans</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">.</span>, <span class="va">tmmn_trend</span>, <span class="va">tmmx_trend</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu">ungroup</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://rdrr.io/r/base/identity.html">identity</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">data</span>
 <span class="va">predictors_trends</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">predictors_trends</span><span class="op">[</span><span class="op">!</span><span class="va">predictors_trends</span> <span class="op">%in%</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"tmmx_trend"</span>, <span class="st">"tmmn_trend"</span>, <span class="st">"def_trend"</span><span class="op">)</span><span class="op">]</span>, <span class="st">"tm_trend"</span><span class="op">)</span>
-<span class="va">predictors_resids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">predictors_resids</span><span class="op">[</span><span class="op">!</span><span class="va">predictors_resids</span> <span class="op">%in%</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"tmmx_resid"</span>, <span class="st">"tmmn_resid"</span>, <span class="st">"def_resid"</span><span class="op">)</span><span class="op">]</span>, <span class="st">"tm_resid"</span><span class="op">)</span></code></pre></div>
+<span class="va">predictors_resids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">predictors_resids</span><span class="op">[</span><span class="op">!</span><span class="va">predictors_resids</span> <span class="op">%in%</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"tmmx_resid"</span>, <span class="st">"tmmn_resid"</span>, <span class="st">"def_resid"</span><span class="op">)</span><span class="op">]</span>, <span class="st">"tm_resid"</span><span class="op">)</span>
+<span class="va">predictors_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">predictors_trends</span>, <span class="va">predictors_resids</span><span class="op">)</span></code></pre></div>
 <p>And we calculate a new correlation matrix.</p>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggcorrmat</span><span class="op">(</span><span class="va">data</span>, cor.vars <span class="op">=</span> <span class="fu">all_of</span><span class="op">(</span><span class="va">predictors_trends</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"parametric"</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="envirpred_files/figure-html/calculate_new_correlation_matrix-1.png" width="672"></div>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggcorrmat</span><span class="op">(</span><span class="va">data</span>, cor.vars <span class="op">=</span> <span class="fu">all_of</span><span class="op">(</span><span class="va">predictors_resids</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"parametric"</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="envirpred_files/figure-html/calculate_new_correlation_matrix-2.png" width="672"></div>
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">ggcorrmat</span><span class="op">(</span><span class="va">data</span>, cor.vars <span class="op">=</span> <span class="fu">all_of</span><span class="op">(</span><span class="va">predictors_all</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"parametric"</span><span class="op">)</span></code></pre></div>
+<div class="inline-figure"><img src="envirpred_files/figure-html/calculate_new_correlation_matrix-3.png" width="672"></div>
 <p>We continue to see strong correlation between <code>pr_resid</code> and <code>ndvi_resid</code>, but as both original variables (<code>ndvi</code> and <code>pr</code>) are effectively uncorrelated in <code>ndvi_trend</code> and <code>pr_trend</code> and we want the trends and predictability model to be comparable, we keep both in.</p>
 </div>
 </div>
@@ -110,13 +117,13 @@
 <span class="header-section-number">6.2</span> Pairplot<a class="anchor" aria-label="anchor" href="#pairplot"><i class="fas fa-link"></i></a>
 </h2>
 <p>While we’re at it, it’s useful to make a pairplot of all predictor variables.</p>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">data</span> <span class="op">%&gt;%</span>
   <span class="fu">slice_sample</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">data_tiny</span>
 
 <span class="fu">ggpairs</span><span class="op">(</span><span class="va">data_tiny</span>, columns <span class="op">=</span> <span class="fu">all_of</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">predictors_trends</span>, <span class="st">"trend_long"</span><span class="op">)</span><span class="op">)</span>, progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="envirpred_files/figure-html/data_pairplot-1.png" width="100%"></div>
-<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggpairs</span><span class="op">(</span><span class="va">data_tiny</span>, columns <span class="op">=</span> <span class="fu">all_of</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">predictors_resids</span>, <span class="st">"trend_long"</span><span class="op">)</span><span class="op">)</span>, progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="envirpred_files/figure-html/data_pairplot-2.png" width="100%"></div>
 </div>
@@ -125,7 +132,7 @@
 <span class="header-section-number">6.3</span> Optimal dataset size<a class="anchor" aria-label="anchor" href="#optimal-dataset-size"><i class="fas fa-link"></i></a>
 </h2>
 <p>The current dataset contains 314868 rows of data, which is quite large for fast and efficient ML workflows. We will first determine how the performance of a few suitable learners depends on dataset size and then determine an optimal balance between model performance and dataset size. In other words, we determine at what point increasing the dataset size (the resampled fraction) does not improve the model performance substantially anymore. Rather than optimizing this in several steps, we will tune the hyperparameter <code>subsample.frac</code> by constructing a <code>GraphLearner</code> objects in an <code>mlr3</code> pipeline which tunes dataset size. The following chunk implements this procedure. As it may take very long to run, it’s more convenient to run it only when strictly necessary from the <code>R/hyperparm_subsample_frac.R</code> file. As we can use this procedure to test suitable ML learners, we use <code><a href="https://rdrr.io/pkg/mboost/man/gamboost.html">mboost::gamboost</a></code>, <code><a href="https://rdrr.io/pkg/gbm/man/gbm.html">gbm::gbm</a></code> and <code><a href="https://rdrr.io/pkg/xgboost/man/xgb.train.html">xgboost::xgboost</a></code> learners in our <code>GraphLearner</code>.</p>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">task</span> <span class="op">&lt;-</span> <span class="va">TaskRegrST</span><span class="op">$</span><span class="fu">new</span><span class="op">(</span>id <span class="op">=</span> <span class="st">"data"</span>, backend <span class="op">=</span> <span class="va">data</span>, target <span class="op">=</span> <span class="st">"trend_long"</span>, extra_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>coordinate_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="st">"y"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
 <span class="va">task</span><span class="op">$</span><span class="fu">select</span><span class="op">(</span><span class="fu">all_of</span><span class="op">(</span><span class="va">predictors</span><span class="op">)</span><span class="op">)</span>
 
@@ -190,7 +197,7 @@
 <span class="va">rr_data</span> <span class="op">&lt;-</span> <span class="fu">bind_rows</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="va">rr</span><span class="op">$</span><span class="va">learners</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">$</span><span class="va">model</span><span class="op">$</span><span class="va">tuning_instance</span><span class="op">$</span><span class="va">archive</span><span class="op">$</span><span class="fu">data</span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">rr_data</span>, file <span class="op">=</span> <span class="st">"data/processed/rr_dataset_size_df.RDS"</span><span class="op">)</span></code></pre></div>
 <p>We can now plot the results of the previous workflow and see how cross-validated model performance depends on the subsampled size of the training dataset.</p>
-<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"rr_data"</span><span class="op">)</span><span class="op">)</span> <span class="va">rr_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/rr_dataset_size_df.RDS"</span><span class="op">)</span>
 
 <span class="va">rr_data</span> <span class="op">%&gt;%</span>
@@ -209,7 +216,7 @@
   <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Subsample size (# rows)"</span>, y <span class="op">=</span> <span class="st">"Model RMSE"</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="envirpred_files/figure-html/plot_model_rmse_subsample_size-1.png" width="672"></div>
 <p>It is clear beyond 10,000 rows performance only continues to improve marginally for untuned <code>xgboost</code> learners and model improvement for the other learners has clearly hit a plateau. So, we can stick to resampling 10,000 rows from the 314868 rows in the original dataframe for our continued statistical modelling.</p>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">nrow_subsample</span> <span class="op">&lt;-</span> <span class="fl">10000</span></code></pre></div>
 </div>
 <div id="modeling-assemblage-trends" class="section level2">
@@ -222,7 +229,7 @@
 <span class="header-section-number">6.4.1</span> Data filtering<a class="anchor" aria-label="anchor" href="#data-filtering"><i class="fas fa-link"></i></a>
 </h3>
 <p>Exploratory modeling showed that model errors are largest in the Sahara. As only few species included in our assemblage trends inhabit this area, the assemblage trend is also least reliable (i.e. it is composed of population trends of few species). It thus makes sense to exclude these areas. We set a minimum number of species that contribute to an assemblage trend to <code>&gt;5</code> and limit our analysis strictly to the areas south of the Sahara, which is the <code>Afrotropic</code> realm in our ecoregion dataset. To illustrate this, let’s plot the number of species that are included in the assemblage trends.</p>
-<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span>
 <span class="va">data</span> <span class="op">%&gt;%</span>
   <span class="fu">slice_sample</span><span class="op">(</span>n <span class="op">=</span> <span class="va">nrow_subsample</span><span class="op">)</span> <span class="op">%&gt;%</span> 
@@ -268,7 +275,7 @@
 <li>We, once again, determine the optimal number of boosting iterations on the new models. Most likely this does not differ substantially from the previous optimum, but it is good to make sure that is the case.</li>
 </ol>
 <p>Let’s start with training the models.</p>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span>
 <span class="va">data</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">count_long</span> <span class="op">&gt;</span> <span class="fl">5</span>,
@@ -278,26 +285,29 @@
 
 <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">data_subset</span>, file <span class="op">=</span> <span class="st">"data/processed/data_subset.RDS"</span><span class="op">)</span>
 
-<span class="va">model_formula</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">predictors</span>, <span class="va">response</span>, <span class="va">rac</span> <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">{</span>
+<span class="va">model_formula</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">predictors</span>, <span class="va">response</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">formula</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/formula.html">as.formula</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">response</span>, <span class="st">" ~ "</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"bbs("</span>, <span class="va">predictors</span>, <span class="st">")"</span>, collapse <span class="op">=</span> <span class="st">" + "</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
   <span class="kw"><a href="https://rdrr.io/r/base/function.html">return</a></span><span class="op">(</span><span class="va">formula</span><span class="op">)</span>
 <span class="op">}</span>
 
 <span class="va">formula_trends</span> <span class="op">&lt;-</span> <span class="fu">model_formula</span><span class="op">(</span><span class="va">predictors_trends</span>, <span class="st">"trend_long"</span><span class="op">)</span>
 <span class="va">formula_resids</span> <span class="op">&lt;-</span> <span class="fu">model_formula</span><span class="op">(</span><span class="va">predictors_resids</span>, <span class="st">"trend_long"</span><span class="op">)</span>
+<span class="va">formula_all</span> <span class="op">&lt;-</span> <span class="fu">model_formula</span><span class="op">(</span><span class="va">predictors_all</span>, <span class="st">"trend_long"</span><span class="op">)</span>
 
 <span class="va">ctrl</span> <span class="op">&lt;-</span> <span class="fu">boost_control</span><span class="op">(</span>trace <span class="op">=</span> <span class="cn">FALSE</span>, mstop <span class="op">=</span> <span class="fl">10000</span><span class="op">)</span>
 <span class="va">mod_trends</span> <span class="op">&lt;-</span> <span class="fu">gamboost</span><span class="op">(</span><span class="va">formula_trends</span>, data <span class="op">=</span> <span class="va">data_subset</span>, family <span class="op">=</span> <span class="fu">Gaussian</span><span class="op">(</span><span class="op">)</span>, control <span class="op">=</span> <span class="va">ctrl</span><span class="op">)</span>
 <span class="va">mod_resids</span> <span class="op">&lt;-</span> <span class="fu">gamboost</span><span class="op">(</span><span class="va">formula_resids</span>, data <span class="op">=</span> <span class="va">data_subset</span>, family <span class="op">=</span> <span class="fu">Gaussian</span><span class="op">(</span><span class="op">)</span>, control <span class="op">=</span> <span class="va">ctrl</span><span class="op">)</span>
+<span class="va">mod_all</span> <span class="op">&lt;-</span> <span class="fu">gamboost</span><span class="op">(</span><span class="va">formula_all</span>, data <span class="op">=</span> <span class="va">data_subset</span>, family <span class="op">=</span> <span class="fu">Gaussian</span><span class="op">(</span><span class="op">)</span>, control <span class="op">=</span> <span class="va">ctrl</span><span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">mod_trends</span>, file <span class="op">=</span> <span class="st">"data/processed/models/mod_trends.RDS"</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">mod_resids</span>, file <span class="op">=</span> <span class="st">"data/processed/models/mod_resids.RDS"</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">mod_resids</span>, file <span class="op">=</span> <span class="st">"data/processed/models/mod_resids.RDS"</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">mod_all</span>, file <span class="op">=</span> <span class="st">"data/processed/models/mod_all.RDS"</span><span class="op">)</span></code></pre></div>
 <div id="determine-the-optimal-number-of-boosting-iterations" class="section level4">
 <h4>
 <span class="header-section-number">6.4.2.1</span> Determine the optimal number of boosting iterations<a class="anchor" aria-label="anchor" href="#determine-the-optimal-number-of-boosting-iterations"><i class="fas fa-link"></i></a>
 </h4>
 <p>Having trained the models, we can now determine the optimal number of boosting iterations. As this is a time-consuming process, the chunk below does not run by default and it’s probably best to run this cross-validation procedure separately through the dedicated <code>R/hyperparm_mboost_mstop.R</code> script.</p>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span>from <span class="op">=</span> <span class="fl">250</span>, to <span class="op">=</span> <span class="fl">30000</span>, by <span class="op">=</span> <span class="fl">250</span><span class="op">)</span>
 <span class="va">cv10f_trends</span> <span class="op">&lt;-</span> <span class="fu">cv</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/model.extract.html">model.weights</a></span><span class="op">(</span><span class="va">mod_trends</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"kfold"</span><span class="op">)</span>
 <span class="va">cvm_trends</span> <span class="op">&lt;-</span> <span class="fu">cvrisk</span><span class="op">(</span><span class="va">mod_trends</span>, folds <span class="op">=</span> <span class="va">cv10f_trends</span>, grid <span class="op">=</span> <span class="va">grid</span><span class="op">)</span>
@@ -305,11 +315,16 @@
 
 <span class="va">cv10f_resids</span> <span class="op">&lt;-</span> <span class="fu">cv</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/model.extract.html">model.weights</a></span><span class="op">(</span><span class="va">mod_resids</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"kfold"</span><span class="op">)</span>
 <span class="va">cvm_resids</span> <span class="op">&lt;-</span> <span class="fu">cvrisk</span><span class="op">(</span><span class="va">mod_resids</span>, folds <span class="op">=</span> <span class="va">cv10f_resids</span>, grid <span class="op">=</span> <span class="va">grid</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">cvm_resids</span>, file <span class="op">=</span> <span class="st">"data/processed/models/cvm_resids.RDS"</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">cvm_resids</span>, file <span class="op">=</span> <span class="st">"data/processed/models/cvm_resids.RDS"</span><span class="op">)</span>
+
+<span class="va">cv10f_all</span> <span class="op">&lt;-</span> <span class="fu">cv</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/model.extract.html">model.weights</a></span><span class="op">(</span><span class="va">mod_all</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"kfold"</span><span class="op">)</span>
+<span class="va">cvm_all</span> <span class="op">&lt;-</span> <span class="fu">cvrisk</span><span class="op">(</span><span class="va">mod_all</span>, folds <span class="op">=</span> <span class="va">cv10f_all</span>, grid <span class="op">=</span> <span class="va">grid</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">cvm_all</span>, file <span class="op">=</span> <span class="st">"data/processed/models/cvm_all.RDS"</span><span class="op">)</span></code></pre></div>
 <p>We can load the results and plot the outputs.</p>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">cvm_trends</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/cvm_trends.RDS"</span><span class="op">)</span>
 <span class="va">cvm_resids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/cvm_resids.RDS"</span><span class="op">)</span>
+<span class="va">cvm_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/cvm_all.RDS"</span><span class="op">)</span>
 
 <span class="va">plot_cvm</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">cvm</span>, <span class="va">plot_id</span> <span class="op">=</span> <span class="st">""</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">m</span> <span class="op">&lt;-</span> <span class="va">cvm</span>
@@ -326,8 +341,9 @@
 <span class="op">}</span>
 <span class="va">plot_cvm_trends</span> <span class="op">&lt;-</span> <span class="fu">plot_cvm</span><span class="op">(</span><span class="va">cvm_trends</span>, <span class="st">"trends"</span><span class="op">)</span>
 <span class="va">plot_cvm_resids</span> <span class="op">&lt;-</span> <span class="fu">plot_cvm</span><span class="op">(</span><span class="va">cvm_resids</span>, <span class="st">"resids"</span><span class="op">)</span>
+<span class="va">plot_cvm_all</span> <span class="op">&lt;-</span> <span class="fu">plot_cvm</span><span class="op">(</span><span class="va">cvm_all</span>, <span class="st">"all"</span><span class="op">)</span>
 
-<span class="va">plot_cvm_trends</span> <span class="op">+</span> <span class="va">plot_cvm_resids</span> <span class="op">+</span> <span class="fu">plot_layout</span><span class="op">(</span>guides <span class="op">=</span> <span class="st">"collect"</span><span class="op">)</span> <span class="op">&amp;</span> <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></code></pre></div>
+<span class="va">plot_cvm_trends</span> <span class="op">+</span> <span class="va">plot_cvm_resids</span> <span class="op">+</span> <span class="va">plot_cvm_all</span> <span class="op">+</span> <span class="fu">plot_layout</span><span class="op">(</span>guides <span class="op">=</span> <span class="st">"collect"</span><span class="op">)</span> <span class="op">&amp;</span> <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="envirpred_files/figure-html/plot_cvm_results-1.png" width="100%"></div>
 <p>We can see that most cross-validated models seem to show stagnating model improvement beyond 10000 boosts, while an optimum is mostly not reached before 30000 boosts. Given the stagnating improvement, limited compute time and no need to optimize predictive performance ad infinitum, we limit the number of boosts to 10000.</p>
 </div>
@@ -336,15 +352,17 @@
 <span class="header-section-number">6.4.2.2</span> Correct for spatial autocorrelation<a class="anchor" aria-label="anchor" href="#correct-for-spatial-autocorrelation"><i class="fas fa-link"></i></a>
 </h4>
 <p>A quick plot of model residuals will show there is strong spatial autocorrelation in the residuals, violating the independence assumption of regression modelling.</p>
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"mod_trends"</span><span class="op">)</span><span class="op">)</span> <span class="va">mod_trends</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/mod_trends.RDS"</span><span class="op">)</span>
 <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"mod_resids"</span><span class="op">)</span><span class="op">)</span> <span class="va">mod_resids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/mod_resids.RDS"</span><span class="op">)</span>
+<span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"mod_all"</span><span class="op">)</span><span class="op">)</span> <span class="va">mod_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/mod_all.RDS"</span><span class="op">)</span>
 <span class="va">data_subset</span><span class="op">$</span><span class="va">norac_trends</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/residuals.html">resid</a></span><span class="op">(</span><span class="va">mod_trends</span><span class="op">)</span>
 <span class="va">data_subset</span><span class="op">$</span><span class="va">norac_resids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/residuals.html">resid</a></span><span class="op">(</span><span class="va">mod_resids</span><span class="op">)</span>
+<span class="va">data_subset</span><span class="op">$</span><span class="va">norac_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/residuals.html">resid</a></span><span class="op">(</span><span class="va">mod_all</span><span class="op">)</span>
 
 <span class="va">data_subset</span> <span class="op">%&gt;%</span>
-  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">norac_trends</span>, <span class="va">norac_resids</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu">rename</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span>Predictability <span class="op">=</span> <span class="va">norac_resids</span>, Trends <span class="op">=</span> <span class="va">norac_trends</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">norac_trends</span>, <span class="va">norac_resids</span>, <span class="va">norac_all</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">rename</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span>Predictability <span class="op">=</span> <span class="va">norac_resids</span>, Trends <span class="op">=</span> <span class="va">norac_trends</span>, `All predictors` <span class="op">=</span> <span class="va">norac_all</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu">pivot_longer</span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span>, names_to <span class="op">=</span> <span class="st">"model"</span>, values_to <span class="op">=</span> <span class="st">"residuals"</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">y</span>, color <span class="op">=</span> <span class="va">residuals</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
@@ -354,27 +372,30 @@
   <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Spatial pattern of model residuals"</span>, x <span class="op">=</span> <span class="st">"Longitude"</span>, y <span class="op">=</span> <span class="st">"Latitude"</span>, color <span class="op">=</span> <span class="st">"Residual"</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="envirpred_files/figure-html/plot_residual_spatial_autocorrelation-1.png" width="100%"></div>
 <p>There’s no need to even quantify spatial autocorrelation (SAC) in residuals here, as it’s so obvious. We will correct for it using the residual autocovariate method introduced by Crase et al. <span class="citation"><sup><a href="references.html#ref-crase2012" role="doc-biblioref">4</a></sup></span>. We calculate the autocovariate of the residuals using a neighborhood radius of 100 kilometers. <strong>This radius could be optimized to reflect actual SAC distances in our dataset, but for now it seems sufficient to dramatically reduce residual SAC.</strong></p>
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">neighborhood_dist</span> <span class="op">&lt;-</span> <span class="fl">100</span>  <span class="co"># Kilometers if longlat = TRUE</span>
 <span class="va">acov_trends</span> <span class="op">&lt;-</span> <span class="fu">autocov_dist</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/residuals.html">resid</a></span><span class="op">(</span><span class="va">mod_trends</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="va">data_subset</span><span class="op">$</span><span class="va">x</span>, <span class="va">data_subset</span><span class="op">$</span><span class="va">y</span><span class="op">)</span><span class="op">)</span>, longlat <span class="op">=</span> <span class="cn">TRUE</span>, 
                             nbs <span class="op">=</span> <span class="va">neighborhood_dist</span>, zero.policy <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
-<pre><code>## Warning in autocov_dist(resid(mod_trends), as.matrix(cbind(data_subset$x, : With
-## value 100 some points have no neighbours</code></pre>
-<pre><code>## Warning in nb2listw(nb, glist = gl, style = style, zero.policy = zero.policy):
-## zero sum general weights</code></pre>
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<pre><code>## Warning in autocov_dist(resid(mod_trends), as.matrix(cbind(data_subset$x, : With value 100 some points have no neighbours</code></pre>
+<pre><code>## Warning in nb2listw(nb, glist = gl, style = style, zero.policy = zero.policy): zero sum general weights</code></pre>
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">acov_resids</span> <span class="op">&lt;-</span> <span class="fu">autocov_dist</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/residuals.html">resid</a></span><span class="op">(</span><span class="va">mod_resids</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="va">data_subset</span><span class="op">$</span><span class="va">x</span>, <span class="va">data_subset</span><span class="op">$</span><span class="va">y</span><span class="op">)</span><span class="op">)</span>, longlat <span class="op">=</span> <span class="cn">TRUE</span>,
                             nbs <span class="op">=</span> <span class="va">neighborhood_dist</span>, zero.policy <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
-<pre><code>## Warning in autocov_dist(resid(mod_resids), as.matrix(cbind(data_subset$x, : With
-## value 100 some points have no neighbours
+<pre><code>## Warning in autocov_dist(resid(mod_resids), as.matrix(cbind(data_subset$x, : With value 100 some points have no neighbours
 
-## Warning in autocov_dist(resid(mod_resids), as.matrix(cbind(data_subset$x, : zero
-## sum general weights</code></pre>
+## Warning in autocov_dist(resid(mod_resids), as.matrix(cbind(data_subset$x, : zero sum general weights</code></pre>
+<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">acov_all</span> <span class="op">&lt;-</span> <span class="fu">autocov_dist</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/residuals.html">resid</a></span><span class="op">(</span><span class="va">mod_all</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="va">data_subset</span><span class="op">$</span><span class="va">x</span>, <span class="va">data_subset</span><span class="op">$</span><span class="va">y</span><span class="op">)</span><span class="op">)</span>, longlat <span class="op">=</span> <span class="cn">TRUE</span>,
+                         nbs <span class="op">=</span> <span class="va">neighborhood_dist</span>, zero.policy <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+<pre><code>## Warning in autocov_dist(resid(mod_all), as.matrix(cbind(data_subset$x, data_subset$y)), : With value 100 some points have no neighbours
+
+## Warning in autocov_dist(resid(mod_all), as.matrix(cbind(data_subset$x, data_subset$y)), : zero sum general weights</code></pre>
 <p>The chunk above may throw some warnings if some points are not within 100 kilometers from other points, but that will most certainly not be many points in our dataset, so we can accept that some of these autocovariates are not as accurate as others.</p>
 <p>Now we will add the calculated autocovariates of residuals to our earlier dataset and retrain the models.</p>
-<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">data_subset</span><span class="op">$</span><span class="va">autocov_trends</span> <span class="op">&lt;-</span> <span class="va">acov_trends</span>
 <span class="va">data_subset</span><span class="op">$</span><span class="va">autocov_resids</span> <span class="op">&lt;-</span> <span class="va">acov_resids</span>
+<span class="va">data_subset</span><span class="op">$</span><span class="va">autocov_all</span> <span class="op">&lt;-</span> <span class="va">acov_all</span>
 
 <span class="va">formula_rac</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">formula</span>, <span class="va">var</span><span class="op">)</span> <span class="op">{</span>
   <span class="fu"><a href="https://rdrr.io/r/stats/formula.html">as.formula</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="va">formula</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, <span class="va">formula</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span>, sep <span class="op">=</span> <span class="st">" ~ "</span><span class="op">)</span>, <span class="st">" + bbs("</span>, <span class="va">var</span>, <span class="st">")"</span><span class="op">)</span><span class="op">)</span>
@@ -382,22 +403,27 @@
 
 <span class="va">formula_trends</span> <span class="op">&lt;-</span> <span class="fu">formula_rac</span><span class="op">(</span><span class="va">formula_trends</span>, <span class="st">"autocov_trends"</span><span class="op">)</span>
 <span class="va">formula_resids</span> <span class="op">&lt;-</span> <span class="fu">formula_rac</span><span class="op">(</span><span class="va">formula_resids</span>, <span class="st">"autocov_resids"</span><span class="op">)</span>
+<span class="va">formula_all</span> <span class="op">&lt;-</span> <span class="fu">formula_rac</span><span class="op">(</span><span class="va">formula_all</span>, <span class="st">"autocov_all"</span><span class="op">)</span>
 
 <span class="va">ctrl</span> <span class="op">&lt;-</span> <span class="fu">boost_control</span><span class="op">(</span>trace <span class="op">=</span> <span class="cn">FALSE</span>, mstop <span class="op">=</span> <span class="fl">10000</span><span class="op">)</span>
 <span class="va">mod_trends_rac</span> <span class="op">&lt;-</span> <span class="fu">gamboost</span><span class="op">(</span><span class="va">formula_trends</span>, data <span class="op">=</span> <span class="va">data_subset</span>, family <span class="op">=</span> <span class="fu">Gaussian</span><span class="op">(</span><span class="op">)</span>, control <span class="op">=</span> <span class="va">ctrl</span><span class="op">)</span>
 <span class="va">mod_resids_rac</span> <span class="op">&lt;-</span> <span class="fu">gamboost</span><span class="op">(</span><span class="va">formula_resids</span>, data <span class="op">=</span> <span class="va">data_subset</span>, family <span class="op">=</span> <span class="fu">Gaussian</span><span class="op">(</span><span class="op">)</span>, control <span class="op">=</span> <span class="va">ctrl</span><span class="op">)</span>
+<span class="va">mod_all_rac</span> <span class="op">&lt;-</span> <span class="fu">gamboost</span><span class="op">(</span><span class="va">formula_all</span>, data <span class="op">=</span> <span class="va">data_subset</span>, family <span class="op">=</span> <span class="fu">Gaussian</span><span class="op">(</span><span class="op">)</span>, control <span class="op">=</span> <span class="va">ctrl</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">mod_trends_rac</span>, file <span class="op">=</span> <span class="st">"data/processed/models/mod_trends_rac.RDS"</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">mod_resids_rac</span>, file <span class="op">=</span> <span class="st">"data/processed/models/mod_resids_rac.RDS"</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">mod_resids_rac</span>, file <span class="op">=</span> <span class="st">"data/processed/models/mod_resids_rac.RDS"</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">mod_all_rac</span>, file <span class="op">=</span> <span class="st">"data/processed/models/mod_all_rac.RDS"</span><span class="op">)</span></code></pre></div>
 <p>And now let’s reassess residual autocorrelation from our retrained model. If all went well, that should be visibly and substantially less than before.</p>
-<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"mod_trends_rac"</span><span class="op">)</span><span class="op">)</span> <span class="va">mod_trends_rac</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/mod_trends_rac.RDS"</span><span class="op">)</span>
 <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"mod_resids_rac"</span><span class="op">)</span><span class="op">)</span> <span class="va">mod_resids_rac</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/mod_resids_rac.RDS"</span><span class="op">)</span>
+<span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"mod_all_rac"</span><span class="op">)</span><span class="op">)</span> <span class="va">mod_all_rac</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/mod_all_rac.RDS"</span><span class="op">)</span>
 <span class="va">data_subset</span><span class="op">$</span><span class="va">rac_trends</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/residuals.html">resid</a></span><span class="op">(</span><span class="va">mod_trends_rac</span><span class="op">)</span>
 <span class="va">data_subset</span><span class="op">$</span><span class="va">rac_resids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/residuals.html">resid</a></span><span class="op">(</span><span class="va">mod_resids_rac</span><span class="op">)</span>
+<span class="va">data_subset</span><span class="op">$</span><span class="va">rac_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/residuals.html">resid</a></span><span class="op">(</span><span class="va">mod_all_rac</span><span class="op">)</span>
 
 <span class="va">data_subset</span> <span class="op">%&gt;%</span>
-  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">rac_trends</span>, <span class="va">rac_resids</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu">rename</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span>Predictability <span class="op">=</span> <span class="va">rac_resids</span>, Trends <span class="op">=</span> <span class="va">rac_trends</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">rac_trends</span>, <span class="va">rac_resids</span>, <span class="va">rac_all</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">rename</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span>Predictability <span class="op">=</span> <span class="va">rac_resids</span>, Trends <span class="op">=</span> <span class="va">rac_trends</span>, `All predictors` <span class="op">=</span> <span class="va">rac_all</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu">pivot_longer</span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span>, names_to <span class="op">=</span> <span class="st">"model"</span>, values_to <span class="op">=</span> <span class="st">"residuals"</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">y</span>, color <span class="op">=</span> <span class="va">residuals</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
@@ -414,7 +440,7 @@
 <span class="header-section-number">6.4.2.3</span> Determine the optimal number of boosting iterations of RAC model<a class="anchor" aria-label="anchor" href="#determine-the-optimal-number-of-boosting-iterations-of-rac-model"><i class="fas fa-link"></i></a>
 </h4>
 <p>Once again, we should make sure the number of boosts used (10000) is ‘optimal’ in our newly trained model. As before, it’s probably best to run this using the dedicated file in <code>R/hyperparm_mboost_mstop.R</code>, but the chunk below can do it as well.</p>
-<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span>from <span class="op">=</span> <span class="fl">250</span>, to <span class="op">=</span> <span class="fl">30000</span>, by <span class="op">=</span> <span class="fl">250</span><span class="op">)</span>
 <span class="va">cv10f_trends_rac</span> <span class="op">&lt;-</span> <span class="fu">cv</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/model.extract.html">model.weights</a></span><span class="op">(</span><span class="va">mod_trends_rac</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"kfold"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">cv10f_trends_rac</span>, file <span class="op">=</span> <span class="st">"data/processed/models/cv10f_trends_rac.RDS"</span><span class="op">)</span>
@@ -424,11 +450,17 @@
 <span class="va">cv10f_resids_rac</span> <span class="op">&lt;-</span> <span class="fu">cv</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/model.extract.html">model.weights</a></span><span class="op">(</span><span class="va">mod_resids_rac</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"kfold"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">cv10f_resids_rac</span>, file <span class="op">=</span> <span class="st">"data/processed/models/cv10f_resids_rac.RDS"</span><span class="op">)</span>
 <span class="va">cvm_resids_rac</span> <span class="op">&lt;-</span> <span class="fu">cvrisk</span><span class="op">(</span><span class="va">mod_resids_rac</span>, folds <span class="op">=</span> <span class="va">cv10f_resids_rac</span>, grid <span class="op">=</span> <span class="va">grid</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">cvm_resids_rac</span>, file <span class="op">=</span> <span class="st">"data/processed/models/cvm_resids_rac.RDS"</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">cvm_resids_rac</span>, file <span class="op">=</span> <span class="st">"data/processed/models/cvm_resids_rac.RDS"</span><span class="op">)</span>
+
+<span class="va">cv10f_all_rac</span> <span class="op">&lt;-</span> <span class="fu">cv</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/model.extract.html">model.weights</a></span><span class="op">(</span><span class="va">mod_all_rac</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"kfold"</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">cv10f_all_rac</span>, file <span class="op">=</span> <span class="st">"data/processed/models/cv10f_all_rac.RDS"</span><span class="op">)</span>
+<span class="va">cvm_all_rac</span> <span class="op">&lt;-</span> <span class="fu">cvrisk</span><span class="op">(</span><span class="va">mod_all_rac</span>, folds <span class="op">=</span> <span class="va">cv10f_all_rac</span>, grid <span class="op">=</span> <span class="va">grid</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">cvm_all_rac</span>, file <span class="op">=</span> <span class="st">"data/processed/models/cvm_all_rac.RDS"</span><span class="op">)</span></code></pre></div>
 <p>We can load these results as well and plot the outputs.</p>
-<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">cvm_trends_rac</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/cvm_trends_rac.RDS"</span><span class="op">)</span>
 <span class="va">cvm_resids_rac</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/cvm_resids_rac.RDS"</span><span class="op">)</span>
+<span class="va">cvm_all_rac</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/cvm_all_rac.RDS"</span><span class="op">)</span>
 
 <span class="va">plot_cvm</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">cvm</span>, <span class="va">plot_id</span> <span class="op">=</span> <span class="st">""</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">m</span> <span class="op">&lt;-</span> <span class="va">cvm</span>
@@ -445,8 +477,10 @@
 <span class="op">}</span>
 <span class="va">plot_cvm_trends_rac</span> <span class="op">&lt;-</span> <span class="fu">plot_cvm</span><span class="op">(</span><span class="va">cvm_trends_rac</span>, <span class="st">"trends"</span><span class="op">)</span>
 <span class="va">plot_cvm_resids_rac</span> <span class="op">&lt;-</span> <span class="fu">plot_cvm</span><span class="op">(</span><span class="va">cvm_resids_rac</span>, <span class="st">"resids"</span><span class="op">)</span>
+<span class="va">plot_cvm_all_rac</span> <span class="op">&lt;-</span> <span class="fu">plot_cvm</span><span class="op">(</span><span class="va">cvm_all_rac</span>, <span class="st">"all"</span><span class="op">)</span>
 
-<span class="va">plot_cvm_trends_rac</span> <span class="op">+</span> <span class="va">plot_cvm_resids_rac</span> <span class="op">+</span> <span class="fu">plot_layout</span><span class="op">(</span>guides <span class="op">=</span> <span class="st">"collect"</span><span class="op">)</span> <span class="op">&amp;</span> <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></code></pre></div>
+<span class="va">plot_cvm_trends_rac</span> <span class="op">+</span> <span class="va">plot_cvm_resids_rac</span> <span class="op">+</span> <span class="va">plot_cvm_all_rac</span> <span class="op">+</span> 
+  <span class="fu">plot_layout</span><span class="op">(</span>guides <span class="op">=</span> <span class="st">"collect"</span><span class="op">)</span> <span class="op">&amp;</span> <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="envirpred_files/figure-html/plot_cvm_results_rac_models-1.png" width="100%"></div>
 <p>Although model improvement did not stagnate as fast in this model, stopping boosting iterations at 10000 boosts again continues to remain reasonable. We could increase it to 20000, but that would (probably) at least double the time required for bootstrapping to quantify model uncertainty in further steps. As predictive performance is not the ultimate goal of this analysis, that trade-off is fine.</p>
 </div>
@@ -455,31 +489,39 @@
 <span class="header-section-number">6.4.2.4</span> Quantifying residual autocorrelation<a class="anchor" aria-label="anchor" href="#quantifying-residual-autocorrelation"><i class="fas fa-link"></i></a>
 </h4>
 <p>Now is a good moment to quantify residual autocorrelation (RSAC) in our model. We do so by calculating Moran’s I across a number of distance classes (8) using the <code>sp.correlogram</code> function from the <code>spdep</code> package. As this is computationally very intensive, we run this calculation once in the chunk below and save the results for fast plotting during knitting of this document.</p>
-<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">nclass</span> <span class="op">&lt;-</span> <span class="fl">8</span>  <span class="co"># Number of distance classes</span>
 <span class="va">neighbors</span> <span class="op">&lt;-</span> <span class="fu">dnearneigh</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="va">data_subset</span><span class="op">$</span><span class="va">x</span>, <span class="va">data_subset</span><span class="op">$</span><span class="va">y</span><span class="op">)</span><span class="op">)</span>, d1 <span class="op">=</span> <span class="fl">0</span>, d2 <span class="op">=</span> <span class="va">neighborhood_dist</span>, longlat <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 
 <span class="va">spc_norac_trends</span> <span class="op">&lt;-</span> <span class="fu">sp.correlogram</span><span class="op">(</span><span class="va">neighbors</span>, <span class="va">data_subset</span><span class="op">$</span><span class="va">norac_trends</span>, order <span class="op">=</span> <span class="va">nclass</span>, method <span class="op">=</span> <span class="st">"I"</span>, zero.policy <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 <span class="va">spc_norac_resids</span> <span class="op">&lt;-</span> <span class="fu">sp.correlogram</span><span class="op">(</span><span class="va">neighbors</span>, <span class="va">data_subset</span><span class="op">$</span><span class="va">norac_resids</span>, order <span class="op">=</span> <span class="va">nclass</span>, method <span class="op">=</span> <span class="st">"I"</span>, zero.policy <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+<span class="va">spc_norac_all</span> <span class="op">&lt;-</span> <span class="fu">sp.correlogram</span><span class="op">(</span><span class="va">neighbors</span>, <span class="va">data_subset</span><span class="op">$</span><span class="va">norac_all</span>, order <span class="op">=</span> <span class="va">nclass</span>, method <span class="op">=</span> <span class="st">"I"</span>, zero.policy <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 <span class="va">spc_rac_trends</span> <span class="op">&lt;-</span> <span class="fu">sp.correlogram</span><span class="op">(</span><span class="va">neighbors</span>, <span class="va">data_subset</span><span class="op">$</span><span class="va">rac_trends</span>, order <span class="op">=</span> <span class="va">nclass</span>, method <span class="op">=</span> <span class="st">"I"</span>, zero.policy <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 <span class="va">spc_rac_resids</span> <span class="op">&lt;-</span> <span class="fu">sp.correlogram</span><span class="op">(</span><span class="va">neighbors</span>, <span class="va">data_subset</span><span class="op">$</span><span class="va">rac_resids</span>, order <span class="op">=</span> <span class="va">nclass</span>, method <span class="op">=</span> <span class="st">"I"</span>, zero.policy <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+<span class="va">spc_rac_all</span> <span class="op">&lt;-</span> <span class="fu">sp.correlogram</span><span class="op">(</span><span class="va">neighbors</span>, <span class="va">data_subset</span><span class="op">$</span><span class="va">rac_all</span>, order <span class="op">=</span> <span class="va">nclass</span>, method <span class="op">=</span> <span class="st">"I"</span>, zero.policy <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">spc_norac_trends</span>, file <span class="op">=</span> <span class="st">"data/processed/models/spc_norac_trends.RDS"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">spc_norac_resids</span>, file <span class="op">=</span> <span class="st">"data/processed/models/spc_norac_resids.RDS"</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">spc_norac_all</span>, file <span class="op">=</span> <span class="st">"data/processed/models/spc_norac_all.RDS"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">spc_rac_trends</span>, file <span class="op">=</span> <span class="st">"data/processed/models/spc_rac_trends.RDS"</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">spc_rac_resids</span>, file <span class="op">=</span> <span class="st">"data/processed/models/spc_rac_resids.RDS"</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">spc_rac_resids</span>, file <span class="op">=</span> <span class="st">"data/processed/models/spc_rac_resids.RDS"</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">spc_rac_all</span>, file <span class="op">=</span> <span class="st">"data/processed/models/spc_rac_all.RDS"</span><span class="op">)</span></code></pre></div>
 <p>And we can now plot the RSAC correlograms.</p>
-<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"spc_norac_trends"</span><span class="op">)</span><span class="op">)</span> <span class="va">spc_norac_trends</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/spc_norac_trends.RDS"</span><span class="op">)</span>
 <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"spc_norac_resids"</span><span class="op">)</span><span class="op">)</span> <span class="va">spc_norac_resids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/spc_norac_resids.RDS"</span><span class="op">)</span>
+<span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"spc_norac_all"</span><span class="op">)</span><span class="op">)</span> <span class="va">spc_norac_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/spc_norac_all.RDS"</span><span class="op">)</span>
 <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"spc_rac_trends"</span><span class="op">)</span><span class="op">)</span> <span class="va">spc_rac_trends</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/spc_rac_trends.RDS"</span><span class="op">)</span>
 <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"spc_rac_resids"</span><span class="op">)</span><span class="op">)</span> <span class="va">spc_rac_resids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/spc_rac_resids.RDS"</span><span class="op">)</span>
+<span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"spc_rac_all"</span><span class="op">)</span><span class="op">)</span> <span class="va">spc_rac_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/spc_rac_all.RDS"</span><span class="op">)</span>
 
-<span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">spc_norac_trends</span>, main <span class="op">=</span> <span class="st">"RSAC Trends mdl"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">spc_norac_resids</span>, main <span class="op">=</span> <span class="st">"RSAC Predictability mdl"</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">spc_norac_all</span>, main <span class="op">=</span> <span class="st">"RSAC All preds mdl"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">spc_rac_trends</span>, main <span class="op">=</span> <span class="st">"RSAC Trends RAC mdl"</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">spc_rac_resids</span>, main <span class="op">=</span> <span class="st">"RSAC Predictability RAC mdl"</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">spc_rac_resids</span>, main <span class="op">=</span> <span class="st">"RSAC Predictability RAC mdl"</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">spc_rac_all</span>, main <span class="op">=</span> <span class="st">"RSAC All preds RAC mdl"</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="envirpred_files/figure-html/plot_rsac-1.png" width="100%"></div>
 <p>Adding the autocovariate of residuals seems to have helped a lot to counter residual spatial autocorrelation. <strong>It’s possible this can be improved further by tweaking the radius of the neighborhood over which the autocovariate is calculated, but that’s some tweaking we can do later.</strong></p>
 </div>
@@ -493,7 +535,7 @@
 <span class="header-section-number">6.4.3.1</span> Model performance<a class="anchor" aria-label="anchor" href="#model-performance"><i class="fas fa-link"></i></a>
 </h4>
 <p>To keep it simple, we stick to good ol’ RMSE and % of deviance explained to compare the performance of all these models.</p>
-<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">perf_metrics</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">actual</span>, <span class="va">models</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">rmse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="va">models</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu">rmse</span><span class="op">(</span><span class="va">actual</span>, <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
   <span class="va">deviance_explained</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="va">models</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">tail</a></span><span class="op">(</span><span class="fu">risk</span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu">risk</span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span><span class="op">)</span>
@@ -502,8 +544,9 @@
   <span class="va">m</span>
 <span class="op">}</span>
 
-<span class="va">pm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">perf_metrics</span><span class="op">(</span><span class="va">data_subset</span><span class="op">$</span><span class="va">trend_long</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="va">mod_trends</span>, <span class="va">mod_resids</span>, <span class="va">mod_trends_rac</span>, <span class="va">mod_resids_rac</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">pm</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"mod_trends"</span>, <span class="st">"mod_resids"</span>, <span class="st">"mod_trends_rac"</span>, <span class="st">"mod_resids_rac"</span><span class="op">)</span>
+<span class="va">pm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">perf_metrics</span><span class="op">(</span><span class="va">data_subset</span><span class="op">$</span><span class="va">trend_long</span>, 
+                                 <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="va">mod_trends</span>, <span class="va">mod_resids</span>, <span class="va">mod_all</span>, <span class="va">mod_trends_rac</span>, <span class="va">mod_resids_rac</span>, <span class="va">mod_all_rac</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">pm</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"mod_trends"</span>, <span class="st">"mod_resids"</span>, <span class="st">"mod_all"</span>, <span class="st">"mod_trends_rac"</span>, <span class="st">"mod_resids_rac"</span>, <span class="st">"mod_all_rac"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">pm</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"RMSE"</span>, <span class="st">"% Deviance explained"</span><span class="op">)</span>
 <span class="va">pm</span></code></pre></div>
 <div class="kable-table">
@@ -512,23 +555,29 @@
 <th align="left"></th>
 <th align="right">mod_trends</th>
 <th align="right">mod_resids</th>
+<th align="right">mod_all</th>
 <th align="right">mod_trends_rac</th>
 <th align="right">mod_resids_rac</th>
+<th align="right">mod_all_rac</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td align="left">RMSE</td>
 <td align="right">16.82066</td>
 <td align="right">13.34693</td>
+<td align="right">12.24033</td>
 <td align="right">6.834131</td>
 <td align="right">6.227944</td>
+<td align="right">6.025773</td>
 </tr>
 <tr class="even">
 <td align="left">% Deviance explained</td>
 <td align="right">28.84072</td>
 <td align="right">55.19692</td>
+<td align="right">62.31820</td>
 <td align="right">88.253406</td>
 <td align="right">90.244832</td>
+<td align="right">90.867896</td>
 </tr>
 </tbody>
 </table></div>
@@ -543,23 +592,214 @@
 <h5>
 <span class="header-section-number">6.4.3.2.1</span> Trends models<a class="anchor" aria-label="anchor" href="#trends-models"><i class="fas fa-link"></i></a>
 </h5>
-<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="fu">varimp</span><span class="op">(</span><span class="va">mod_trends</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Varimp Trends mdl"</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="envirpred_files/figure-html/varimp_trends-1.png" width="100%"></div>
-<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="fu">varimp</span><span class="op">(</span><span class="va">mod_trends_rac</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Varimp Trends RAC mdl"</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="envirpred_files/figure-html/varimp_trends-2.png" width="100%"></div>
+<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">varimp</span><span class="op">(</span><span class="va">mod_trends_rac</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">reduction</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<div class="kable-table">
+<div class="inline-table"><table class="table table-sm">
+<thead><tr class="header">
+<th align="right">reduction</th>
+<th align="left">blearner</th>
+<th align="left">variable</th>
+<th align="right">selfreq</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="right">269.422461</td>
+<td align="left">bbs(autocov_trends)</td>
+<td align="left">autocov_trends</td>
+<td align="right">0.2410</td>
+</tr>
+<tr class="even">
+<td align="right">46.902638</td>
+<td align="left">bbs(tm_trend)</td>
+<td align="left">tm_trend</td>
+<td align="right">0.2565</td>
+</tr>
+<tr class="odd">
+<td align="right">21.384352</td>
+<td align="left">bbs(pr_trend)</td>
+<td align="left">pr_trend</td>
+<td align="right">0.1996</td>
+</tr>
+<tr class="even">
+<td align="right">4.796977</td>
+<td align="left">bbs(aet_trend)</td>
+<td align="left">aet_trend</td>
+<td align="right">0.1274</td>
+</tr>
+<tr class="odd">
+<td align="right">4.594185</td>
+<td align="left">bbs(pet_trend)</td>
+<td align="left">pet_trend</td>
+<td align="right">0.1399</td>
+</tr>
+<tr class="even">
+<td align="right">3.801587</td>
+<td align="left">bbs(ndvi_trend)</td>
+<td align="left">ndvi_trend</td>
+<td align="right">0.0356</td>
+</tr>
+</tbody>
+</table></div>
+</div>
 </div>
 <div id="predictability-models" class="section level5">
 <h5>
 <span class="header-section-number">6.4.3.2.2</span> Predictability models<a class="anchor" aria-label="anchor" href="#predictability-models"><i class="fas fa-link"></i></a>
 </h5>
-<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="fu">varimp</span><span class="op">(</span><span class="va">mod_resids</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Varimp Predictability mdl"</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="envirpred_files/figure-html/varimp_resids-1.png" width="100%"></div>
-<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="fu">varimp</span><span class="op">(</span><span class="va">mod_resids_rac</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Varimp Predictability RAC mdl"</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="envirpred_files/figure-html/varimp_resids-2.png" width="100%"></div>
+<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">varimp</span><span class="op">(</span><span class="va">mod_resids_rac</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">reduction</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<div class="kable-table">
+<div class="inline-table"><table class="table table-sm">
+<thead><tr class="header">
+<th align="right">reduction</th>
+<th align="left">blearner</th>
+<th align="left">variable</th>
+<th align="right">selfreq</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="right">177.3754837</td>
+<td align="left">bbs(autocov_resids)</td>
+<td align="left">autocov_resids</td>
+<td align="right">0.1691</td>
+</tr>
+<tr class="even">
+<td align="right">94.7949396</td>
+<td align="left">bbs(ndvi_resid)</td>
+<td align="left">ndvi_resid</td>
+<td align="right">0.5856</td>
+</tr>
+<tr class="odd">
+<td align="right">57.5502643</td>
+<td align="left">bbs(tm_resid)</td>
+<td align="left">tm_resid</td>
+<td align="right">0.0712</td>
+</tr>
+<tr class="even">
+<td align="right">17.5826413</td>
+<td align="left">bbs(pet_resid)</td>
+<td align="left">pet_resid</td>
+<td align="right">0.0631</td>
+</tr>
+<tr class="odd">
+<td align="right">10.6466394</td>
+<td align="left">bbs(aet_resid)</td>
+<td align="left">aet_resid</td>
+<td align="right">0.0616</td>
+</tr>
+<tr class="even">
+<td align="right">0.8702888</td>
+<td align="left">bbs(pr_resid)</td>
+<td align="left">pr_resid</td>
+<td align="right">0.0494</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<div id="all-predictor-models" class="section level5">
+<h5>
+<span class="header-section-number">6.4.3.2.3</span> All predictor models<a class="anchor" aria-label="anchor" href="#all-predictor-models"><i class="fas fa-link"></i></a>
+</h5>
+<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="fu">varimp</span><span class="op">(</span><span class="va">mod_all</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Varimp All pred mdl"</span><span class="op">)</span></code></pre></div>
+<div class="inline-figure"><img src="envirpred_files/figure-html/varimp_all-1.png" width="100%"></div>
+<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="fu">varimp</span><span class="op">(</span><span class="va">mod_all_rac</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Varimp All pred RAC mdl"</span><span class="op">)</span></code></pre></div>
+<div class="inline-figure"><img src="envirpred_files/figure-html/varimp_all-2.png" width="100%"></div>
+<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">varimp</span><span class="op">(</span><span class="va">mod_all_rac</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">reduction</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<div class="kable-table">
+<div class="inline-table"><table class="table table-sm">
+<thead><tr class="header">
+<th align="right">reduction</th>
+<th align="left">blearner</th>
+<th align="left">variable</th>
+<th align="right">selfreq</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="right">154.5668048</td>
+<td align="left">bbs(autocov_all)</td>
+<td align="left">autocov_all</td>
+<td align="right">0.0850</td>
+</tr>
+<tr class="even">
+<td align="right">85.7846328</td>
+<td align="left">bbs(ndvi_resid)</td>
+<td align="left">ndvi_resid</td>
+<td align="right">0.4450</td>
+</tr>
+<tr class="odd">
+<td align="right">58.6159656</td>
+<td align="left">bbs(tm_resid)</td>
+<td align="left">tm_resid</td>
+<td align="right">0.0319</td>
+</tr>
+<tr class="even">
+<td align="right">22.0012257</td>
+<td align="left">bbs(tm_trend)</td>
+<td align="left">tm_trend</td>
+<td align="right">0.1217</td>
+</tr>
+<tr class="odd">
+<td align="right">14.7849093</td>
+<td align="left">bbs(pet_resid)</td>
+<td align="left">pet_resid</td>
+<td align="right">0.0459</td>
+</tr>
+<tr class="even">
+<td align="right">11.3661273</td>
+<td align="left">bbs(aet_resid)</td>
+<td align="left">aet_resid</td>
+<td align="right">0.0640</td>
+</tr>
+<tr class="odd">
+<td align="right">5.3905217</td>
+<td align="left">bbs(pr_trend)</td>
+<td align="left">pr_trend</td>
+<td align="right">0.0352</td>
+</tr>
+<tr class="even">
+<td align="right">3.9144631</td>
+<td align="left">bbs(pet_trend)</td>
+<td align="left">pet_trend</td>
+<td align="right">0.0803</td>
+</tr>
+<tr class="odd">
+<td align="right">3.8844503</td>
+<td align="left">bbs(aet_trend)</td>
+<td align="left">aet_trend</td>
+<td align="right">0.0349</td>
+</tr>
+<tr class="even">
+<td align="right">0.7639658</td>
+<td align="left">bbs(pr_resid)</td>
+<td align="left">pr_resid</td>
+<td align="right">0.0459</td>
+</tr>
+<tr class="odd">
+<td align="right">0.2245429</td>
+<td align="left">bbs(ndvi_trend)</td>
+<td align="left">ndvi_trend</td>
+<td align="right">0.0102</td>
+</tr>
+</tbody>
+</table></div>
+</div>
 </div>
 </div>
 <div id="partialmarginal-effects" class="section level4">
@@ -571,28 +811,36 @@
 <h5>
 <span class="header-section-number">6.4.3.3.1</span> Partial effects original models<a class="anchor" aria-label="anchor" href="#partial-effects-original-models"><i class="fas fa-link"></i></a>
 </h5>
-<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_trends</span><span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="envirpred_files/figure-html/partial_effects_simple_original-1.png" width="100%"></div>
-<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_resids</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="envirpred_files/figure-html/partial_effects_simple_original-2.png" width="100%"></div>
+<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_all</span><span class="op">)</span></code></pre></div>
+<div class="inline-figure"><img src="envirpred_files/figure-html/partial_effects_simple_original_all-1.png" width="100%"></div>
 </div>
 <div id="partial-effects-rac-models" class="section level5">
 <h5>
 <span class="header-section-number">6.4.3.3.2</span> Partial effects RAC models<a class="anchor" aria-label="anchor" href="#partial-effects-rac-models"><i class="fas fa-link"></i></a>
 </h5>
-<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_trends_rac</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="envirpred_files/figure-html/partial_effects_simple_rac-1.png" width="100%"></div>
-<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_resids_rac</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="envirpred_files/figure-html/partial_effects_simple_rac-2.png" width="100%"></div>
+<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_all_rac</span><span class="op">)</span></code></pre></div>
+<div class="inline-figure"><img src="envirpred_files/figure-html/partial_effects_simple_rac_all-1.png" width="100%"></div>
 
 </div>
 </div>
