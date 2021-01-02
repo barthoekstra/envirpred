@@ -170,3 +170,10 @@ ndvi + pr + tm + pet + aet + total + plot_layout(ncol = 3) +
 ggsave(filename = "data/processed/plots/environmental_predictability.pdf", device = "pdf", width = 12, units = "in")
 ```
 
+As `ggplot2` stores the last figure in cache, and memory during knitting of this document/website is limited, we have to empty the cache now explicitly.
+
+```{r empty_ggplot_cache}
+ggplot2::set_last_plot(NULL)
+gc()
+```
+
