@@ -1,3 +1,10 @@
+# Most of the harmonic regression procedure is based on the excellent time
+# series analysis lab in GEE by the Google team (see below). Modifications
+# include dynamic naming of output bands, explicit detrending, and tweaks to
+# suit this specific use-case.
+# See the following url for the GEE time series analyis lab:
+# https://docs.google.com/document/d/1mNIRB90jwLuASO1JYas1kuOXCLbOoy1Z4NlV1qIXM10/edit
+
 rgee_harmonic_regression <- function(dataset, dependent, harmonics = 1L, aoi,
                                      resolution = 10000, dsn = NULL, 
                                      mask = NULL, refdataset = NULL) {

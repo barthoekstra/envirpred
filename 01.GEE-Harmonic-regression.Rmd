@@ -15,7 +15,7 @@ ee_Initialize(drive = TRUE)
 
 ## Apply harmonic regression to GEE datasets
 
-The function `R/rgee_harmonic_regression.R` contains the code necessary to run the harmonic regression on GEE using the [rgee](https://github.com/r-spatial/rgee) package. We export the harmonic regression results at a 10km resolution and limit the spatial domain to the following area.
+The function `R/rgee_harmonic_regression.R` contains the code necessary to run the harmonic regression on GEE using the [rgee](https://github.com/r-spatial/rgee) package. Most of the harmonic regression analysis code is based on those provided by the Google Earth Engine team in the [Time series analysis lab](https://docs.google.com/document/d/1mNIRB90jwLuASO1JYas1kuOXCLbOoy1Z4NlV1qIXM10/edit), with a few tweaks for our use-case as listed in the `R/rgee_harmonic_regression.R` document. We export the harmonic regression results at a 10km resolution and limit the spatial domain to the following area.
 
 ```{r display_aoi}
 aoi <- read_sf("data/raw/studyarea.geojson")
