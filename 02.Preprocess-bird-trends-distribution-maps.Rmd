@@ -20,7 +20,7 @@ ogr2ogr("data/raw/birdlife/BOTW.gdb", "data/raw/birdlife/BOTW.gpkg", f = "GPKG",
 
 ## Load species trends
 
-We will use species trends derived from [PECBMS](https://pecbms.info/trends-and-indicators/species-trends/), the Pan-European Common Bird Monitoring Scheme, which contains trends for 179 European breeding birds.
+We will use species trends derived from [PECBMS](https://pecbms.info/trends-and-indicators/species-trends/), the Pan-European Common Bird Monitoring Scheme, which contains trends for 170 European breeding birds.
 
 ```{r load_trend_dataset}
 colnames_species <- c("euring", "species", "namenote", "trend_long", "trend_short", "trend_long_slope",
@@ -202,6 +202,11 @@ Finally the following species have now been included in this analysis, based on 
 readRDS("data/processed/trendspecies.RDS") %>% 
   st_drop_geometry() %>%
   ungroup() %>%
-  dplyr::select(species, common_name_birdlife) %>%
-  rename(`Scientific name` = species, `Common name (BirdLife)` = common_name_birdlife)
+  dplyr::select(species, common_name_birdlife, trend_long) %>%
+  rename(`Scientific name` = species, 
+         `Common name (BirdLife)` = common_name_birdlife,
+         `Long-term trend` = trend_long) -> species_included
+
+species_included
 ```
+A total of `r nrow(species_included)` is retained in this dataset.
