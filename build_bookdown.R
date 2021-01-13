@@ -1,5 +1,7 @@
 library(bookdown)
 rm(list = ls(all = TRUE))
+ggplot2::set_last_plot(NULL)
+gc()
 # repro modes
 full_repro <- FALSE
 gee_repro <- FALSE
