@@ -9,19 +9,22 @@ To be able to run this harmonic time series analysis on a fine-scale across the 
 ```{r setup_rgee_environment, include=FALSE}
 library(rgee)
 library(sf)
-library(leaflet)
+library(ggplot2)
+library(rnaturalearth)
 ee_Initialize(drive = TRUE)
 ```
 
 ## Apply harmonic regression to GEE datasets
 
-The function `R/rgee_harmonic_regression.R` contains the code necessary to run the harmonic regression on GEE using the [rgee](https://github.com/r-spatial/rgee) package. Most of the harmonic regression analysis code is based on those provided by the Google Earth Engine team in the [Time series analysis lab](https://docs.google.com/document/d/1mNIRB90jwLuASO1JYas1kuOXCLbOoy1Z4NlV1qIXM10/edit), with a few tweaks for our use-case as listed in the `R/rgee_harmonic_regression.R` document. We export the harmonic regression results at a 10km resolution and limit the spatial domain to the following area.
+The function `R/rgee_harmonic_regression.R` contains the code necessary to run the harmonic regression on GEE using the [rgee](https://github.com/r-spatial/rgee) package. Most of the harmonic regression analysis code is based on those provided by the Google Earth Engine team in the [Time series analysis lab](https://docs.google.com/document/d/1mNIRB90jwLuASO1JYas1kuOXCLbOoy1Z4NlV1qIXM10/edit), with a few tweaks for our use-case as listed in the `R/rgee_harmonic_regression.R` document. We export the harmonic regression results at a 10km resolution and limit the spatial domain to the following area, denoted by the red square.
 
-```{r display_aoi}
+```{r display_aoi, out.width='100%'}
 aoi <- read_sf("data/raw/studyarea.geojson")
-leaflet(aoi) %>%
-  addProviderTiles("CartoDB.Positron") %>%
-  addPolygons(color = "black")
+world <- ne_countries(returnclass = "sf")
+
+ggplot() +
+  geom_sf(data = world) +
+  geom_sf(data = aoi, fill = NA, color = "red")
 ```
 
 Obviously that area spans much more than just Africa, but for our interpretation of results (and possible future expansion of the analysis to include breeding areas), this is more beneficial.
