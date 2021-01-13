@@ -5,6 +5,7 @@ In this study we follow the methodology of Beresford et al. [-@beresford2018] an
 ```{r assemblage_trends_processing_environment, include=FALSE}
 library(raster)
 library(fasterize)
+library(sf)
 ```
 
 ## Calculate assemblage trends
