@@ -9,10 +9,7 @@
 <!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.2"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.5.1/jquery-3.5.1.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="libs/bootstrap-4.5.3/bootstrap.min.css" rel="stylesheet">
 <script src="libs/bootstrap-4.5.3/bootstrap.bundle.min.js"></script><script src="libs/bs3compat-0.2.3.9000/tabs.js"></script><script src="libs/bs3compat-0.2.3.9000/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
-<script src="libs/bs4_book-1.0.0/bs4_book.js"></script><script src="libs/accessible-code-block-0.0.1/empty-anchor.js"></script><script src="libs/htmlwidgets-1.5.2/htmlwidgets.js"></script><link href="libs/leaflet-1.3.1/leaflet.css" rel="stylesheet">
-<script src="libs/leaflet-1.3.1/leaflet.js"></script><link href="libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet">
-<script src="libs/Proj4Leaflet-1.0.1/proj4-compressed.js"></script><script src="libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script><link href="libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet">
-<script src="libs/leaflet-binding-2.0.3/leaflet.js"></script><script src="libs/leaflet-providers-1.9.0/leaflet-providers_1.9.0.js"></script><script src="libs/leaflet-providers-plugin-2.0.3/leaflet-providers-plugin.js"></script><script src="https://cdn.jsdelivr.net/autocomplete.js/0/autocomplete.jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/mark.js@8.11.1/dist/mark.min.js"></script><!-- CSS -->
+<script src="libs/bs4_book-1.0.0/bs4_book.js"></script><script src="libs/accessible-code-block-0.0.1/empty-anchor.js"></script><script src="https://cdn.jsdelivr.net/autocomplete.js/0/autocomplete.jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/mark.js@8.11.1/dist/mark.min.js"></script><!-- CSS -->
 </head>
 <body data-spy="scroll" data-target="#toc">
 
@@ -62,7 +59,7 @@
 <h1>
 <span class="header-section-number">9</span> Environmental predictability<a class="anchor" aria-label="anchor" href="#environmental-predictability"><i class="fas fa-link"></i></a>
 </h1>
-<div class="sourceCode" id="cb89"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb90"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">data_stars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/data_stars.RDS"</span><span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">data_stars</span><span class="op">)</span> <span class="op">%&gt;%</span>
@@ -80,7 +77,7 @@
 ## dimension:      XY
 ## bbox:           xmin: -25.3618 ymin: -50.01889 xmax: 77.60327 ymax: 37.55986
 ## CRS:            4326</code></pre>
-<div class="sourceCode" id="cb91"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb92"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">xlims</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">20</span>, <span class="fl">50</span><span class="op">)</span>
 <span class="va">ylims</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">40</span>, <span class="fl">40</span><span class="op">)</span>
 <span class="va">xbreaks</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">20</span>, <span class="fl">0</span>, <span class="fl">20</span>, <span class="fl">40</span><span class="op">)</span>
@@ -90,7 +87,7 @@
 <span class="header-section-number">9.1</span> Environmental long-term trends<a class="anchor" aria-label="anchor" href="#environmental-long-term-trends"><i class="fas fa-link"></i></a>
 </h2>
 <p><strong>Color scales are mapped to (ie limited by) 1% and 99% quantiles, but for now I seem unable to calculate this on the fly in <code>ggplot</code> so these values are hard-coded and should be changed manually when the dataset changes.</strong></p>
-<div class="sourceCode" id="cb92"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb93"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggplot</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_sf</span><span class="op">(</span>data <span class="op">=</span> <span class="va">africa</span>, colour <span class="op">=</span> <span class="st">"grey"</span>, fill <span class="op">=</span> <span class="cn">NA</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_raster</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">y</span>, fill <span class="op">=</span> <span class="va">ndvi_trend</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
@@ -143,8 +140,8 @@
 
 <span class="va">ndvi</span> <span class="op">+</span> <span class="va">pr</span> <span class="op">+</span> <span class="va">tm</span> <span class="op">+</span> <span class="va">pet</span> <span class="op">+</span> <span class="va">aet</span> <span class="op">+</span> <span class="fu">plot_layout</span><span class="op">(</span>ncol <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">plot_annotation</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Environmental long-term trends"</span>, subtitle <span class="op">=</span> <span class="st">"Model trends"</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="envirpred_files/figure-html/plot_environmental_trends_params-1.png" width="100%"></div>
-<div class="sourceCode" id="cb93"><pre class="downlit sourceCode r">
+<div class="inline-figure"><img src="F1.Environmental-predictability_files/figure-html/plot_environmental_trends_params-1.png" width="100%"></div>
+<div class="sourceCode" id="cb94"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggsave</span><span class="op">(</span>filename <span class="op">=</span> <span class="st">"data/processed/plots/environmental_trends.pdf"</span>, device <span class="op">=</span> <span class="st">"pdf"</span>, width <span class="op">=</span> <span class="fl">12</span>, units <span class="op">=</span> <span class="st">"in"</span><span class="op">)</span></code></pre></div>
 <pre><code>## Saving 12 x 5 in image</code></pre>
 </div>
@@ -153,7 +150,7 @@
 <span class="header-section-number">9.2</span> Environmental predictability<a class="anchor" aria-label="anchor" href="#environmental-predictability-1"><i class="fas fa-link"></i></a>
 </h2>
 <p><strong>Color scales are mapped to (ie limited by) 1% and 99% quantiles, but for now I seem unable to calculate this on the fly in <code>ggplot</code> so these values are hard-coded and should be changed manually when the dataset changes.</strong></p>
-<div class="sourceCode" id="cb95"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb96"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">total_unpred</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">range01</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/scale.html">scale</a></span><span class="op">(</span><span class="va">data</span><span class="op">[</span><span class="st">"ndvi_resid"</span><span class="op">]</span><span class="op">)</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span> <span class="fu">range01</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/scale.html">scale</a></span><span class="op">(</span><span class="va">data</span><span class="op">[</span><span class="st">"pr_resid"</span><span class="op">]</span><span class="op">)</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">range01</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/scale.html">scale</a></span><span class="op">(</span><span class="va">data</span><span class="op">[</span><span class="st">"tm_resid"</span><span class="op">]</span><span class="op">)</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span> <span class="fu">range01</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/scale.html">scale</a></span><span class="op">(</span><span class="va">data</span><span class="op">[</span><span class="st">"pet_resid"</span><span class="op">]</span><span class="op">)</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span>
@@ -224,10 +221,17 @@
 
 <span class="va">ndvi</span> <span class="op">+</span> <span class="va">pr</span> <span class="op">+</span> <span class="va">tm</span> <span class="op">+</span> <span class="va">pet</span> <span class="op">+</span> <span class="va">aet</span> <span class="op">+</span> <span class="va">total</span> <span class="op">+</span> <span class="fu">plot_layout</span><span class="op">(</span>ncol <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">plot_annotation</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Environmental predictability"</span>, subtitle <span class="op">=</span> <span class="st">"Model RMSE"</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="envirpred_files/figure-html/plot_environmental_predictability_params-1.png" width="100%"></div>
-<div class="sourceCode" id="cb96"><pre class="downlit sourceCode r">
+<div class="inline-figure"><img src="F1.Environmental-predictability_files/figure-html/plot_environmental_predictability_params-1.png" width="100%"></div>
+<div class="sourceCode" id="cb97"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggsave</span><span class="op">(</span>filename <span class="op">=</span> <span class="st">"data/processed/plots/environmental_predictability.pdf"</span>, device <span class="op">=</span> <span class="st">"pdf"</span>, width <span class="op">=</span> <span class="fl">12</span>, units <span class="op">=</span> <span class="st">"in"</span><span class="op">)</span></code></pre></div>
 <pre><code>## Saving 12 x 5 in image</code></pre>
+<p>As <code>ggplot2</code> stores the last figure in cache, and memory during knitting of this document/website is limited, we have to empty the cache now explicitly.</p>
+<div class="sourceCode" id="cb99"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/set_last_plot.html">set_last_plot</a></span><span class="op">(</span><span class="cn">NULL</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/gc.html">gc</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<pre><code>##             used  (Mb) gc trigger   (Mb)  max used   (Mb)
+## Ncells   2077174 111.0    3785128  202.2   3785128  202.2
+## Vcells 126589588 965.9  344369756 2627.4 430462194 3284.2</code></pre>
 
 </div>
 </div>

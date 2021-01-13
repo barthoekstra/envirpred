@@ -9,10 +9,7 @@
 <!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.2"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.5.1/jquery-3.5.1.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="libs/bootstrap-4.5.3/bootstrap.min.css" rel="stylesheet">
 <script src="libs/bootstrap-4.5.3/bootstrap.bundle.min.js"></script><script src="libs/bs3compat-0.2.3.9000/tabs.js"></script><script src="libs/bs3compat-0.2.3.9000/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
-<script src="libs/bs4_book-1.0.0/bs4_book.js"></script><script src="libs/accessible-code-block-0.0.1/empty-anchor.js"></script><script src="libs/htmlwidgets-1.5.2/htmlwidgets.js"></script><link href="libs/leaflet-1.3.1/leaflet.css" rel="stylesheet">
-<script src="libs/leaflet-1.3.1/leaflet.js"></script><link href="libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet">
-<script src="libs/Proj4Leaflet-1.0.1/proj4-compressed.js"></script><script src="libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script><link href="libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet">
-<script src="libs/leaflet-binding-2.0.3/leaflet.js"></script><script src="libs/leaflet-providers-1.9.0/leaflet-providers_1.9.0.js"></script><script src="libs/leaflet-providers-plugin-2.0.3/leaflet-providers-plugin.js"></script><script src="https://cdn.jsdelivr.net/autocomplete.js/0/autocomplete.jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/mark.js@8.11.1/dist/mark.min.js"></script><!-- CSS -->
+<script src="libs/bs4_book-1.0.0/bs4_book.js"></script><script src="libs/accessible-code-block-0.0.1/empty-anchor.js"></script><script src="https://cdn.jsdelivr.net/autocomplete.js/0/autocomplete.jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/mark.js@8.11.1/dist/mark.min.js"></script><!-- CSS -->
 </head>
 <body data-spy="scroll" data-target="#toc">
 
@@ -74,7 +71,7 @@
 <h2>
 <span class="header-section-number">2.2</span> Load species trends<a class="anchor" aria-label="anchor" href="#load-species-trends"><i class="fas fa-link"></i></a>
 </h2>
-<p>We will use species trends derived from <a href="https://pecbms.info/trends-and-indicators/species-trends/">PECBMS</a>, the Pan-European Common Bird Monitoring Scheme, which contains trends for 179 European breeding birds.</p>
+<p>We will use species trends derived from <a href="https://pecbms.info/trends-and-indicators/species-trends/">PECBMS</a>, the Pan-European Common Bird Monitoring Scheme, which contains trends for 170 European breeding birds.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">colnames_species</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"euring"</span>, <span class="st">"species"</span>, <span class="st">"namenote"</span>, <span class="st">"trend_long"</span>, <span class="st">"trend_short"</span>, <span class="st">"trend_long_slope"</span>,
                       <span class="st">"trend_long_se"</span>, <span class="st">"trend_short_slope"</span>, <span class="st">"trend_short_se"</span>, <span class="st">"habitat"</span>, <span class="st">"common_name"</span>,
@@ -1023,358 +1020,449 @@
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/trendspecies.RDS"</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">st_drop_geometry</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu">ungroup</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">species</span>, <span class="va">common_name_birdlife</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu">rename</span><span class="op">(</span>`Scientific name` <span class="op">=</span> <span class="va">species</span>, `Common name (BirdLife)` <span class="op">=</span> <span class="va">common_name_birdlife</span><span class="op">)</span></code></pre></div>
+  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">species</span>, <span class="va">common_name_birdlife</span>, <span class="va">trend_long</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">rename</span><span class="op">(</span>`Scientific name` <span class="op">=</span> <span class="va">species</span>, 
+         `Common name (BirdLife)` <span class="op">=</span> <span class="va">common_name_birdlife</span>,
+         `Long-term trend` <span class="op">=</span> <span class="va">trend_long</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">species_included</span>
+
+<span class="va">species_included</span></code></pre></div>
 <div class="kable-table">
 <div class="inline-table"><table class="table table-sm">
 <thead><tr class="header">
 <th align="left">Scientific name</th>
 <th align="left">Common name (BirdLife)</th>
+<th align="right">Long-term trend</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td align="left">Accipiter nisus</td>
 <td align="left">Eurasian Sparrowhawk</td>
+<td align="right">4</td>
 </tr>
 <tr class="even">
 <td align="left">Acrocephalus arundinaceus</td>
 <td align="left">Great Reed-warbler</td>
+<td align="right">-3</td>
 </tr>
 <tr class="odd">
 <td align="left">Acrocephalus palustris</td>
 <td align="left">Marsh Warbler</td>
+<td align="right">-9</td>
 </tr>
 <tr class="even">
 <td align="left">Acrocephalus schoenobaenus</td>
 <td align="left">Sedge Warbler</td>
+<td align="right">-29</td>
 </tr>
 <tr class="odd">
 <td align="left">Acrocephalus scirpaceus</td>
 <td align="left">Common Reed-warbler</td>
+<td align="right">-4</td>
 </tr>
 <tr class="even">
 <td align="left">Actitis hypoleucos</td>
 <td align="left">Common Sandpiper</td>
+<td align="right">-36</td>
 </tr>
 <tr class="odd">
 <td align="left">Anas platyrhynchos</td>
 <td align="left">Mallard</td>
+<td align="right">49</td>
 </tr>
 <tr class="even">
 <td align="left">Anthus campestris</td>
 <td align="left">Tawny Pipit</td>
+<td align="right">-67</td>
 </tr>
 <tr class="odd">
 <td align="left">Anthus pratensis</td>
 <td align="left">Meadow Pipit</td>
+<td align="right">-62</td>
 </tr>
 <tr class="even">
 <td align="left">Anthus trivialis</td>
 <td align="left">Tree Pipit</td>
+<td align="right">-52</td>
 </tr>
 <tr class="odd">
 <td align="left">Apus apus</td>
 <td align="left">Common Swift</td>
+<td align="right">4</td>
 </tr>
 <tr class="even">
 <td align="left">Ardea cinerea</td>
 <td align="left">Grey Heron</td>
+<td align="right">118</td>
 </tr>
 <tr class="odd">
 <td align="left">Burhinus oedicnemus</td>
 <td align="left">Eurasian Thick-knee</td>
+<td align="right">-33</td>
 </tr>
 <tr class="even">
 <td align="left">Calandrella brachydactyla</td>
 <td align="left">Greater Short-toed Lark</td>
+<td align="right">49</td>
 </tr>
 <tr class="odd">
 <td align="left">Carpodacus erythrinus</td>
 <td align="left">Common Rosefinch</td>
+<td align="right">-38</td>
 </tr>
 <tr class="even">
 <td align="left">Cecropis daurica</td>
 <td align="left">NA</td>
+<td align="right">NA</td>
 </tr>
 <tr class="odd">
 <td align="left">Ciconia ciconia</td>
 <td align="left">White Stork</td>
+<td align="right">57</td>
 </tr>
 <tr class="even">
 <td align="left">Circus aeruginosus</td>
 <td align="left">Western Marsh-harrier</td>
+<td align="right">436</td>
 </tr>
 <tr class="odd">
 <td align="left">Clamator glandarius</td>
 <td align="left">Great Spotted Cuckoo</td>
+<td align="right">23</td>
 </tr>
 <tr class="even">
 <td align="left">Columba palumbus</td>
 <td align="left">Common Woodpigeon</td>
+<td align="right">105</td>
 </tr>
 <tr class="odd">
 <td align="left">Cuculus canorus</td>
 <td align="left">Common Cuckoo</td>
+<td align="right">-32</td>
 </tr>
 <tr class="even">
 <td align="left">Cyanecula svecica</td>
 <td align="left">NA</td>
+<td align="right">NA</td>
 </tr>
 <tr class="odd">
 <td align="left">Delichon urbicum</td>
 <td align="left">Northern House Martin</td>
+<td align="right">-22</td>
 </tr>
 <tr class="even">
 <td align="left">Egretta garzetta</td>
 <td align="left">Little Egret</td>
+<td align="right">NA</td>
 </tr>
 <tr class="odd">
 <td align="left">Emberiza hortulana</td>
 <td align="left">Ortolan Bunting</td>
+<td align="right">-90</td>
 </tr>
 <tr class="even">
 <td align="left">Emberiza melanocephala</td>
 <td align="left">Black-headed Bunting</td>
+<td align="right">NA</td>
 </tr>
 <tr class="odd">
 <td align="left">Falco tinnunculus</td>
 <td align="left">Common Kestrel</td>
+<td align="right">-24</td>
 </tr>
 <tr class="even">
 <td align="left">Ficedula albicollis</td>
 <td align="left">Collared Flycatcher</td>
+<td align="right">141</td>
 </tr>
 <tr class="odd">
 <td align="left">Ficedula hypoleuca</td>
 <td align="left">European Pied Flycatcher</td>
+<td align="right">-29</td>
 </tr>
 <tr class="even">
 <td align="left">Fringilla montifringilla</td>
 <td align="left">Brambling</td>
+<td align="right">-48</td>
 </tr>
 <tr class="odd">
 <td align="left">Gallinago gallinago</td>
 <td align="left">Common Snipe</td>
+<td align="right">-48</td>
 </tr>
 <tr class="even">
 <td align="left">Grus grus</td>
 <td align="left">Common Crane</td>
+<td align="right">513</td>
 </tr>
 <tr class="odd">
 <td align="left">Haematopus ostralegus</td>
 <td align="left">Eurasian Oystercatcher</td>
+<td align="right">-6</td>
 </tr>
 <tr class="even">
 <td align="left">Hippolais icterina</td>
 <td align="left">Icterine Warbler</td>
+<td align="right">-49</td>
 </tr>
 <tr class="odd">
 <td align="left">Hippolais polyglotta</td>
 <td align="left">Melodious Warbler</td>
+<td align="right">-29</td>
 </tr>
 <tr class="even">
 <td align="left">Hirundo rustica</td>
 <td align="left">Barn Swallow</td>
+<td align="right">-9</td>
 </tr>
 <tr class="odd">
 <td align="left">Iduna pallida</td>
 <td align="left">NA</td>
+<td align="right">NA</td>
 </tr>
 <tr class="even">
 <td align="left">Jynx torquilla</td>
 <td align="left">Eurasian Wryneck</td>
+<td align="right">-64</td>
 </tr>
 <tr class="odd">
 <td align="left">Lanius collurio</td>
 <td align="left">Red-backed Shrike</td>
+<td align="right">-18</td>
 </tr>
 <tr class="even">
 <td align="left">Lanius minor</td>
 <td align="left">Lesser Grey Shrike</td>
+<td align="right">NA</td>
 </tr>
 <tr class="odd">
 <td align="left">Lanius senator</td>
 <td align="left">Woodchat Shrike</td>
+<td align="right">-20</td>
 </tr>
 <tr class="even">
 <td align="left">Larus ridibundus</td>
 <td align="left">Black-headed Gull</td>
+<td align="right">-48</td>
 </tr>
 <tr class="odd">
 <td align="left">Limosa limosa</td>
 <td align="left">Black-tailed Godwit</td>
+<td align="right">-59</td>
 </tr>
 <tr class="even">
 <td align="left">Locustella fluviatilis</td>
 <td align="left">River Warbler</td>
+<td align="right">-74</td>
 </tr>
 <tr class="odd">
 <td align="left">Locustella naevia</td>
 <td align="left">Common Grasshopper-warbler</td>
+<td align="right">-73</td>
 </tr>
 <tr class="even">
 <td align="left">Luscinia luscinia</td>
 <td align="left">Thrush Nightingale</td>
+<td align="right">-33</td>
 </tr>
 <tr class="odd">
 <td align="left">Luscinia megarhynchos</td>
 <td align="left">Common Nightingale</td>
+<td align="right">-67</td>
 </tr>
 <tr class="even">
 <td align="left">Merops apiaster</td>
 <td align="left">European Bee-eater</td>
+<td align="right">120</td>
 </tr>
 <tr class="odd">
 <td align="left">Motacilla cinerea</td>
 <td align="left">Grey Wagtail</td>
+<td align="right">9</td>
 </tr>
 <tr class="even">
 <td align="left">Motacilla flava</td>
 <td align="left">Western Yellow Wagtail</td>
+<td align="right">-76</td>
 </tr>
 <tr class="odd">
 <td align="left">Muscicapa striata</td>
 <td align="left">Spotted Flycatcher</td>
+<td align="right">-50</td>
 </tr>
 <tr class="even">
 <td align="left">Numenius arquata</td>
 <td align="left">Eurasian Curlew</td>
+<td align="right">-36</td>
 </tr>
 <tr class="odd">
 <td align="left">Numenius phaeopus</td>
 <td align="left">Whimbrel</td>
+<td align="right">77</td>
 </tr>
 <tr class="even">
 <td align="left">Oenanthe cypriaca</td>
 <td align="left">Cyprus Wheatear</td>
+<td align="right">NA</td>
 </tr>
 <tr class="odd">
 <td align="left">Oenanthe hispanica</td>
 <td align="left">Black-eared Wheatear</td>
+<td align="right">-36</td>
 </tr>
 <tr class="even">
 <td align="left">Oenanthe oenanthe</td>
 <td align="left">Northern Wheatear</td>
+<td align="right">-71</td>
 </tr>
 <tr class="odd">
 <td align="left">Oriolus oriolus</td>
 <td align="left">Eurasian Golden Oriole</td>
+<td align="right">16</td>
 </tr>
 <tr class="even">
 <td align="left">Phoenicurus phoenicurus</td>
 <td align="left">Common Redstart</td>
+<td align="right">8</td>
 </tr>
 <tr class="odd">
 <td align="left">Phylloscopus bonelli</td>
 <td align="left">Western Bonelli’s Warbler</td>
+<td align="right">-15</td>
 </tr>
 <tr class="even">
 <td align="left">Phylloscopus collybita</td>
 <td align="left">Common Chiffchaff</td>
+<td align="right">119</td>
 </tr>
 <tr class="odd">
 <td align="left">Phylloscopus sibilatrix</td>
 <td align="left">Wood Warbler</td>
+<td align="right">-44</td>
 </tr>
 <tr class="even">
 <td align="left">Phylloscopus trochilus</td>
 <td align="left">Willow Warbler</td>
+<td align="right">-33</td>
 </tr>
 <tr class="odd">
 <td align="left">Pluvialis apricaria</td>
 <td align="left">Eurasian Golden Plover</td>
+<td align="right">-13</td>
 </tr>
 <tr class="even">
 <td align="left">Podiceps cristatus</td>
 <td align="left">Great Crested Grebe</td>
+<td align="right">5</td>
 </tr>
 <tr class="odd">
 <td align="left">Saxicola rubetra</td>
 <td align="left">Whinchat</td>
+<td align="right">-88</td>
 </tr>
 <tr class="even">
 <td align="left">Spinus spinus</td>
 <td align="left">NA</td>
+<td align="right">NA</td>
 </tr>
 <tr class="odd">
 <td align="left">Streptopelia turtur</td>
 <td align="left">European Turtle-dove</td>
+<td align="right">-80</td>
 </tr>
 <tr class="even">
 <td align="left">Sylvia borin</td>
 <td align="left">Garden Warbler</td>
+<td align="right">-28</td>
 </tr>
 <tr class="odd">
 <td align="left">Sylvia cantillans</td>
 <td align="left">Subalpine Warbler</td>
+<td align="right">176</td>
 </tr>
 <tr class="even">
 <td align="left">Sylvia communis</td>
 <td align="left">Common Whitethroat</td>
+<td align="right">23</td>
 </tr>
 <tr class="odd">
 <td align="left">Sylvia curruca</td>
 <td align="left">Lesser Whitethroat</td>
+<td align="right">-16</td>
 </tr>
 <tr class="even">
 <td align="left">Sylvia hortensis</td>
 <td align="left">Western Orphean Warbler</td>
+<td align="right">160</td>
 </tr>
 <tr class="odd">
 <td align="left">Sylvia nisoria</td>
 <td align="left">Barred Warbler</td>
+<td align="right">-66</td>
 </tr>
 <tr class="even">
 <td align="left">Tachybaptus ruficollis</td>
 <td align="left">Little Grebe</td>
+<td align="right">12</td>
 </tr>
 <tr class="odd">
 <td align="left">Tadorna tadorna</td>
 <td align="left">Common Shelduck</td>
+<td align="right">27</td>
 </tr>
 <tr class="even">
 <td align="left">Tringa erythropus</td>
 <td align="left">Spotted Redshank</td>
+<td align="right">NA</td>
 </tr>
 <tr class="odd">
 <td align="left">Tringa glareola</td>
 <td align="left">Wood Sandpiper</td>
+<td align="right">-13</td>
 </tr>
 <tr class="even">
 <td align="left">Tringa nebularia</td>
 <td align="left">Common Greenshank</td>
+<td align="right">1</td>
 </tr>
 <tr class="odd">
 <td align="left">Tringa ochropus</td>
 <td align="left">Green Sandpiper</td>
+<td align="right">2</td>
 </tr>
 <tr class="even">
 <td align="left">Tringa totanus</td>
 <td align="left">Common Redshank</td>
+<td align="right">-54</td>
 </tr>
 <tr class="odd">
 <td align="left">Turdus iliacus</td>
 <td align="left">Redwing</td>
+<td align="right">-16</td>
 </tr>
 <tr class="even">
 <td align="left">Turdus pilaris</td>
 <td align="left">Fieldfare</td>
+<td align="right">18</td>
 </tr>
 <tr class="odd">
 <td align="left">Turdus torquatus</td>
 <td align="left">Ring Ouzel</td>
+<td align="right">7</td>
 </tr>
 <tr class="even">
 <td align="left">Upupa epops</td>
 <td align="left">Common Hoopoe</td>
+<td align="right">244</td>
 </tr>
 <tr class="odd">
 <td align="left">Vanellus vanellus</td>
 <td align="left">Northern Lapwing</td>
+<td align="right">-55</td>
 </tr>
 </tbody>
 </table></div>
 </div>
+<p>A total of 85 is retained in this dataset.</p>
 
 </div>
 </div>
