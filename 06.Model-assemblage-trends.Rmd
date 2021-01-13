@@ -31,12 +31,12 @@ We first assess correlations among predictors. As we also intend to compare mode
 ### Pearson's correlation matrix
 
 ```{r pearson_correlation_matrix, out.width='100%', results='hold'}
-unused_predictors <- c("trend_long", "trend_short", "count_long", "count_short",
+unused_predictors <- c("count_long", "count_short",
                        "def", "tmmx", "tmmn", "aet", "pet", "pr", "ndvi", "x", "y",
                        lut$ecoregions, lut$biomes, lut$realms)
 predictors <- colnames(data)[!colnames(data) %in% unused_predictors]
-predictors_trends <- colnames(dplyr::select(data, ends_with("_trend")))
-predictors_resids <- colnames(dplyr::select(data, ends_with("_resid")))
+predictors_trends <- c("trend_long", "trend_short", colnames(dplyr::select(data, ends_with("_trend"))))
+predictors_resids <- c("trend_long", "trend_short", colnames(dplyr::select(data, ends_with("_resid"))))
 predictors_all <- c(predictors_trends, predictors_resids)
 
 ggcorrmat(data, cor.vars = all_of(predictors_trends), type = "parametric")
@@ -65,7 +65,7 @@ ggcorrmat(data, cor.vars = all_of(predictors_resids), type = "parametric")
 ggcorrmat(data, cor.vars = all_of(predictors_all), type = "parametric")
 ```
 
-We continue to see strong correlation between `pr_resid` and `ndvi_resid`, but as both original variables (`ndvi` and `pr`) are effectively uncorrelated in `ndvi_trend` and `pr_trend` and we want the trends and predictability model to be comparable, we keep both in.
+We continue to see strong correlation between `pr_resid` and `ndvi_resid`, but Pearson correlation coefficients are < 0.7, and as both original variables (`ndvi` and `pr`) are effectively uncorrelated in `ndvi_trend` and `pr_trend` and we want the trends and predictability model to be comparable, we keep both in.
 
 ## Pairplot
 
@@ -75,8 +75,8 @@ While we're at it, it's useful to make a pairplot of all predictor variables.
 data %>%
   slice_sample(n = 1000) -> data_tiny
 
-ggpairs(data_tiny, columns = all_of(c(predictors_trends, "trend_long")), progress = FALSE)
-ggpairs(data_tiny, columns = all_of(c(predictors_resids, "trend_long")), progress = FALSE)
+ggpairs(data_tiny, columns = all_of(c(predictors_trends)), progress = FALSE)
+ggpairs(data_tiny, columns = all_of(c(predictors_resids)), progress = FALSE)
 ```
 
 ## Optimal dataset size
@@ -239,14 +239,26 @@ data %>%
 
 saveRDS(data_subset, file = "data/processed/data_subset.RDS")
 
-model_formula <- function(predictors, response) {
-  formula <- as.formula(paste0(response, " ~ ", paste0("bbs(", predictors, ")", collapse = " + ")))
+model_formula <- function(predictors, response, interactions = FALSE) {
+  formula <- paste0(response, " ~ ", paste0("bbs(", predictors, ")", collapse = " + "))
+  
+  if (interactions) {
+    envir_vars <- unlist(unique(lapply(str_split(predictors, "_"), function(x) x[[1]])))
+    interactions <- lapply(envir_vars, function(x) {
+      paste0("bspatial(", predictors[str_starts(predictors, paste0(x, "_"))][1], ", ", 
+             predictors[str_starts(predictors, paste0(x, "_"))][2], ")")
+    })
+    formula <- paste0(formula, " + ", paste0(interactions, collapse = " + "))
+  }
+  
+  formula <- as.formula(formula)
   return(formula)
 }
 
-formula_trends <- model_formula(predictors_trends, "trend_long")
-formula_resids <- model_formula(predictors_resids, "trend_long")
-formula_all <- model_formula(predictors_all, "trend_long")
+formula_trends <- model_formula(predictors_trends[!predictors_trends %in% c("trend_long", "trend_short")], "trend_long")
+formula_resids <- model_formula(predictors_resids[!predictors_resids %in% c("trend_long", "trend_short")], "trend_long")
+formula_all <- model_formula(predictors_all[!predictors_all %in% c("trend_long", "trend_short")], "trend_long", 
+                             interactions = TRUE)
 
 ctrl <- boost_control(trace = FALSE, mstop = 10000)
 mod_trends <- gamboost(formula_trends, data = data_subset, family = Gaussian(), control = ctrl)
@@ -265,14 +277,17 @@ Having trained the models, we can now determine the optimal number of boosting i
 ```{r determine_optimal_number_of_boosts, eval=FALSE}
 grid <- seq(from = 250, to = 30000, by = 250)
 cv10f_trends <- cv(model.weights(mod_trends), type = "kfold")
+saveRDS(cv10f_trends, file = "data/processed/models/cv10f_trends.RDS")
 cvm_trends <- cvrisk(mod_trends, folds = cv10f_trends, grid = grid)
 saveRDS(cvm_trends, file = "data/processed/models/cvm_trends.RDS")
 
 cv10f_resids <- cv(model.weights(mod_resids), type = "kfold")
+saveRDS(cv10f_resids, file = "data/processed/models/cv10f_resids.RDS")
 cvm_resids <- cvrisk(mod_resids, folds = cv10f_resids, grid = grid)
 saveRDS(cvm_resids, file = "data/processed/models/cvm_resids.RDS")
 
 cv10f_all <- cv(model.weights(mod_all), type = "kfold")
+saveRDS(cv10f_all, file = "data/processed/models/cv10f_all.RDS")
 cvm_all <- cvrisk(mod_all, folds = cv10f_all, grid = grid)
 saveRDS(cvm_all, file = "data/processed/models/cvm_all.RDS")
 ```
@@ -508,6 +523,7 @@ pm <- as.data.frame(perf_metrics(data_subset$trend_long,
                                  list(mod_trends, mod_resids, mod_all, mod_trends_rac, mod_resids_rac, mod_all_rac)))
 colnames(pm) <- c("mod_trends", "mod_resids", "mod_all", "mod_trends_rac", "mod_resids_rac", "mod_all_rac")
 rownames(pm) <- c("RMSE", "% Deviance explained")
+pm <- as.data.frame(t(pm))
 pm
 ```
 
@@ -539,10 +555,21 @@ plot(varimp(mod_all_rac), main = "Varimp All pred RAC mdl")
 as.data.frame(varimp(mod_all_rac)) %>% arrange(desc(reduction))
 ```
 
-
 #### Partial/Marginal Effects
 
 And, finally, we can have a look at the modelled effects of predictors on long-term assemblage trends. We first compare the output of the original models.
+
+Because the full model included interaction terms, and by default the partial dependence plots are calculated by evaluating the estimated value over every unique value of the two involved variables, this can get extremely computationally intensive. So instead, we use a tweaked version of the `mboost.plot` function, which lets use set a `gridsize`, the number of values over which the partial dependence is evaluated on a quantile grid. See the `R/mboost_plot_grid.R` file for details.
+
+```{r load_adjusted_plot_function}
+source('~/envirpred/R/mboost_plot_grid.R')
+```
+
+```{r remove_unnecessary_rac_models, include=FALSE}
+rm(mod_all_rac)
+rm(mod_resids_rac)
+rm(mod_trends_rac)
+```
 
 ##### Partial effects original models
 
@@ -554,9 +581,32 @@ par(mfrow = c(2, 3))
 plot(mod_resids)
 ```
 
-```{r partial_effects_simple_original_all, out.width='100%', fig.width=10, fig.height=15}
-par(mfrow = c(4, 3))
-plot(mod_all)
+```{r partial_effects_simple_original_all, out.width='100%', fig.width=5, fig.height=5}
+plot_all <- function(model, gridsize) {
+  preds <- names(model.frame(model))
+  single <- which(str_starts(preds, "bbs"))
+  interx <- which(str_starts(preds, "bspatial"))
+  
+  for (id in single) {
+    w <- which(names(variable.names(model)) == preds[id])
+    plot(model, which = w)
+  }
+  
+  for (id in interx) {
+    w <- which(names(variable.names(model)) == preds[id])
+    print(plot.mboost_grid(model, which = w, gridsize = gridsize))
+  }  
+}
+plot_all(mod_all, 100)
+```
+
+```{r switch_loaded_models_for_plotting, include=FALSE}
+rm(mod_all)
+rm(mod_resids)
+rm(mod_trends)
+mod_all_rac <- readRDS("data/processed/models/mod_all_rac.RDS")
+mod_resids_rac <- readRDS("data/processed/models/mod_resids_rac.RDS")
+mod_trends_rac <- readRDS("data/processed/models/mod_trends_rac.RDS")
 ```
 
 ##### Partial effects RAC models
@@ -568,8 +618,7 @@ plot(mod_trends_rac)
 par(mfrow = c(2, 3))
 plot(mod_resids_rac)
 ```
-```{r partial_effects_simple_rac_all, out.width='100%', fig.width=10, fig.height=15}
-par(mfrow = c(4, 3))
-plot(mod_all_rac)
-```
 
+```{r partial_effects_simple_rac_all, out.width='100%', fig.width=5, fig.height=5}
+plot_all(mod_all_rac, 100)
+```
