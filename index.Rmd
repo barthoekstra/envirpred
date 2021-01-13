@@ -16,7 +16,7 @@ link-citations: yes
 The entire analysis contained in this book can be reproduced by running the following function from the `bookdown` package.
 
 ```{r bookdown_code, eval=FALSE}
-bookdown::render_book("index.Rmd")
+bookdown::render_book("index.Rmd", new_session = TRUE)
 ```
 
 It may be necessary to install some additional packages to make use of the `bs4_book` template for this book.
