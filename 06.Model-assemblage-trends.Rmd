@@ -72,6 +72,7 @@ We continue to see strong correlation between `pr_resid` and `ndvi_resid`, but P
 While we're at it, it's useful to make a pairplot of all predictor variables.
 
 ```{r data_pairplot, out.width='100%', results='hold'}
+set.seed(42)
 data %>%
   slice_sample(n = 1000) -> data_tiny
 
