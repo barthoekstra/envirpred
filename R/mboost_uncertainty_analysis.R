@@ -67,7 +67,7 @@ confint.mboost_adjusted <- function(object, parm = NULL, level = 0.95,
     
     for (w in which) {
       ## get data from w-th base-learner
-      tmp <- data[[w]][rep(1, 1000), , drop = FALSE]
+      tmp <- data[[w]][rep(1, 250), , drop = FALSE]
       
       ## are there varying coefficients (i.e. argument by)
       get_vary <- object$baselearner[[w]]$get_vary
@@ -90,9 +90,9 @@ confint.mboost_adjusted <- function(object, parm = NULL, level = 0.95,
       ## now make grid
       grid <- function(x) {
         if (is.numeric(x)) {
-          return(seq(min(x), max(x), length = 1000))
+          return(seq(min(x), max(x), length = 250))
         } else {
-          return(rep(unique(x), length.out = 1000))
+          return(rep(unique(x), length.out = 250))
         }
       }
       
