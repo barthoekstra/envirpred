@@ -1,6 +1,6 @@
 # (PART) Figures {-}
 
-# Environmental predictability
+# Environmental variables
 
 ```{r setup_figure1_environment, include=FALSE}
 library(tidyverse)
@@ -23,6 +23,11 @@ as.data.frame(data_stars) %>%
   identity() -> data
 
 africa <- st_read("data/raw/Africa.gpkg")
+
+data_base <- data
+
+data %>%
+  filter(Afrotropic == 1 & count_long >= 5) -> data
 
 xlims <- c(-20, 50)
 ylims <- c(-40, 40)
@@ -85,13 +90,24 @@ ggplot(data) +
   theme_bw() +
   labs(x = "Lon", y = "Lat", fill = "Actevap.") -> aet
 
-ndvi + pr + tm + pet + aet + plot_layout(ncol = 3) +
+ggplot(data) +
+  geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
+  geom_raster(aes(x = x, y = y, fill = trend_long)) +
+  scale_fill_continuous_diverging(limits = c(-32.82353, 72.33334), 
+                                  oob = scales::squish, na.value = NA, palette = "Blue-Red 3") +
+  coord_sf(xlim = xlims, ylim = ylims) +
+  scale_x_continuous(breaks = xbreaks) +
+  theme_bw() +
+  labs(x = "Lon", y = "Lat", fill = "Ass. trend") -> pop
+
+
+ndvi + pr + tm + pet + aet + pop + plot_layout(ncol = 3) +
   plot_annotation(title = "Environmental long-term trends", subtitle = "Model trends")
 
 ggsave(filename = "data/processed/plots/environmental_trends.pdf", device = "pdf", width = 12, units = "in")
 ```
 
-## Environmental predictability
+## Environmental variability
 
 **Color scales are mapped to (ie limited by) 1% and 99% quantiles, but for now I seem unable to calculate this on the fly in `ggplot` so these values are hard-coded and should be changed manually when the dataset changes.**
 
@@ -157,15 +173,16 @@ ggplot() +
 
 ggplot() +
   geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
-  geom_raster(aes(x = x, y = y, fill = total), data = data) +
-  scale_fill_continuous_sequential(oob = scales::squish, na.value = NA, palette = "Viridis") +
+  geom_raster(aes(x = x, y = y, fill = trend_long), data = data) +
+  scale_fill_continuous_diverging(limits = c(-32.82353, 72.33334), 
+                                  oob = scales::squish, na.value = NA, palette = "Blue-Red 3") +
   coord_sf(xlim = xlims, ylim = ylims) +
   scale_x_continuous(breaks = xbreaks) +
   theme_bw() +
-  labs(x = "Lon", y = "Lat", fill = "Total") -> total
+  labs(x = "Lon", y = "Lat", fill = "Ass. trend") -> pop
 
-ndvi + pr + tm + pet + aet + total + plot_layout(ncol = 3) +
-  plot_annotation(title = "Environmental predictability", subtitle = "Model RMSE")
+ndvi + pr + tm + pet + aet + pop + plot_layout(ncol = 3) +
+  plot_annotation(title = "Environmental variability", subtitle = "Model RMSE")
 
 ggsave(filename = "data/processed/plots/environmental_predictability.pdf", device = "pdf", width = 12, units = "in")
 ```
