@@ -60,10 +60,25 @@ predictors_all <- c(predictors_trends, predictors_resids)
 And we calculate a new correlation matrix.
 
 ```{r calculate_new_correlation_matrix, results='hold'}
-ggcorrmat(data, cor.vars = all_of(predictors_trends), type = "parametric")
-ggcorrmat(data, cor.vars = all_of(predictors_resids), type = "parametric")
-ggcorrmat(data, cor.vars = all_of(predictors_all), type = "parametric")
+ggcorrmat(data, cor.vars = all_of(predictors_trends), type = "parametric", maxtrix.type = "upper")
+ggcorrmat(data, cor.vars = all_of(predictors_resids), type = "parametric", maxtrix.type = "upper")
+ggcorrmat(data, cor.vars = all_of(predictors_all), type = "parametric", maxtrix.type = "upper")
 ```
+
+Let's calculate how trends and variability of the same variable are correlated.
+
+```{r calculate_correlation_matrix_dataframe, results='hold'}
+ggcorrmat(data, cor.vars = all_of(predictors_all), type = "parametric", output = "dataframe") %>%
+  rowwise() %>%
+  mutate(var1 = str_split(parameter1, "_", simplify = TRUE)[[1]],
+         var2 = str_split(parameter2, "_", simplify = TRUE)[[1]]) %>%
+  ungroup() %>%
+  filter(var1 == var2, var1 != "trend") -> corr_trend_var
+
+corr_trend_var[, c("parameter1", "parameter2", "r", "ci_low", "ci_high", "p")]
+```
+
+So, clearly, these are only weakly positively correlated, with the exception of `pet` potential evapotranspiration. The mean Pearson's r for the correlation between environmental trends and respective variability is only `r mean(corr_trend_var$r)`.
 
 We continue to see strong correlation between `pr_resid` and `ndvi_resid`, but Pearson correlation coefficients are < 0.7, and as both original variables (`ndvi` and `pr`) are effectively uncorrelated in `ndvi_trend` and `pr_trend` and we want the trends and predictability model to be comparable, we keep both in.
 
@@ -509,7 +524,7 @@ Adding the autocovariate of residuals seems to have helped a lot to counter resi
 
 #### Model performance
 
-To keep it simple, we stick to good ol' RMSE and % of deviance explained to compare the performance of all these models.
+We use good ol' RMSE, % of deviance explained and Moran's I to compare the performance of all these models.
 
 ```{r model_performance_metrics}
 perf_metrics <- function(actual, models) {
@@ -520,10 +535,19 @@ perf_metrics <- function(actual, models) {
   m
 }
 
+residual_columns <- c("norac_trends", "norac_resids", "norac_all", "rac_trends", "rac_resids", "rac_all")
+sar_metrics <- lapply(residual_columns, function(x) {
+  mi <- moran.test(data_subset[, x], nb2listw(neighbors, zero.policy = TRUE), zero.policy = TRUE)
+  c(round(mi$estimate[1], 2), mi$p.value)
+})
+sar_metrics <- data.frame(matrix(unlist(sar_metrics), ncol = length(sar_metrics)))
+
 pm <- as.data.frame(perf_metrics(data_subset$trend_long, 
                                  list(mod_trends, mod_resids, mod_all, mod_trends_rac, mod_resids_rac, mod_all_rac)))
+colnames(sar_metrics) <- colnames(pm)
+pm <- rbind(pm, sar_metrics)
 colnames(pm) <- c("mod_trends", "mod_resids", "mod_all", "mod_trends_rac", "mod_resids_rac", "mod_all_rac")
-rownames(pm) <- c("RMSE", "% Deviance explained")
+rownames(pm) <- c("RMSE", "% Deviance explained", "Moran's I", "Moran's I test p-val")
 pm <- as.data.frame(t(pm))
 pm
 ```
@@ -532,28 +556,41 @@ pm
 
 We can quantify the importance of variables within our model using the `varimp` function of the `mboost` package. This returns variable importance, a measure of the total improvement to model deviance a variable is responsible for. This is weighted by the number of times a predictor is selected in the boosted models.
 
-##### Trends models
+##### Trends model
 
 ```{r varimp_trends, results='hold', out.width='100%'}
-plot(varimp(mod_trends), main = "Varimp Trends mdl")
 plot(varimp(mod_trends_rac), main = "Varimp Trends RAC mdl")
-as.data.frame(varimp(mod_trends_rac)) %>% arrange(desc(reduction))
+as.data.frame(varimp(mod_trends_rac)) %>% 
+  arrange(desc(reduction)) %>%
+  mutate(imp = reduction / sum(reduction) * 100,
+         imp_biol = if_else(str_detect(blearner, "autocov"), 0, imp),
+         imp_biol = round((imp_biol / sum(imp_biol) * 100), 2),
+         imp = round(imp, 2))
 ```
 
-##### Predictability models
+##### Predictability model
 
 ```{r varimp_resids, results='hold', out.width='100%'}
-plot(varimp(mod_resids), main = "Varimp Predictability mdl")
 plot(varimp(mod_resids_rac), main = "Varimp Predictability RAC mdl")
-as.data.frame(varimp(mod_resids_rac)) %>% arrange(desc(reduction))
+as.data.frame(varimp(mod_resids_rac)) %>% 
+  arrange(desc(reduction)) %>%
+  mutate(imp = reduction / sum(reduction) * 100,
+         imp_biol = if_else(str_detect(blearner, "autocov"), 0, imp),
+         imp_biol = round((imp_biol / sum(imp_biol) * 100), 2),
+         imp = round(imp, 2))
 ```
 
 ##### All predictor models
 
 ```{r varimp_all, results='hold', out.width='100%'}
-plot(varimp(mod_all), main = "Varimp All pred mdl")
 plot(varimp(mod_all_rac), main = "Varimp All pred RAC mdl")
-as.data.frame(varimp(mod_all_rac)) %>% arrange(desc(reduction))
+as.data.frame(varimp(mod_all_rac)) %>% 
+  arrange(desc(reduction)) %>%
+  mutate(imp = reduction / sum(reduction) * 100,
+         imp_biol = if_else(str_detect(blearner, "autocov"), 0, imp),
+         imp_biol = round((imp_biol / sum(imp_biol) * 100), 2),
+         imp = round(imp, 2)) %>%
+  head(20)
 ```
 
 #### Partial/Marginal Effects
@@ -566,23 +603,28 @@ Because the full model included interaction terms, and by default the partial de
 source('~/envirpred/R/mboost_plot_grid.R')
 ```
 
-```{r remove_unnecessary_rac_models, include=FALSE}
-rm(mod_all_rac)
-rm(mod_resids_rac)
+```{r switch_loaded_models_for_plotting, include=FALSE}
+rm(mod_all)
+rm(mod_resids)
+rm(mod_trends)
+if (!exists("mod_all_rac")) mod_all_rac <- readRDS("data/processed/models/mod_all_rac.RDS")
+if (!exists("mod_resids_rac")) mod_resids_rac <- readRDS("data/processed/models/mod_resids_rac.RDS")
+if (!exists("mod_trends_rac"))mod_trends_rac <- readRDS("data/processed/models/mod_trends_rac.RDS")
+```
+
+##### Partial effects RAC models
+
+```{r partial_effects_simple_rac, out.width='100%', fig.width=10, fig.height=7}
+par(mfrow = c(2, 3))
+plot(mod_trends_rac)
 rm(mod_trends_rac)
-```
-
-##### Partial effects original models
-
-```{r partial_effects_simple_original, out.width='100%', fig.width=10, fig.height=7}
-par(mfrow = c(2, 3))
-plot(mod_trends)
 
 par(mfrow = c(2, 3))
-plot(mod_resids)
+plot(mod_resids_rac)
+rm(mod_resids_rac)
 ```
 
-```{r partial_effects_simple_original_all, out.width='100%', fig.width=5, fig.height=5}
+```{r partial_effects_simple_rac_all, out.width='100%', fig.width=5, fig.height=5}
 plot_all <- function(model, gridsize) {
   preds <- names(model.frame(model))
   single <- which(str_starts(preds, "bbs"))
@@ -598,28 +640,6 @@ plot_all <- function(model, gridsize) {
     print(plot.mboost_grid(model, which = w, gridsize = gridsize))
   }  
 }
-plot_all(mod_all, 100)
-```
-
-```{r switch_loaded_models_for_plotting, include=FALSE}
-rm(mod_all)
-rm(mod_resids)
-rm(mod_trends)
-mod_all_rac <- readRDS("data/processed/models/mod_all_rac.RDS")
-mod_resids_rac <- readRDS("data/processed/models/mod_resids_rac.RDS")
-mod_trends_rac <- readRDS("data/processed/models/mod_trends_rac.RDS")
-```
-
-##### Partial effects RAC models
-
-```{r partial_effects_simple_rac, out.width='100%', fig.width=10, fig.height=7}
-par(mfrow = c(2, 3))
-plot(mod_trends_rac)
-
-par(mfrow = c(2, 3))
-plot(mod_resids_rac)
-```
-
-```{r partial_effects_simple_rac_all, out.width='100%', fig.width=5, fig.height=5}
-plot_all(mod_all_rac, 100)
+plot_all(mod_all_rac, 200)
+rm(mod_all_rac)
 ```
