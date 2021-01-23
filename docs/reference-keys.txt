@@ -31,11 +31,10 @@ quantifying-residual-autocorrelation
 model-outputs
 model-performance
 variable-importance
-trends-models
-predictability-models
+trends-model
+predictability-model
 all-predictor-models
 partialmarginal-effects
-partial-effects-original-models
 partial-effects-rac-models
 quantify-model-uncertainty
 bootstrap-uncertainty-analysis
@@ -43,7 +42,7 @@ determine-bootstrap-folds
 run-bootstrap-procedure
 recombine-bootstrapped-results
 model-local-assemblage-trends
-environmental-predictability
+environmental-variables
 environmental-long-term-trends
-environmental-predictability-1
+environmental-variability
 references

@@ -45,7 +45,7 @@
 <li class="book-part">Analysis: Local model</li>
 <li><a class="" href="model-local-assemblage-trends.html"><span class="header-section-number">8</span> Model local assemblage trends</a></li>
 <li class="book-part">Figures</li>
-<li><a class="" href="environmental-predictability.html"><span class="header-section-number">9</span> Environmental predictability</a></li>
+<li><a class="" href="environmental-variables.html"><span class="header-section-number">9</span> Environmental variables</a></li>
 <li class="book-part">Other</li>
 <li><a class="" href="references.html"><span class="header-section-number">10</span> References</a></li>
 </ul>
@@ -98,14 +98,79 @@
 <span class="va">predictors_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">predictors_trends</span>, <span class="va">predictors_resids</span><span class="op">)</span></code></pre></div>
 <p>And we calculate a new correlation matrix.</p>
 <div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">ggcorrmat</span><span class="op">(</span><span class="va">data</span>, cor.vars <span class="op">=</span> <span class="fu">all_of</span><span class="op">(</span><span class="va">predictors_trends</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"parametric"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu">ggcorrmat</span><span class="op">(</span><span class="va">data</span>, cor.vars <span class="op">=</span> <span class="fu">all_of</span><span class="op">(</span><span class="va">predictors_trends</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"parametric"</span>, maxtrix.type <span class="op">=</span> <span class="st">"upper"</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="06.Model-assemblage-trends_files/figure-html/calculate_new_correlation_matrix-1.png" width="672"></div>
 <div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">ggcorrmat</span><span class="op">(</span><span class="va">data</span>, cor.vars <span class="op">=</span> <span class="fu">all_of</span><span class="op">(</span><span class="va">predictors_resids</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"parametric"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu">ggcorrmat</span><span class="op">(</span><span class="va">data</span>, cor.vars <span class="op">=</span> <span class="fu">all_of</span><span class="op">(</span><span class="va">predictors_resids</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"parametric"</span>, maxtrix.type <span class="op">=</span> <span class="st">"upper"</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="06.Model-assemblage-trends_files/figure-html/calculate_new_correlation_matrix-2.png" width="672"></div>
 <div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">ggcorrmat</span><span class="op">(</span><span class="va">data</span>, cor.vars <span class="op">=</span> <span class="fu">all_of</span><span class="op">(</span><span class="va">predictors_all</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"parametric"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu">ggcorrmat</span><span class="op">(</span><span class="va">data</span>, cor.vars <span class="op">=</span> <span class="fu">all_of</span><span class="op">(</span><span class="va">predictors_all</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"parametric"</span>, maxtrix.type <span class="op">=</span> <span class="st">"upper"</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="06.Model-assemblage-trends_files/figure-html/calculate_new_correlation_matrix-3.png" width="672"></div>
+<p>Let’s calculate how trends and variability of the same variable are correlated.</p>
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">ggcorrmat</span><span class="op">(</span><span class="va">data</span>, cor.vars <span class="op">=</span> <span class="fu">all_of</span><span class="op">(</span><span class="va">predictors_all</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"parametric"</span>, output <span class="op">=</span> <span class="st">"dataframe"</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">rowwise</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">mutate</span><span class="op">(</span>var1 <span class="op">=</span> <span class="fu">str_split</span><span class="op">(</span><span class="va">parameter1</span>, <span class="st">"_"</span>, simplify <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>,
+         var2 <span class="op">=</span> <span class="fu">str_split</span><span class="op">(</span><span class="va">parameter2</span>, <span class="st">"_"</span>, simplify <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">ungroup</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">var1</span> <span class="op">==</span> <span class="va">var2</span>, <span class="va">var1</span> <span class="op">!=</span> <span class="st">"trend"</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">corr_trend_var</span>
+
+<span class="va">corr_trend_var</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"parameter1"</span>, <span class="st">"parameter2"</span>, <span class="st">"r"</span>, <span class="st">"ci_low"</span>, <span class="st">"ci_high"</span>, <span class="st">"p"</span><span class="op">)</span><span class="op">]</span></code></pre></div>
+<div class="kable-table">
+<div class="inline-table"><table class="table table-sm">
+<thead><tr class="header">
+<th align="left">parameter1</th>
+<th align="left">parameter2</th>
+<th align="right">r</th>
+<th align="right">ci_low</th>
+<th align="right">ci_high</th>
+<th align="right">p</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">ndvi_trend</td>
+<td align="left">ndvi_resid</td>
+<td align="right">0.2932629</td>
+<td align="right">0.2900672</td>
+<td align="right">0.2964521</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">pr_trend</td>
+<td align="left">pr_resid</td>
+<td align="right">0.2207327</td>
+<td align="right">0.2174075</td>
+<td align="right">0.2240529</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">pet_trend</td>
+<td align="left">pet_resid</td>
+<td align="right">-0.1890657</td>
+<td align="right">-0.1924315</td>
+<td align="right">-0.1856955</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">aet_trend</td>
+<td align="left">aet_resid</td>
+<td align="right">0.2944051</td>
+<td align="right">0.2912117</td>
+<td align="right">0.2975920</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">tm_trend</td>
+<td align="left">tm_resid</td>
+<td align="right">0.2422414</td>
+<td align="right">0.2389507</td>
+<td align="right">0.2455266</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<p>So, clearly, these are only weakly positively correlated, with the exception of <code>pet</code> potential evapotranspiration. The mean Pearson’s r for the correlation between environmental trends and respective variability is only 0.1723153.</p>
 <p>We continue to see strong correlation between <code>pr_resid</code> and <code>ndvi_resid</code>, but Pearson correlation coefficients are &lt; 0.7, and as both original variables (<code>ndvi</code> and <code>pr</code>) are effectively uncorrelated in <code>ndvi_trend</code> and <code>pr_trend</code> and we want the trends and predictability model to be comparable, we keep both in.</p>
 </div>
 </div>
@@ -114,13 +179,14 @@
 <span class="header-section-number">6.2</span> Pairplot<a class="anchor" aria-label="anchor" href="#pairplot"><i class="fas fa-link"></i></a>
 </h2>
 <p>While we’re at it, it’s useful to make a pairplot of all predictor variables.</p>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">data</span> <span class="op">%&gt;%</span>
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span>
+<span class="va">data</span> <span class="op">%&gt;%</span>
   <span class="fu">slice_sample</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">data_tiny</span>
 
 <span class="fu">ggpairs</span><span class="op">(</span><span class="va">data_tiny</span>, columns <span class="op">=</span> <span class="fu">all_of</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">predictors_trends</span><span class="op">)</span><span class="op">)</span>, progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="06.Model-assemblage-trends_files/figure-html/data_pairplot-1.png" width="100%"></div>
-<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggpairs</span><span class="op">(</span><span class="va">data_tiny</span>, columns <span class="op">=</span> <span class="fu">all_of</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">predictors_resids</span><span class="op">)</span><span class="op">)</span>, progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="06.Model-assemblage-trends_files/figure-html/data_pairplot-2.png" width="100%"></div>
 </div>
@@ -129,7 +195,7 @@
 <span class="header-section-number">6.3</span> Optimal dataset size<a class="anchor" aria-label="anchor" href="#optimal-dataset-size"><i class="fas fa-link"></i></a>
 </h2>
 <p>The current dataset contains 314868 rows of data, which is quite large for fast and efficient ML workflows. We will first determine how the performance of a few suitable learners depends on dataset size and then determine an optimal balance between model performance and dataset size. In other words, we determine at what point increasing the dataset size (the resampled fraction) does not improve the model performance substantially anymore. Rather than optimizing this in several steps, we will tune the hyperparameter <code>subsample.frac</code> by constructing a <code>GraphLearner</code> objects in an <code>mlr3</code> pipeline which tunes dataset size. The following chunk implements this procedure. As it may take very long to run, it’s more convenient to run it only when strictly necessary from the <code>R/hyperparm_subsample_frac.R</code> file. As we can use this procedure to test suitable ML learners, we use <code><a href="https://rdrr.io/pkg/mboost/man/gamboost.html">mboost::gamboost</a></code>, <code><a href="https://rdrr.io/pkg/gbm/man/gbm.html">gbm::gbm</a></code> and <code><a href="https://rdrr.io/pkg/xgboost/man/xgb.train.html">xgboost::xgboost</a></code> learners in our <code>GraphLearner</code>.</p>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">task</span> <span class="op">&lt;-</span> <span class="va">TaskRegrST</span><span class="op">$</span><span class="fu">new</span><span class="op">(</span>id <span class="op">=</span> <span class="st">"data"</span>, backend <span class="op">=</span> <span class="va">data</span>, target <span class="op">=</span> <span class="st">"trend_long"</span>, extra_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>coordinate_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="st">"y"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
 <span class="va">task</span><span class="op">$</span><span class="fu">select</span><span class="op">(</span><span class="fu">all_of</span><span class="op">(</span><span class="va">predictors</span><span class="op">)</span><span class="op">)</span>
 
@@ -194,7 +260,7 @@
 <span class="va">rr_data</span> <span class="op">&lt;-</span> <span class="fu">bind_rows</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="va">rr</span><span class="op">$</span><span class="va">learners</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">$</span><span class="va">model</span><span class="op">$</span><span class="va">tuning_instance</span><span class="op">$</span><span class="va">archive</span><span class="op">$</span><span class="fu">data</span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">rr_data</span>, file <span class="op">=</span> <span class="st">"data/processed/rr_dataset_size_df.RDS"</span><span class="op">)</span></code></pre></div>
 <p>We can now plot the results of the previous workflow and see how cross-validated model performance depends on the subsampled size of the training dataset.</p>
-<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"rr_data"</span><span class="op">)</span><span class="op">)</span> <span class="va">rr_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/rr_dataset_size_df.RDS"</span><span class="op">)</span>
 
 <span class="va">rr_data</span> <span class="op">%&gt;%</span>
@@ -213,7 +279,7 @@
   <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Subsample size (# rows)"</span>, y <span class="op">=</span> <span class="st">"Model RMSE"</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="06.Model-assemblage-trends_files/figure-html/plot_model_rmse_subsample_size-1.png" width="672"></div>
 <p>It is clear beyond 10,000 rows performance only continues to improve marginally for untuned <code>xgboost</code> learners and model improvement for the other learners has clearly hit a plateau. So, we can stick to resampling 10,000 rows from the 314868 rows in the original dataframe for our continued statistical modelling.</p>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">nrow_subsample</span> <span class="op">&lt;-</span> <span class="fl">10000</span></code></pre></div>
 </div>
 <div id="modeling-assemblage-trends" class="section level2">
@@ -226,7 +292,7 @@
 <span class="header-section-number">6.4.1</span> Data filtering<a class="anchor" aria-label="anchor" href="#data-filtering"><i class="fas fa-link"></i></a>
 </h3>
 <p>Exploratory modeling showed that model errors are largest in the Sahara. As only few species included in our assemblage trends inhabit this area, the assemblage trend is also least reliable (i.e. it is composed of population trends of few species). It thus makes sense to exclude these areas. We set a minimum number of species that contribute to an assemblage trend to <code>&gt;5</code> and limit our analysis strictly to the areas south of the Sahara, which is the <code>Afrotropic</code> realm in our ecoregion dataset. To illustrate this, let’s plot the number of species that are included in the assemblage trends.</p>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span>
 <span class="va">data</span> <span class="op">%&gt;%</span>
   <span class="fu">slice_sample</span><span class="op">(</span>n <span class="op">=</span> <span class="va">nrow_subsample</span><span class="op">)</span> <span class="op">%&gt;%</span> 
@@ -272,7 +338,7 @@
 <li>We, once again, determine the optimal number of boosting iterations on the new models. Most likely this does not differ substantially from the previous optimum, but it is good to make sure that is the case.</li>
 </ol>
 <p>Let’s start with training the models.</p>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span>
 <span class="va">data</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">count_long</span> <span class="op">&gt;</span> <span class="fl">5</span>,
@@ -316,7 +382,7 @@
 <span class="header-section-number">6.4.2.1</span> Determine the optimal number of boosting iterations<a class="anchor" aria-label="anchor" href="#determine-the-optimal-number-of-boosting-iterations"><i class="fas fa-link"></i></a>
 </h4>
 <p>Having trained the models, we can now determine the optimal number of boosting iterations. As this is a time-consuming process, the chunk below does not run by default and it’s probably best to run this cross-validation procedure separately through the dedicated <code>R/hyperparm_mboost_mstop.R</code> script.</p>
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span>from <span class="op">=</span> <span class="fl">250</span>, to <span class="op">=</span> <span class="fl">30000</span>, by <span class="op">=</span> <span class="fl">250</span><span class="op">)</span>
 <span class="va">cv10f_trends</span> <span class="op">&lt;-</span> <span class="fu">cv</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/model.extract.html">model.weights</a></span><span class="op">(</span><span class="va">mod_trends</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"kfold"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">cv10f_trends</span>, file <span class="op">=</span> <span class="st">"data/processed/models/cv10f_trends.RDS"</span><span class="op">)</span>
@@ -333,7 +399,7 @@
 <span class="va">cvm_all</span> <span class="op">&lt;-</span> <span class="fu">cvrisk</span><span class="op">(</span><span class="va">mod_all</span>, folds <span class="op">=</span> <span class="va">cv10f_all</span>, grid <span class="op">=</span> <span class="va">grid</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">cvm_all</span>, file <span class="op">=</span> <span class="st">"data/processed/models/cvm_all.RDS"</span><span class="op">)</span></code></pre></div>
 <p>We can load the results and plot the outputs.</p>
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">cvm_trends</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/cvm_trends.RDS"</span><span class="op">)</span>
 <span class="va">cvm_resids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/cvm_resids.RDS"</span><span class="op">)</span>
 <span class="va">cvm_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/cvm_all.RDS"</span><span class="op">)</span>
@@ -364,7 +430,7 @@
 <span class="header-section-number">6.4.2.2</span> Correct for spatial autocorrelation<a class="anchor" aria-label="anchor" href="#correct-for-spatial-autocorrelation"><i class="fas fa-link"></i></a>
 </h4>
 <p>A quick plot of model residuals will show there is strong spatial autocorrelation in the residuals, violating the independence assumption of regression modelling.</p>
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"mod_trends"</span><span class="op">)</span><span class="op">)</span> <span class="va">mod_trends</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/mod_trends.RDS"</span><span class="op">)</span>
 <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"mod_resids"</span><span class="op">)</span><span class="op">)</span> <span class="va">mod_resids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/mod_resids.RDS"</span><span class="op">)</span>
 <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"mod_all"</span><span class="op">)</span><span class="op">)</span> <span class="va">mod_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/mod_all.RDS"</span><span class="op">)</span>
@@ -384,7 +450,7 @@
   <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Spatial pattern of model residuals"</span>, x <span class="op">=</span> <span class="st">"Longitude"</span>, y <span class="op">=</span> <span class="st">"Latitude"</span>, color <span class="op">=</span> <span class="st">"Residual"</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="06.Model-assemblage-trends_files/figure-html/plot_residual_spatial_autocorrelation-1.png" width="100%"></div>
 <p>There’s no need to even quantify spatial autocorrelation (SAC) in residuals here, as it’s so obvious. We will correct for it using the residual autocovariate method introduced by Crase et al. <span class="citation"><sup><a href="references.html#ref-crase2012" role="doc-biblioref">4</a></sup></span>. We calculate the autocovariate of the residuals using a neighborhood radius of 100 kilometers. <strong>This radius could be optimized to reflect actual SAC distances in our dataset, but for now it seems sufficient to dramatically reduce residual SAC.</strong></p>
-<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">neighborhood_dist</span> <span class="op">&lt;-</span> <span class="fl">100</span>  <span class="co"># Kilometers if longlat = TRUE</span>
 <span class="va">acov_trends</span> <span class="op">&lt;-</span> <span class="fu">autocov_dist</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/residuals.html">resid</a></span><span class="op">(</span><span class="va">mod_trends</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="va">data_subset</span><span class="op">$</span><span class="va">x</span>, <span class="va">data_subset</span><span class="op">$</span><span class="va">y</span><span class="op">)</span><span class="op">)</span>, longlat <span class="op">=</span> <span class="cn">TRUE</span>, 
                             nbs <span class="op">=</span> <span class="va">neighborhood_dist</span>, zero.policy <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
@@ -392,7 +458,7 @@
 ## value 100 some points have no neighbours</code></pre>
 <pre><code>## Warning in nb2listw(nb, glist = gl, style = style, zero.policy = zero.policy):
 ## zero sum general weights</code></pre>
-<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">acov_resids</span> <span class="op">&lt;-</span> <span class="fu">autocov_dist</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/residuals.html">resid</a></span><span class="op">(</span><span class="va">mod_resids</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="va">data_subset</span><span class="op">$</span><span class="va">x</span>, <span class="va">data_subset</span><span class="op">$</span><span class="va">y</span><span class="op">)</span><span class="op">)</span>, longlat <span class="op">=</span> <span class="cn">TRUE</span>,
                             nbs <span class="op">=</span> <span class="va">neighborhood_dist</span>, zero.policy <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 <pre><code>## Warning in autocov_dist(resid(mod_resids), as.matrix(cbind(data_subset$x, : With
@@ -400,7 +466,7 @@
 
 ## Warning in autocov_dist(resid(mod_resids), as.matrix(cbind(data_subset$x, : zero
 ## sum general weights</code></pre>
-<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">acov_all</span> <span class="op">&lt;-</span> <span class="fu">autocov_dist</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/residuals.html">resid</a></span><span class="op">(</span><span class="va">mod_all</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="va">data_subset</span><span class="op">$</span><span class="va">x</span>, <span class="va">data_subset</span><span class="op">$</span><span class="va">y</span><span class="op">)</span><span class="op">)</span>, longlat <span class="op">=</span> <span class="cn">TRUE</span>,
                          nbs <span class="op">=</span> <span class="va">neighborhood_dist</span>, zero.policy <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 <pre><code>## Warning in autocov_dist(resid(mod_all), as.matrix(cbind(data_subset$x,
@@ -410,7 +476,7 @@
 ## data_subset$y)), : zero sum general weights</code></pre>
 <p>The chunk above may throw some warnings if some points are not within 100 kilometers from other points, but that will most certainly not be many points in our dataset, so we can accept that some of these autocovariates are not as accurate as others.</p>
 <p>Now we will add the calculated autocovariates of residuals to our earlier dataset and retrain the models.</p>
-<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">data_subset</span><span class="op">$</span><span class="va">autocov_trends</span> <span class="op">&lt;-</span> <span class="va">acov_trends</span>
 <span class="va">data_subset</span><span class="op">$</span><span class="va">autocov_resids</span> <span class="op">&lt;-</span> <span class="va">acov_resids</span>
 <span class="va">data_subset</span><span class="op">$</span><span class="va">autocov_all</span> <span class="op">&lt;-</span> <span class="va">acov_all</span>
@@ -431,7 +497,7 @@
 <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">mod_resids_rac</span>, file <span class="op">=</span> <span class="st">"data/processed/models/mod_resids_rac.RDS"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">mod_all_rac</span>, file <span class="op">=</span> <span class="st">"data/processed/models/mod_all_rac.RDS"</span><span class="op">)</span></code></pre></div>
 <p>And now let’s reassess residual autocorrelation from our retrained model. If all went well, that should be visibly and substantially less than before.</p>
-<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"mod_trends_rac"</span><span class="op">)</span><span class="op">)</span> <span class="va">mod_trends_rac</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/mod_trends_rac.RDS"</span><span class="op">)</span>
 <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"mod_resids_rac"</span><span class="op">)</span><span class="op">)</span> <span class="va">mod_resids_rac</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/mod_resids_rac.RDS"</span><span class="op">)</span>
 <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"mod_all_rac"</span><span class="op">)</span><span class="op">)</span> <span class="va">mod_all_rac</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/mod_all_rac.RDS"</span><span class="op">)</span>
@@ -458,7 +524,7 @@
 <span class="header-section-number">6.4.2.3</span> Determine the optimal number of boosting iterations of RAC model<a class="anchor" aria-label="anchor" href="#determine-the-optimal-number-of-boosting-iterations-of-rac-model"><i class="fas fa-link"></i></a>
 </h4>
 <p>Once again, we should make sure the number of boosts used (10000) is ‘optimal’ in our newly trained model. As before, it’s probably best to run this using the dedicated file in <code>R/hyperparm_mboost_mstop.R</code>, but the chunk below can do it as well.</p>
-<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span>from <span class="op">=</span> <span class="fl">250</span>, to <span class="op">=</span> <span class="fl">30000</span>, by <span class="op">=</span> <span class="fl">250</span><span class="op">)</span>
 <span class="va">cv10f_trends_rac</span> <span class="op">&lt;-</span> <span class="fu">cv</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/model.extract.html">model.weights</a></span><span class="op">(</span><span class="va">mod_trends_rac</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"kfold"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">cv10f_trends_rac</span>, file <span class="op">=</span> <span class="st">"data/processed/models/cv10f_trends_rac.RDS"</span><span class="op">)</span>
@@ -475,7 +541,7 @@
 <span class="va">cvm_all_rac</span> <span class="op">&lt;-</span> <span class="fu">cvrisk</span><span class="op">(</span><span class="va">mod_all_rac</span>, folds <span class="op">=</span> <span class="va">cv10f_all_rac</span>, grid <span class="op">=</span> <span class="va">grid</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">cvm_all_rac</span>, file <span class="op">=</span> <span class="st">"data/processed/models/cvm_all_rac.RDS"</span><span class="op">)</span></code></pre></div>
 <p>We can load these results as well and plot the outputs.</p>
-<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">cvm_trends_rac</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/cvm_trends_rac.RDS"</span><span class="op">)</span>
 <span class="va">cvm_resids_rac</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/cvm_resids_rac.RDS"</span><span class="op">)</span>
 <span class="va">cvm_all_rac</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/cvm_all_rac.RDS"</span><span class="op">)</span>
@@ -507,7 +573,7 @@
 <span class="header-section-number">6.4.2.4</span> Quantifying residual autocorrelation<a class="anchor" aria-label="anchor" href="#quantifying-residual-autocorrelation"><i class="fas fa-link"></i></a>
 </h4>
 <p>Now is a good moment to quantify residual autocorrelation (RSAC) in our model. We do so by calculating Moran’s I across a number of distance classes (8) using the <code>sp.correlogram</code> function from the <code>spdep</code> package. As this is computationally very intensive, we run this calculation once in the chunk below and save the results for fast plotting during knitting of this document.</p>
-<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">nclass</span> <span class="op">&lt;-</span> <span class="fl">8</span>  <span class="co"># Number of distance classes</span>
 <span class="va">neighbors</span> <span class="op">&lt;-</span> <span class="fu">dnearneigh</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="va">data_subset</span><span class="op">$</span><span class="va">x</span>, <span class="va">data_subset</span><span class="op">$</span><span class="va">y</span><span class="op">)</span><span class="op">)</span>, d1 <span class="op">=</span> <span class="fl">0</span>, d2 <span class="op">=</span> <span class="va">neighborhood_dist</span>, longlat <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 
@@ -525,7 +591,7 @@
 <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">spc_rac_resids</span>, file <span class="op">=</span> <span class="st">"data/processed/models/spc_rac_resids.RDS"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">spc_rac_all</span>, file <span class="op">=</span> <span class="st">"data/processed/models/spc_rac_all.RDS"</span><span class="op">)</span></code></pre></div>
 <p>And we can now plot the RSAC correlograms.</p>
-<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"spc_norac_trends"</span><span class="op">)</span><span class="op">)</span> <span class="va">spc_norac_trends</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/spc_norac_trends.RDS"</span><span class="op">)</span>
 <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"spc_norac_resids"</span><span class="op">)</span><span class="op">)</span> <span class="va">spc_norac_resids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/spc_norac_resids.RDS"</span><span class="op">)</span>
 <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"spc_norac_all"</span><span class="op">)</span><span class="op">)</span> <span class="va">spc_norac_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/models/spc_norac_all.RDS"</span><span class="op">)</span>
@@ -552,8 +618,8 @@
 <h4>
 <span class="header-section-number">6.4.3.1</span> Model performance<a class="anchor" aria-label="anchor" href="#model-performance"><i class="fas fa-link"></i></a>
 </h4>
-<p>To keep it simple, we stick to good ol’ RMSE and % of deviance explained to compare the performance of all these models.</p>
-<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
+<p>We use good ol’ RMSE, % of deviance explained and Moran’s I to compare the performance of all these models.</p>
+<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">perf_metrics</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">actual</span>, <span class="va">models</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">rmse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="va">models</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu">rmse</span><span class="op">(</span><span class="va">actual</span>, <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
   <span class="va">deviance_explained</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="va">models</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">tail</a></span><span class="op">(</span><span class="fu">risk</span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu">risk</span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span><span class="op">)</span>
@@ -562,10 +628,22 @@
   <span class="va">m</span>
 <span class="op">}</span>
 
+<span class="va">residual_columns</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"norac_trends"</span>, <span class="st">"norac_resids"</span>, <span class="st">"norac_all"</span>, <span class="st">"rac_trends"</span>, <span class="st">"rac_resids"</span>, <span class="st">"rac_all"</span><span class="op">)</span>
+<span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"neighbors"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">neighbors</span> <span class="op">&lt;-</span> <span class="fu">dnearneigh</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="va">data_subset</span><span class="op">$</span><span class="va">x</span>, <span class="va">data_subset</span><span class="op">$</span><span class="va">y</span><span class="op">)</span><span class="op">)</span>, d1 <span class="op">=</span> <span class="fl">0</span>, d2 <span class="op">=</span> <span class="va">neighborhood_dist</span>, longlat <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+<span class="op">}</span>
+<span class="va">sar_metrics</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="va">residual_columns</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">mi</span> <span class="op">&lt;-</span> <span class="fu">moran.test</span><span class="op">(</span><span class="va">data_subset</span><span class="op">[</span>, <span class="va">x</span><span class="op">]</span>, <span class="fu">nb2listw</span><span class="op">(</span><span class="va">neighbors</span>, zero.policy <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, zero.policy <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+  <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">mi</span><span class="op">$</span><span class="va">estimate</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="fl">2</span><span class="op">)</span>, <span class="va">mi</span><span class="op">$</span><span class="va">p.value</span><span class="op">)</span>
+<span class="op">}</span><span class="op">)</span>
+<span class="va">sar_metrics</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html">unlist</a></span><span class="op">(</span><span class="va">sar_metrics</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">sar_metrics</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+
 <span class="va">pm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">perf_metrics</span><span class="op">(</span><span class="va">data_subset</span><span class="op">$</span><span class="va">trend_long</span>, 
                                  <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="va">mod_trends</span>, <span class="va">mod_resids</span>, <span class="va">mod_all</span>, <span class="va">mod_trends_rac</span>, <span class="va">mod_resids_rac</span>, <span class="va">mod_all_rac</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">sar_metrics</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">pm</span><span class="op">)</span>
+<span class="va">pm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="va">pm</span>, <span class="va">sar_metrics</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">pm</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"mod_trends"</span>, <span class="st">"mod_resids"</span>, <span class="st">"mod_all"</span>, <span class="st">"mod_trends_rac"</span>, <span class="st">"mod_resids_rac"</span>, <span class="st">"mod_all_rac"</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">pm</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"RMSE"</span>, <span class="st">"% Deviance explained"</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">pm</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"RMSE"</span>, <span class="st">"% Deviance explained"</span>, <span class="st">"Moran's I"</span>, <span class="st">"Moran's I test p-val"</span><span class="op">)</span>
 <span class="va">pm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">pm</span><span class="op">)</span><span class="op">)</span>
 <span class="va">pm</span></code></pre></div>
 <div class="kable-table">
@@ -574,37 +652,51 @@
 <th align="left"></th>
 <th align="right">RMSE</th>
 <th align="right">% Deviance explained</th>
+<th align="right">Moran’s I</th>
+<th align="right">Moran’s I test p-val</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td align="left">mod_trends</td>
 <td align="right">16.820661</td>
 <td align="right">28.84072</td>
+<td align="right">0.83</td>
+<td align="right">0</td>
 </tr>
 <tr class="even">
 <td align="left">mod_resids</td>
 <td align="right">13.346926</td>
 <td align="right">55.19692</td>
+<td align="right">0.73</td>
+<td align="right">0</td>
 </tr>
 <tr class="odd">
 <td align="left">mod_all</td>
 <td align="right">11.230939</td>
 <td align="right">68.27676</td>
+<td align="right">0.64</td>
+<td align="right">0</td>
 </tr>
 <tr class="even">
 <td align="left">mod_trends_rac</td>
 <td align="right">6.834131</td>
 <td align="right">88.25341</td>
+<td align="right">0.24</td>
+<td align="right">0</td>
 </tr>
 <tr class="odd">
 <td align="left">mod_resids_rac</td>
 <td align="right">6.227944</td>
 <td align="right">90.24483</td>
+<td align="right">0.18</td>
+<td align="right">0</td>
 </tr>
 <tr class="even">
 <td align="left">mod_all_rac</td>
 <td align="right">5.869456</td>
 <td align="right">91.33555</td>
+<td align="right">0.13</td>
+<td align="right">0</td>
 </tr>
 </tbody>
 </table></div>
@@ -615,18 +707,20 @@
 <span class="header-section-number">6.4.3.2</span> Variable importance<a class="anchor" aria-label="anchor" href="#variable-importance"><i class="fas fa-link"></i></a>
 </h4>
 <p>We can quantify the importance of variables within our model using the <code>varimp</code> function of the <code>mboost</code> package. This returns variable importance, a measure of the total improvement to model deviance a variable is responsible for. This is weighted by the number of times a predictor is selected in the boosted models.</p>
-<div id="trends-models" class="section level5">
+<div id="trends-model" class="section level5">
 <h5>
-<span class="header-section-number">6.4.3.2.1</span> Trends models<a class="anchor" aria-label="anchor" href="#trends-models"><i class="fas fa-link"></i></a>
+<span class="header-section-number">6.4.3.2.1</span> Trends model<a class="anchor" aria-label="anchor" href="#trends-model"><i class="fas fa-link"></i></a>
 </h5>
-<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="fu">varimp</span><span class="op">(</span><span class="va">mod_trends</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Varimp Trends mdl"</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="06.Model-assemblage-trends_files/figure-html/varimp_trends-1.png" width="100%"></div>
 <div class="sourceCode" id="cb69"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="fu">varimp</span><span class="op">(</span><span class="va">mod_trends_rac</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Varimp Trends RAC mdl"</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="06.Model-assemblage-trends_files/figure-html/varimp_trends-2.png" width="100%"></div>
+<div class="inline-figure"><img src="06.Model-assemblage-trends_files/figure-html/varimp_trends-1.png" width="100%"></div>
 <div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">varimp</span><span class="op">(</span><span class="va">mod_trends_rac</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">reduction</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">varimp</span><span class="op">(</span><span class="va">mod_trends_rac</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">reduction</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">mutate</span><span class="op">(</span>imp <span class="op">=</span> <span class="va">reduction</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">reduction</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>,
+         imp_biol <span class="op">=</span> <span class="fu">if_else</span><span class="op">(</span><span class="fu">str_detect</span><span class="op">(</span><span class="va">blearner</span>, <span class="st">"autocov"</span><span class="op">)</span>, <span class="fl">0</span>, <span class="va">imp</span><span class="op">)</span>,
+         imp_biol <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="op">(</span><span class="va">imp_biol</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">imp_biol</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>,
+         imp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">imp</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <div class="kable-table">
 <div class="inline-table"><table class="table table-sm">
 <thead><tr class="header">
@@ -634,6 +728,8 @@
 <th align="left">blearner</th>
 <th align="left">variable</th>
 <th align="right">selfreq</th>
+<th align="right">imp</th>
+<th align="right">imp_biol</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
@@ -641,53 +737,67 @@
 <td align="left">bbs(autocov_trends)</td>
 <td align="left">autocov_trends</td>
 <td align="right">0.2410</td>
+<td align="right">76.78</td>
+<td align="right">0.00</td>
 </tr>
 <tr class="even">
 <td align="right">46.902638</td>
 <td align="left">bbs(tm_trend)</td>
 <td align="left">tm_trend</td>
 <td align="right">0.2565</td>
+<td align="right">13.37</td>
+<td align="right">57.56</td>
 </tr>
 <tr class="odd">
 <td align="right">21.384352</td>
 <td align="left">bbs(pr_trend)</td>
 <td align="left">pr_trend</td>
 <td align="right">0.1996</td>
+<td align="right">6.09</td>
+<td align="right">26.24</td>
 </tr>
 <tr class="even">
 <td align="right">4.796977</td>
 <td align="left">bbs(aet_trend)</td>
 <td align="left">aet_trend</td>
 <td align="right">0.1274</td>
+<td align="right">1.37</td>
+<td align="right">5.89</td>
 </tr>
 <tr class="odd">
 <td align="right">4.594185</td>
 <td align="left">bbs(pet_trend)</td>
 <td align="left">pet_trend</td>
 <td align="right">0.1399</td>
+<td align="right">1.31</td>
+<td align="right">5.64</td>
 </tr>
 <tr class="even">
 <td align="right">3.801587</td>
 <td align="left">bbs(ndvi_trend)</td>
 <td align="left">ndvi_trend</td>
 <td align="right">0.0356</td>
+<td align="right">1.08</td>
+<td align="right">4.67</td>
 </tr>
 </tbody>
 </table></div>
 </div>
 </div>
-<div id="predictability-models" class="section level5">
+<div id="predictability-model" class="section level5">
 <h5>
-<span class="header-section-number">6.4.3.2.2</span> Predictability models<a class="anchor" aria-label="anchor" href="#predictability-models"><i class="fas fa-link"></i></a>
+<span class="header-section-number">6.4.3.2.2</span> Predictability model<a class="anchor" aria-label="anchor" href="#predictability-model"><i class="fas fa-link"></i></a>
 </h5>
 <div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="fu">varimp</span><span class="op">(</span><span class="va">mod_resids</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Varimp Predictability mdl"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="fu">varimp</span><span class="op">(</span><span class="va">mod_resids_rac</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Varimp Predictability RAC mdl"</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="06.Model-assemblage-trends_files/figure-html/varimp_resids-1.png" width="100%"></div>
 <div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="fu">varimp</span><span class="op">(</span><span class="va">mod_resids_rac</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Varimp Predictability RAC mdl"</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="06.Model-assemblage-trends_files/figure-html/varimp_resids-2.png" width="100%"></div>
-<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">varimp</span><span class="op">(</span><span class="va">mod_resids_rac</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">reduction</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">varimp</span><span class="op">(</span><span class="va">mod_resids_rac</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">reduction</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">mutate</span><span class="op">(</span>imp <span class="op">=</span> <span class="va">reduction</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">reduction</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>,
+         imp_biol <span class="op">=</span> <span class="fu">if_else</span><span class="op">(</span><span class="fu">str_detect</span><span class="op">(</span><span class="va">blearner</span>, <span class="st">"autocov"</span><span class="op">)</span>, <span class="fl">0</span>, <span class="va">imp</span><span class="op">)</span>,
+         imp_biol <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="op">(</span><span class="va">imp_biol</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">imp_biol</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>,
+         imp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">imp</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <div class="kable-table">
 <div class="inline-table"><table class="table table-sm">
 <thead><tr class="header">
@@ -695,6 +805,8 @@
 <th align="left">blearner</th>
 <th align="left">variable</th>
 <th align="right">selfreq</th>
+<th align="right">imp</th>
+<th align="right">imp_biol</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
@@ -702,36 +814,48 @@
 <td align="left">bbs(autocov_resids)</td>
 <td align="left">autocov_resids</td>
 <td align="right">0.1691</td>
+<td align="right">49.43</td>
+<td align="right">0.00</td>
 </tr>
 <tr class="even">
 <td align="right">94.7949396</td>
 <td align="left">bbs(ndvi_resid)</td>
 <td align="left">ndvi_resid</td>
 <td align="right">0.5856</td>
+<td align="right">26.42</td>
+<td align="right">52.24</td>
 </tr>
 <tr class="odd">
 <td align="right">57.5502643</td>
 <td align="left">bbs(tm_resid)</td>
 <td align="left">tm_resid</td>
 <td align="right">0.0712</td>
+<td align="right">16.04</td>
+<td align="right">31.72</td>
 </tr>
 <tr class="even">
 <td align="right">17.5826413</td>
 <td align="left">bbs(pet_resid)</td>
 <td align="left">pet_resid</td>
 <td align="right">0.0631</td>
+<td align="right">4.90</td>
+<td align="right">9.69</td>
 </tr>
 <tr class="odd">
 <td align="right">10.6466394</td>
 <td align="left">bbs(aet_resid)</td>
 <td align="left">aet_resid</td>
 <td align="right">0.0616</td>
+<td align="right">2.97</td>
+<td align="right">5.87</td>
 </tr>
 <tr class="even">
 <td align="right">0.8702888</td>
 <td align="left">bbs(pr_resid)</td>
 <td align="left">pr_resid</td>
 <td align="right">0.0494</td>
+<td align="right">0.24</td>
+<td align="right">0.48</td>
 </tr>
 </tbody>
 </table></div>
@@ -741,21 +865,34 @@
 <h5>
 <span class="header-section-number">6.4.3.2.3</span> All predictor models<a class="anchor" aria-label="anchor" href="#all-predictor-models"><i class="fas fa-link"></i></a>
 </h5>
-<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="fu">varimp</span><span class="op">(</span><span class="va">mod_all</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Varimp All pred mdl"</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="06.Model-assemblage-trends_files/figure-html/varimp_all-1.png" width="100%"></div>
-<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="fu">varimp</span><span class="op">(</span><span class="va">mod_all_rac</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Varimp All pred RAC mdl"</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="06.Model-assemblage-trends_files/figure-html/varimp_all-2.png" width="100%"></div>
-<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">varimp</span><span class="op">(</span><span class="va">mod_all_rac</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">reduction</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<div class="inline-figure"><img src="06.Model-assemblage-trends_files/figure-html/varimp_all-1.png" width="100%"></div>
+<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">varimp</span><span class="op">(</span><span class="va">mod_all_rac</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">reduction</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">mutate</span><span class="op">(</span>imp <span class="op">=</span> <span class="va">reduction</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">reduction</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>,
+         imp_biol <span class="op">=</span> <span class="fu">if_else</span><span class="op">(</span><span class="fu">str_detect</span><span class="op">(</span><span class="va">blearner</span>, <span class="st">"autocov"</span><span class="op">)</span>, <span class="fl">0</span>, <span class="va">imp</span><span class="op">)</span>,
+         imp_biol <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="op">(</span><span class="va">imp_biol</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">imp_biol</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>,
+         imp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">imp</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fl">20</span><span class="op">)</span></code></pre></div>
 <div class="kable-table">
 <div class="inline-table"><table class="table table-sm">
+<colgroup>
+<col width="13%">
+<col width="36%">
+<col width="25%">
+<col width="8%">
+<col width="6%">
+<col width="9%">
+</colgroup>
 <thead><tr class="header">
 <th align="right">reduction</th>
 <th align="left">blearner</th>
 <th align="left">variable</th>
 <th align="right">selfreq</th>
+<th align="right">imp</th>
+<th align="right">imp_biol</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
@@ -763,96 +900,128 @@
 <td align="left">bbs(autocov_all)</td>
 <td align="left">autocov_all</td>
 <td align="right">0.0352</td>
+<td align="right">38.52</td>
+<td align="right">0.00</td>
 </tr>
 <tr class="even">
 <td align="right">127.0774984</td>
 <td align="left">bspatial(tm_trend, tm_resid)</td>
 <td align="left">tm_resid, tm_trend</td>
 <td align="right">0.2324</td>
+<td align="right">34.99</td>
+<td align="right">56.92</td>
 </tr>
 <tr class="odd">
 <td align="right">56.2974251</td>
 <td align="left">bbs(ndvi_resid)</td>
 <td align="left">ndvi_resid</td>
 <td align="right">0.1593</td>
+<td align="right">15.50</td>
+<td align="right">25.22</td>
 </tr>
 <tr class="even">
 <td align="right">18.0412086</td>
 <td align="left">bspatial(aet_trend, aet_resid)</td>
 <td align="left">aet_resid, aet_trend</td>
 <td align="right">0.2036</td>
+<td align="right">4.97</td>
+<td align="right">8.08</td>
 </tr>
 <tr class="odd">
 <td align="right">12.2534894</td>
 <td align="left">bspatial(pet_trend, pet_resid)</td>
 <td align="left">pet_resid, pet_trend</td>
 <td align="right">0.1641</td>
+<td align="right">3.37</td>
+<td align="right">5.49</td>
 </tr>
 <tr class="even">
 <td align="right">4.1345608</td>
 <td align="left">bspatial(ndvi_trend, ndvi_resid)</td>
 <td align="left">ndvi_resid, ndvi_trend</td>
 <td align="right">0.0977</td>
+<td align="right">1.14</td>
+<td align="right">1.85</td>
 </tr>
 <tr class="odd">
 <td align="right">2.6364365</td>
 <td align="left">bbs(pr_trend)</td>
 <td align="left">pr_trend</td>
 <td align="right">0.0058</td>
+<td align="right">0.73</td>
+<td align="right">1.18</td>
 </tr>
 <tr class="even">
 <td align="right">1.1339132</td>
 <td align="left">bbs(pet_resid)</td>
 <td align="left">pet_resid</td>
 <td align="right">0.0082</td>
+<td align="right">0.31</td>
+<td align="right">0.51</td>
 </tr>
 <tr class="odd">
 <td align="right">0.8446243</td>
 <td align="left">bbs(aet_resid)</td>
 <td align="left">aet_resid</td>
 <td align="right">0.0073</td>
+<td align="right">0.23</td>
+<td align="right">0.38</td>
 </tr>
 <tr class="even">
 <td align="right">0.4523058</td>
 <td align="left">bspatial(pr_trend, pr_resid)</td>
 <td align="left">pr_resid, pr_trend</td>
 <td align="right">0.0610</td>
+<td align="right">0.12</td>
+<td align="right">0.20</td>
 </tr>
 <tr class="odd">
 <td align="right">0.1833741</td>
 <td align="left">bbs(pet_trend)</td>
 <td align="left">pet_trend</td>
 <td align="right">0.0095</td>
+<td align="right">0.05</td>
+<td align="right">0.08</td>
 </tr>
 <tr class="even">
 <td align="right">0.0976552</td>
 <td align="left">bbs(tm_trend)</td>
 <td align="left">tm_trend</td>
 <td align="right">0.0123</td>
+<td align="right">0.03</td>
+<td align="right">0.04</td>
 </tr>
 <tr class="odd">
 <td align="right">0.0790772</td>
 <td align="left">bbs(aet_trend)</td>
 <td align="left">aet_trend</td>
 <td align="right">0.0017</td>
+<td align="right">0.02</td>
+<td align="right">0.04</td>
 </tr>
 <tr class="even">
 <td align="right">0.0196674</td>
 <td align="left">bbs(tm_resid)</td>
 <td align="left">tm_resid</td>
 <td align="right">0.0015</td>
+<td align="right">0.01</td>
+<td align="right">0.01</td>
 </tr>
 <tr class="odd">
 <td align="right">0.0017870</td>
 <td align="left">bbs(pr_resid)</td>
 <td align="left">pr_resid</td>
 <td align="right">0.0004</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
 </tr>
 <tr class="even">
 <td align="right">0.0000000</td>
 <td align="left">bbs(ndvi_trend)</td>
 <td align="left">ndvi_trend</td>
 <td align="right">0.0000</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
 </tr>
 </tbody>
 </table></div>
@@ -865,22 +1034,25 @@
 </h4>
 <p>And, finally, we can have a look at the modelled effects of predictors on long-term assemblage trends. We first compare the output of the original models.</p>
 <p>Because the full model included interaction terms, and by default the partial dependence plots are calculated by evaluating the estimated value over every unique value of the two involved variables, this can get extremely computationally intensive. So instead, we use a tweaked version of the <code>mboost.plot</code> function, which lets use set a <code>gridsize</code>, the number of values over which the partial dependence is evaluated on a quantile grid. See the <code>R/mboost_plot_grid.R</code> file for details.</p>
-<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/source.html">source</a></span><span class="op">(</span><span class="st">'~/envirpred/R/mboost_plot_grid.R'</span><span class="op">)</span></code></pre></div>
-<div id="partial-effects-original-models" class="section level5">
+<div id="partial-effects-rac-models" class="section level5">
 <h5>
-<span class="header-section-number">6.4.3.3.1</span> Partial effects original models<a class="anchor" aria-label="anchor" href="#partial-effects-original-models"><i class="fas fa-link"></i></a>
+<span class="header-section-number">6.4.3.3.1</span> Partial effects RAC models<a class="anchor" aria-label="anchor" href="#partial-effects-rac-models"><i class="fas fa-link"></i></a>
 </h5>
-<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_trends</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_trends_rac</span><span class="op">)</span></code></pre></div>
+<div class="inline-figure"><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_rac-1.png" width="100%"></div>
+<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/rm.html">rm</a></span><span class="op">(</span><span class="va">mod_trends_rac</span><span class="op">)</span>
 
-<span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_original-1.png" width="100%"></div>
+<span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_resids_rac</span><span class="op">)</span></code></pre></div>
+<div class="inline-figure"><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_rac-2.png" width="100%"></div>
+<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/rm.html">rm</a></span><span class="op">(</span><span class="va">mod_resids_rac</span><span class="op">)</span></code></pre></div>
 <div class="sourceCode" id="cb79"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_resids</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_original-2.png" width="100%"></div>
-<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">plot_all</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">model</span>, <span class="va">gridsize</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">preds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/model.frame.html">model.frame</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span><span class="op">)</span>
   <span class="va">single</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span><span class="op">(</span><span class="fu">str_starts</span><span class="op">(</span><span class="va">preds</span>, <span class="st">"bbs"</span><span class="op">)</span><span class="op">)</span>
@@ -896,24 +1068,10 @@
     <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="fu">plot.mboost_grid</span><span class="op">(</span><span class="va">model</span>, which <span class="op">=</span> <span class="va">w</span>, gridsize <span class="op">=</span> <span class="va">gridsize</span><span class="op">)</span><span class="op">)</span>
   <span class="op">}</span>  
 <span class="op">}</span>
-<span class="fu">plot_all</span><span class="op">(</span><span class="va">mod_all</span>, <span class="fl">100</span><span class="op">)</span></code></pre></div>
-<p><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_original_all-1.png" width="100%"><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_original_all-2.png" width="100%"><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_original_all-3.png" width="100%"><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_original_all-4.png" width="100%"><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_original_all-5.png" width="100%"><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_original_all-6.png" width="100%"><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_original_all-7.png" width="100%"><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_original_all-8.png" width="100%"><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_original_all-9.png" width="100%"><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_original_all-10.png" width="100%"><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_original_all-11.png" width="100%"></p>
-</div>
-<div id="partial-effects-rac-models" class="section level5">
-<h5>
-<span class="header-section-number">6.4.3.3.2</span> Partial effects RAC models<a class="anchor" aria-label="anchor" href="#partial-effects-rac-models"><i class="fas fa-link"></i></a>
-</h5>
-<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_trends_rac</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_rac-1.png" width="100%"></div>
-<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_resids_rac</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_rac-2.png" width="100%"></div>
-<div class="sourceCode" id="cb83"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">plot_all</span><span class="op">(</span><span class="va">mod_all_rac</span>, <span class="fl">100</span><span class="op">)</span></code></pre></div>
+<span class="fu">plot_all</span><span class="op">(</span><span class="va">mod_all_rac</span>, <span class="fl">200</span><span class="op">)</span></code></pre></div>
 <p><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_rac_all-1.png" width="100%"><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_rac_all-2.png" width="100%"><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_rac_all-3.png" width="100%"><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_rac_all-4.png" width="100%"><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_rac_all-5.png" width="100%"><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_rac_all-6.png" width="100%"><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_rac_all-7.png" width="100%"><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_rac_all-8.png" width="100%"><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_rac_all-9.png" width="100%"><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_rac_all-10.png" width="100%"><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_rac_all-11.png" width="100%"><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_rac_all-12.png" width="100%"><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_rac_all-13.png" width="100%"><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_rac_all-14.png" width="100%"><img src="06.Model-assemblage-trends_files/figure-html/partial_effects_simple_rac_all-15.png" width="100%"></p>
+<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/rm.html">rm</a></span><span class="op">(</span><span class="va">mod_all_rac</span><span class="op">)</span></code></pre></div>
 
 </div>
 </div>
