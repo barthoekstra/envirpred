@@ -536,6 +536,9 @@ perf_metrics <- function(actual, models) {
 }
 
 residual_columns <- c("norac_trends", "norac_resids", "norac_all", "rac_trends", "rac_resids", "rac_all")
+if (!exists("neighbors")) {
+  neighbors <- dnearneigh(as.matrix(cbind(data_subset$x, data_subset$y)), d1 = 0, d2 = neighborhood_dist, longlat = TRUE)
+}
 sar_metrics <- lapply(residual_columns, function(x) {
   mi <- moran.test(data_subset[, x], nb2listw(neighbors, zero.policy = TRUE), zero.policy = TRUE)
   c(round(mi$estimate[1], 2), mi$p.value)
