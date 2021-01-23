@@ -87,14 +87,15 @@ vars_resids <- as.data.frame(modelci_resids$data) %>% colnames()
 par(mfrow = c(2, 3))
 lapply(vars_resids, function(x) plot(modelci_resids, which = x))
 ```
-And finally for the all-encompassing (`all`) model.
+And finally the single-variable base-learners for the all-encompassing (`all`) model. The interaction effects will have to be visualised some other way.
 
 ```{r plot_mboot_ci_all, results='hide', fig.show='asis', out.width='100%', fig.width=10, fig.height=10}
 rm(modelci_resids)
 if (!exists("modelci_all")) modelci_all <- readRDS("data/processed/models/confints/modelci_all.RDS")
 
-vars_all <- as.data.frame(modelci_all$data) %>% colnames()
+vars_names <- as.data.frame(modelci_all$data) %>% select(!starts_with("bspatial")) %>% colnames()
+vars_ids <- unlist(lapply(vars_names, function(x) modelci_all$model$which(x)[1]))
 
 par(mfrow = c(4, 3))
-lapply(vars_all, function(x) plot(modelci_all, which = x))
+lapply(vars_ids, function(x) plot(modelci_all, which = x))
 ```
