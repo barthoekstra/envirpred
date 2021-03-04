@@ -37,7 +37,7 @@ p1
 ```
 
 ```{r}
-p + 
+p1 + 
   geom_abline(slope = 0.15, intercept = 0, color = "blue", linetype = 2) +
   theme_classic() +
   labs(y = "Environmental variable", x = "Time", title = "(b) Determine long-term trend") +
