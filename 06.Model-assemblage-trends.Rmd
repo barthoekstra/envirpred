@@ -646,7 +646,6 @@ plot_all <- function(model, gridsize) {
   }  
 }
 plot_all(mod_all_rac, 200)
-rm(mod_all_rac)
 ```
 
 And because we focus specifically on temperature, let's prettify that plot a bit.
@@ -662,4 +661,5 @@ plot.mboost_grid(mod_all_rac, which = w, gridsize = 200, at = seq(from = -40, to
                  xlab = expression("Temp. trend [0.1"~degree*C~y^-1*"]"), 
                  ylab = expression("Temp. variability [0.1"~degree*C*"]"), 
                  par.settings = theme)
+rm(mod_all_rac)
 ```
