@@ -46,8 +46,9 @@
 <li><a class="" href="model-local-assemblage-trends.html"><span class="header-section-number">8</span> Model local assemblage trends</a></li>
 <li class="book-part">Figures</li>
 <li><a class="active" href="environmental-variables.html"><span class="header-section-number">9</span> Environmental variables</a></li>
+<li><a class="" href="trends-variability-method.html"><span class="header-section-number">10</span> Trends-Variability method</a></li>
 <li class="book-part">Other</li>
-<li><a class="" href="references.html"><span class="header-section-number">10</span> References</a></li>
+<li><a class="" href="references.html"><span class="header-section-number">11</span> References</a></li>
 </ul>
 
         <div class="book-extra">
@@ -59,7 +60,7 @@
 <h1>
 <span class="header-section-number">9</span> Environmental variables<a class="anchor" aria-label="anchor" href="#environmental-variables"><i class="fas fa-link"></i></a>
 </h1>
-<div class="sourceCode" id="cb87"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb88"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">data_stars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"data/processed/data_stars.RDS"</span><span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">data_stars</span><span class="op">)</span> <span class="op">%&gt;%</span>
@@ -77,7 +78,7 @@
 ## dimension:      XY
 ## bbox:           xmin: -25.3618 ymin: -50.01889 xmax: 77.60327 ymax: 37.55986
 ## CRS:            4326</code></pre>
-<div class="sourceCode" id="cb89"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb90"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">data_base</span> <span class="op">&lt;-</span> <span class="va">data</span>
 
 <span class="va">data</span> <span class="op">%&gt;%</span>
@@ -92,7 +93,7 @@
 <span class="header-section-number">9.1</span> Environmental long-term trends<a class="anchor" aria-label="anchor" href="#environmental-long-term-trends"><i class="fas fa-link"></i></a>
 </h2>
 <p><strong>Color scales are mapped to (ie limited by) 1% and 99% quantiles, but for now I seem unable to calculate this on the fly in <code>ggplot</code> so these values are hard-coded and should be changed manually when the dataset changes.</strong></p>
-<div class="sourceCode" id="cb90"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb91"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggplot</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_sf</span><span class="op">(</span>data <span class="op">=</span> <span class="va">africa</span>, colour <span class="op">=</span> <span class="st">"grey"</span>, fill <span class="op">=</span> <span class="cn">NA</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_raster</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">y</span>, fill <span class="op">=</span> <span class="va">ndvi_trend</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
@@ -101,7 +102,10 @@
   <span class="fu">coord_sf</span><span class="op">(</span>xlim <span class="op">=</span> <span class="va">xlims</span>, ylim <span class="op">=</span> <span class="va">ylims</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">scale_x_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="va">xbreaks</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Lon"</span>, y <span class="op">=</span> <span class="st">"Lat"</span>, fill <span class="op">=</span> <span class="st">"NDVI"</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">ndvi</span>
+  <span class="fu">labs</span><span class="op">(</span>subtitle <span class="op">=</span> <span class="st">"(a) NDVI"</span>, fill <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html">expression</a></span><span class="op">(</span><span class="st">"[-]"</span><span class="op">~</span><span class="va">y</span><span class="op">^</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">theme</span><span class="op">(</span>axis.title.x <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
+        axis.title.y <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
+        legend.key.width <span class="op">=</span> <span class="fu">unit</span><span class="op">(</span><span class="fl">0.15</span>, <span class="st">"in"</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">ndvi</span>
 
 <span class="fu">ggplot</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_sf</span><span class="op">(</span>data <span class="op">=</span> <span class="va">africa</span>, colour <span class="op">=</span> <span class="st">"grey"</span>, fill <span class="op">=</span> <span class="cn">NA</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span>
@@ -111,7 +115,10 @@
   <span class="fu">coord_sf</span><span class="op">(</span>xlim <span class="op">=</span> <span class="va">xlims</span>, ylim <span class="op">=</span> <span class="va">ylims</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">scale_x_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="va">xbreaks</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Lon"</span>, y <span class="op">=</span> <span class="st">"Lat"</span>, fill <span class="op">=</span> <span class="st">"Precip."</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">pr</span>
+  <span class="fu">labs</span><span class="op">(</span>subtitle <span class="op">=</span> <span class="st">"(b) Precipitation"</span>, fill <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html">expression</a></span><span class="op">(</span><span class="st">"mm"</span><span class="op">~</span><span class="va">y</span><span class="op">^</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">theme</span><span class="op">(</span>axis.title.x <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
+        axis.title.y <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
+        legend.key.width <span class="op">=</span> <span class="fu">unit</span><span class="op">(</span><span class="fl">0.15</span>, <span class="st">"in"</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">pr</span>
 
 <span class="fu">ggplot</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_sf</span><span class="op">(</span>data <span class="op">=</span> <span class="va">africa</span>, colour <span class="op">=</span> <span class="st">"grey"</span>, fill <span class="op">=</span> <span class="cn">NA</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span>
@@ -121,7 +128,10 @@
   <span class="fu">coord_sf</span><span class="op">(</span>xlim <span class="op">=</span> <span class="va">xlims</span>, ylim <span class="op">=</span> <span class="va">ylims</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">scale_x_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="va">xbreaks</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Lon"</span>, y <span class="op">=</span> <span class="st">"Lat"</span>, fill <span class="op">=</span> <span class="st">"Temp."</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">tm</span>
+  <span class="fu">labs</span><span class="op">(</span>subtitle <span class="op">=</span> <span class="st">"(c) Temperature"</span>, fill <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html">expression</a></span><span class="op">(</span><span class="st">"0.1"</span><span class="op">~</span><span class="va">degree</span><span class="op">*</span><span class="va">C</span><span class="op">~</span><span class="va">y</span><span class="op">^</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">theme</span><span class="op">(</span>axis.title.x <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
+        axis.title.y <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
+        legend.key.width <span class="op">=</span> <span class="fu">unit</span><span class="op">(</span><span class="fl">0.15</span>, <span class="st">"in"</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">tm</span>
 
 <span class="fu">ggplot</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_sf</span><span class="op">(</span>data <span class="op">=</span> <span class="va">africa</span>, colour <span class="op">=</span> <span class="st">"grey"</span>, fill <span class="op">=</span> <span class="cn">NA</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span>
@@ -131,7 +141,10 @@
   <span class="fu">coord_sf</span><span class="op">(</span>xlim <span class="op">=</span> <span class="va">xlims</span>, ylim <span class="op">=</span> <span class="va">ylims</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">scale_x_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="va">xbreaks</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Lon"</span>, y <span class="op">=</span> <span class="st">"Lat"</span>, fill <span class="op">=</span> <span class="st">"Potevap."</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">pet</span>
+  <span class="fu">labs</span><span class="op">(</span>subtitle <span class="op">=</span> <span class="st">"(d) Potential evapotransp."</span>, fill <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html">expression</a></span><span class="op">(</span><span class="st">"0.1 mm"</span><span class="op">~</span><span class="va">y</span><span class="op">^</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">theme</span><span class="op">(</span>axis.title.x <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
+        axis.title.y <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
+        legend.key.width <span class="op">=</span> <span class="fu">unit</span><span class="op">(</span><span class="fl">0.15</span>, <span class="st">"in"</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">pet</span>
 
 <span class="fu">ggplot</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_sf</span><span class="op">(</span>data <span class="op">=</span> <span class="va">africa</span>, colour <span class="op">=</span> <span class="st">"grey"</span>, fill <span class="op">=</span> <span class="cn">NA</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span>
@@ -141,7 +154,10 @@
   <span class="fu">coord_sf</span><span class="op">(</span>xlim <span class="op">=</span> <span class="va">xlims</span>, ylim <span class="op">=</span> <span class="va">ylims</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">scale_x_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="va">xbreaks</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Lon"</span>, y <span class="op">=</span> <span class="st">"Lat"</span>, fill <span class="op">=</span> <span class="st">"Actevap."</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">aet</span>
+  <span class="fu">labs</span><span class="op">(</span>subtitle <span class="op">=</span> <span class="st">"(e) Actual evapotransp."</span>, fill <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html">expression</a></span><span class="op">(</span><span class="st">"0.1 mm"</span><span class="op">~</span><span class="va">y</span><span class="op">^</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">theme</span><span class="op">(</span>axis.title.x <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
+        axis.title.y <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
+        legend.key.width <span class="op">=</span> <span class="fu">unit</span><span class="op">(</span><span class="fl">0.15</span>, <span class="st">"in"</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">aet</span>
 
 <span class="fu">ggplot</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_sf</span><span class="op">(</span>data <span class="op">=</span> <span class="va">africa</span>, colour <span class="op">=</span> <span class="st">"grey"</span>, fill <span class="op">=</span> <span class="cn">NA</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span>
@@ -151,15 +167,17 @@
   <span class="fu">coord_sf</span><span class="op">(</span>xlim <span class="op">=</span> <span class="va">xlims</span>, ylim <span class="op">=</span> <span class="va">ylims</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">scale_x_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="va">xbreaks</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Lon"</span>, y <span class="op">=</span> <span class="st">"Lat"</span>, fill <span class="op">=</span> <span class="st">"Ass. trend"</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">pop</span>
+  <span class="fu">labs</span><span class="op">(</span>subtitle <span class="op">=</span> <span class="st">"(f) Assemblage trends"</span>, fill <span class="op">=</span> <span class="st">"Trend [%]"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">theme</span><span class="op">(</span>axis.title.x <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
+        axis.title.y <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
+        legend.key.width <span class="op">=</span> <span class="fu">unit</span><span class="op">(</span><span class="fl">0.15</span>, <span class="st">"in"</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">pop</span>
 
 
 <span class="va">ndvi</span> <span class="op">+</span> <span class="va">pr</span> <span class="op">+</span> <span class="va">tm</span> <span class="op">+</span> <span class="va">pet</span> <span class="op">+</span> <span class="va">aet</span> <span class="op">+</span> <span class="va">pop</span> <span class="op">+</span> <span class="fu">plot_layout</span><span class="op">(</span>ncol <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">plot_annotation</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Environmental long-term trends"</span>, subtitle <span class="op">=</span> <span class="st">"Model trends"</span><span class="op">)</span></code></pre></div>
+  <span class="fu">plot_annotation</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Environmental and species assemblage trends"</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="F1.Environmental-variables_files/figure-html/plot_environmental_trends_params-1.png" width="100%"></div>
-<div class="sourceCode" id="cb91"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">ggsave</span><span class="op">(</span>filename <span class="op">=</span> <span class="st">"data/processed/plots/environmental_trends.pdf"</span>, device <span class="op">=</span> <span class="st">"pdf"</span>, width <span class="op">=</span> <span class="fl">12</span>, units <span class="op">=</span> <span class="st">"in"</span><span class="op">)</span></code></pre></div>
-<pre><code>## Saving 12 x 5 in image</code></pre>
+<div class="sourceCode" id="cb92"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">ggsave</span><span class="op">(</span>filename <span class="op">=</span> <span class="st">"data/processed/plots/environmental_trends.pdf"</span>, device <span class="op">=</span> <span class="st">"pdf"</span>, width <span class="op">=</span> <span class="fl">12</span>, height <span class="op">=</span> <span class="fl">6.21</span>, units <span class="op">=</span> <span class="st">"in"</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="environmental-variability" class="section level2">
 <h2>
@@ -179,85 +197,104 @@
 <span class="fu">ggplot</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_sf</span><span class="op">(</span>data <span class="op">=</span> <span class="va">africa</span>, colour <span class="op">=</span> <span class="st">"grey"</span>, fill <span class="op">=</span> <span class="cn">NA</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_raster</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">y</span>, fill <span class="op">=</span> <span class="va">ndvi_resid</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">data</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">scale_fill_continuous_sequential</span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.006920418</span>, <span class="fl">0.123886703</span><span class="op">)</span>, 
-                                   oob <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org//reference/oob.html">squish</a></span>, na.value <span class="op">=</span> <span class="cn">NA</span>, palette <span class="op">=</span> <span class="st">"Greens"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="co"># scale_fill_continuous_sequential(limits = c(0.006920418, 0.123886703), </span>
+  <span class="co">#                                  oob = scales::squish, na.value = NA, palette = "Greens") +</span>
+  <span class="fu">scale_fill_viridis_c</span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.006920418</span>, <span class="fl">0.123886703</span><span class="op">)</span>, oob <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org//reference/oob.html">squish</a></span>, na.value <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">coord_sf</span><span class="op">(</span>xlim <span class="op">=</span> <span class="va">xlims</span>, ylim <span class="op">=</span> <span class="va">ylims</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">scale_x_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="va">xbreaks</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Lon"</span>, y <span class="op">=</span> <span class="st">"Lat"</span>, fill <span class="op">=</span> <span class="st">"NDVI"</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">ndvi</span>
+  <span class="fu">labs</span><span class="op">(</span>subtitle <span class="op">=</span> <span class="st">"(a) NDVI"</span>, fill <span class="op">=</span> <span class="st">"[-]"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">theme</span><span class="op">(</span>axis.title.x <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
+        axis.title.y <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
+        legend.key.width <span class="op">=</span> <span class="fu">unit</span><span class="op">(</span><span class="fl">0.15</span>, <span class="st">"in"</span><span class="op">)</span><span class="op">)</span><span class="op">-&gt;</span> <span class="va">ndvi</span>
 
 <span class="fu">ggplot</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_sf</span><span class="op">(</span>data <span class="op">=</span> <span class="va">africa</span>, colour <span class="op">=</span> <span class="st">"grey"</span>, fill <span class="op">=</span> <span class="cn">NA</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_raster</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">y</span>, fill <span class="op">=</span> <span class="va">pr_resid</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">data</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">scale_fill_continuous_sequential</span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.1481013</span>, <span class="fl">118.3143118</span><span class="op">)</span>, 
-                                   oob <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org//reference/oob.html">squish</a></span>, na.value <span class="op">=</span> <span class="cn">NA</span>, palette <span class="op">=</span> <span class="st">"Blues"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="co"># scale_fill_continuous_sequential(limits = c(0.1481013, 118.3143118), </span>
+  <span class="co">#                                  oob = scales::squish, na.value = NA, palette = "Blues") +</span>
+  <span class="fu">scale_fill_viridis_c</span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.1481013</span>, <span class="fl">118.3143118</span><span class="op">)</span>, oob <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org//reference/oob.html">squish</a></span>, na.value <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">coord_sf</span><span class="op">(</span>xlim <span class="op">=</span> <span class="va">xlims</span>, ylim <span class="op">=</span> <span class="va">ylims</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">scale_x_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="va">xbreaks</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Lon"</span>, y <span class="op">=</span> <span class="st">"Lat"</span>, fill <span class="op">=</span> <span class="st">"Precip."</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">pr</span>
+  <span class="fu">labs</span><span class="op">(</span>subtitle <span class="op">=</span> <span class="st">"(b) Precipitation"</span>, fill <span class="op">=</span> <span class="st">"mm"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">theme</span><span class="op">(</span>axis.title.x <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
+        axis.title.y <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
+        legend.key.width <span class="op">=</span> <span class="fu">unit</span><span class="op">(</span><span class="fl">0.15</span>, <span class="st">"in"</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">pr</span>
 
 <span class="fu">ggplot</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_sf</span><span class="op">(</span>data <span class="op">=</span> <span class="va">africa</span>, colour <span class="op">=</span> <span class="st">"grey"</span>, fill <span class="op">=</span> <span class="cn">NA</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_raster</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">y</span>, fill <span class="op">=</span> <span class="va">tm_resid</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">data</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">scale_fill_continuous_sequential</span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">5.577115</span>, <span class="fl">22.475821</span><span class="op">)</span>, 
-                                   oob <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org//reference/oob.html">squish</a></span>, na.value <span class="op">=</span> <span class="cn">NA</span>, palette <span class="op">=</span> <span class="st">"Reds"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="co"># scale_fill_continuous_sequential(limits = c(5.577115, 22.475821), </span>
+  <span class="co">#                                  oob = scales::squish, na.value = NA, palette = "Reds") +</span>
+  <span class="fu">scale_fill_viridis_c</span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">5.577115</span>, <span class="fl">22.475821</span><span class="op">)</span>, oob <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org//reference/oob.html">squish</a></span>, na.value <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">coord_sf</span><span class="op">(</span>xlim <span class="op">=</span> <span class="va">xlims</span>, ylim <span class="op">=</span> <span class="va">ylims</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">scale_x_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="va">xbreaks</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Lon"</span>, y <span class="op">=</span> <span class="st">"Lat"</span>, fill <span class="op">=</span> <span class="st">"Temp."</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">tm</span>
+  <span class="fu">labs</span><span class="op">(</span>subtitle <span class="op">=</span> <span class="st">"(c) Temperature"</span>, fill <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html">expression</a></span><span class="op">(</span><span class="st">"0.1"</span><span class="op">~</span><span class="va">degree</span><span class="op">*</span><span class="va">C</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">theme</span><span class="op">(</span>axis.title.x <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
+        axis.title.y <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
+        legend.key.width <span class="op">=</span> <span class="fu">unit</span><span class="op">(</span><span class="fl">0.15</span>, <span class="st">"in"</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">tm</span>
 
 <span class="fu">ggplot</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_sf</span><span class="op">(</span>data <span class="op">=</span> <span class="va">africa</span>, colour <span class="op">=</span> <span class="st">"grey"</span>, fill <span class="op">=</span> <span class="cn">NA</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_raster</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">y</span>, fill <span class="op">=</span> <span class="va">pet_resid</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">data</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">scale_fill_continuous_sequential</span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">69.39295</span>, <span class="fl">244.31387</span><span class="op">)</span>, 
-                                   oob <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org//reference/oob.html">squish</a></span>, na.value <span class="op">=</span> <span class="cn">NA</span>, palette <span class="op">=</span> <span class="st">"Oranges"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="co"># scale_fill_continuous_sequential(limits = c(69.39295, 244.31387), </span>
+  <span class="co">#                                  oob = scales::squish, na.value = NA, palette = "Oranges") +</span>
+  <span class="fu">scale_fill_viridis_c</span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">69.39295</span>, <span class="fl">244.31387</span><span class="op">)</span>, oob <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org//reference/oob.html">squish</a></span>, na.value <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">coord_sf</span><span class="op">(</span>xlim <span class="op">=</span> <span class="va">xlims</span>, ylim <span class="op">=</span> <span class="va">ylims</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">scale_x_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="va">xbreaks</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Lon"</span>, y <span class="op">=</span> <span class="st">"Lat"</span>, fill <span class="op">=</span> <span class="st">"Potevap."</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">pet</span>
+  <span class="fu">labs</span><span class="op">(</span>subtitle <span class="op">=</span> <span class="st">"(d) Potential evapotransp."</span>, fill <span class="op">=</span> <span class="st">"0.1 mm"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">theme</span><span class="op">(</span>axis.title.x <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
+        axis.title.y <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
+        legend.key.width <span class="op">=</span> <span class="fu">unit</span><span class="op">(</span><span class="fl">0.15</span>, <span class="st">"in"</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">pet</span>
 
 <span class="fu">ggplot</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_sf</span><span class="op">(</span>data <span class="op">=</span> <span class="va">africa</span>, colour <span class="op">=</span> <span class="st">"grey"</span>, fill <span class="op">=</span> <span class="cn">NA</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_raster</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">y</span>, fill <span class="op">=</span> <span class="va">aet_resid</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">data</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">scale_fill_continuous_sequential</span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1.212078</span>, <span class="fl">384.816440</span><span class="op">)</span>, 
-                                   oob <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org//reference/oob.html">squish</a></span>, na.value <span class="op">=</span> <span class="cn">NA</span>, palette <span class="op">=</span> <span class="st">"Oranges"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="co"># scale_fill_continuous_sequential(limits = c(1.212078, 384.816440), </span>
+  <span class="co">#                                  oob = scales::squish, na.value = NA, palette = "Oranges") +</span>
+  <span class="fu">scale_fill_viridis_c</span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1.212078</span>, <span class="fl">384.816440</span><span class="op">)</span>, oob <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org//reference/oob.html">squish</a></span>, na.value <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">coord_sf</span><span class="op">(</span>xlim <span class="op">=</span> <span class="va">xlims</span>, ylim <span class="op">=</span> <span class="va">ylims</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">scale_x_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="va">xbreaks</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Lon"</span>, y <span class="op">=</span> <span class="st">"Lat"</span>, fill <span class="op">=</span> <span class="st">"Actevap."</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">aet</span>
+  <span class="fu">labs</span><span class="op">(</span>subtitle <span class="op">=</span> <span class="st">"(e) Actual evapotransp."</span>, fill <span class="op">=</span> <span class="st">"0.1 mm"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">theme</span><span class="op">(</span>axis.title.x <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
+        axis.title.y <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
+        legend.key.width <span class="op">=</span> <span class="fu">unit</span><span class="op">(</span><span class="fl">0.15</span>, <span class="st">"in"</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">aet</span>
 
-<span class="fu">ggplot</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+<span class="fu">ggplot</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_sf</span><span class="op">(</span>data <span class="op">=</span> <span class="va">africa</span>, colour <span class="op">=</span> <span class="st">"grey"</span>, fill <span class="op">=</span> <span class="cn">NA</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">geom_raster</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">y</span>, fill <span class="op">=</span> <span class="va">trend_long</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">data</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">scale_fill_continuous_diverging</span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">32.82353</span>, <span class="fl">72.33334</span><span class="op">)</span>, 
+  <span class="fu">geom_raster</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">y</span>, fill <span class="op">=</span> <span class="va">trend_long</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">scale_fill_continuous_diverging</span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">32.82353</span>, <span class="fl">72.33334</span><span class="op">)</span>,
                                   oob <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="va"><a href="https://scales.r-lib.org//reference/oob.html">squish</a></span>, na.value <span class="op">=</span> <span class="cn">NA</span>, palette <span class="op">=</span> <span class="st">"Blue-Red 3"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">coord_sf</span><span class="op">(</span>xlim <span class="op">=</span> <span class="va">xlims</span>, ylim <span class="op">=</span> <span class="va">ylims</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">scale_x_continuous</span><span class="op">(</span>breaks <span class="op">=</span> <span class="va">xbreaks</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">theme_bw</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Lon"</span>, y <span class="op">=</span> <span class="st">"Lat"</span>, fill <span class="op">=</span> <span class="st">"Ass. trend"</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">pop</span>
+  <span class="fu">labs</span><span class="op">(</span>subtitle <span class="op">=</span> <span class="st">"(f) Assemblage trends"</span>, fill <span class="op">=</span> <span class="st">"Trend [%]"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">theme</span><span class="op">(</span>axis.title.x <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
+        axis.title.y <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,
+        legend.key.width <span class="op">=</span> <span class="fu">unit</span><span class="op">(</span><span class="fl">0.15</span>, <span class="st">"in"</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">popop</span>
 
 <span class="va">ndvi</span> <span class="op">+</span> <span class="va">pr</span> <span class="op">+</span> <span class="va">tm</span> <span class="op">+</span> <span class="va">pet</span> <span class="op">+</span> <span class="va">aet</span> <span class="op">+</span> <span class="va">pop</span> <span class="op">+</span> <span class="fu">plot_layout</span><span class="op">(</span>ncol <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">plot_annotation</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Environmental variability"</span>, subtitle <span class="op">=</span> <span class="st">"Model RMSE"</span><span class="op">)</span></code></pre></div>
+  <span class="fu">plot_annotation</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Environmental variability (in RMSE) and species assemblage trends"</span><span class="op">)</span></code></pre></div>
 <div class="inline-figure"><img src="F1.Environmental-variables_files/figure-html/plot_environmental_predictability_params-1.png" width="100%"></div>
 <div class="sourceCode" id="cb94"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">ggsave</span><span class="op">(</span>filename <span class="op">=</span> <span class="st">"data/processed/plots/environmental_predictability.pdf"</span>, device <span class="op">=</span> <span class="st">"pdf"</span>, width <span class="op">=</span> <span class="fl">12</span>, units <span class="op">=</span> <span class="st">"in"</span><span class="op">)</span></code></pre></div>
-<pre><code>## Saving 12 x 5 in image</code></pre>
+<code class="sourceCode R"><span class="fu">ggsave</span><span class="op">(</span>filename <span class="op">=</span> <span class="st">"data/processed/plots/environmental_predictability.pdf"</span>, device <span class="op">=</span> <span class="st">"pdf"</span>, width <span class="op">=</span> <span class="fl">12</span>, height <span class="op">=</span> <span class="fl">6.21</span>, units <span class="op">=</span> <span class="st">"in"</span><span class="op">)</span></code></pre></div>
 <p>As <code>ggplot2</code> stores the last figure in cache, and memory during knitting of this document/website is limited, we have to empty the cache now explicitly.</p>
-<div class="sourceCode" id="cb96"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb95"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/set_last_plot.html">set_last_plot</a></span><span class="op">(</span><span class="cn">NULL</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/gc.html">gc</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>##             used   (Mb) gc trigger   (Mb)  max used   (Mb)
-## Ncells   2077757  111.0    3834544  204.8   3834544  204.8
-## Vcells 136532920 1041.7  429298448 3275.3 429294644 3275.3</code></pre>
+## Ncells   2085322  111.4    3836272  204.9   3836272  204.9
+## Vcells 136554913 1041.9  429298991 3275.3 429293841 3275.3</code></pre>
 
 </div>
 </div>
-
-
-
   <div class="chapter-nav">
 <div class="prev"><a href="model-local-assemblage-trends.html"><span class="header-section-number">8</span> Model local assemblage trends</a></div>
-<div class="next"><a href="references.html"><span class="header-section-number">10</span> References</a></div>
+<div class="next"><a href="trends-variability-method.html"><span class="header-section-number">10</span> Trends-Variability method</a></div>
 </div></main><div class="col-md-3 col-lg-2 d-none d-md-block sidebar sidebar-chapter">
     <nav id="toc" data-toggle="toc" aria-label="On this page"><h2>On this page</h2>
       <ul class="nav navbar-nav">

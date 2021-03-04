@@ -45,4 +45,5 @@ model-local-assemblage-trends
 environmental-variables
 environmental-long-term-trends
 environmental-variability
+trends-variability-method
 references
