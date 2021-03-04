@@ -18,4 +18,5 @@ rmd_files:
 - "07.Quantify-model-uncertainty.Rmd"
 - "08.Model-local-assemblage-trends.Rmd"
 - "F1.Environmental-variables.Rmd"
+- "F2.Trends-Variability-method.Rmd"
 - "References.Rmd"
