@@ -72,9 +72,11 @@ Let's confirm that worked by plotting the bootstrapped confidence intervals. Fir
 if (!exists("modelci_trends")) modelci_trends <- readRDS("data/processed/models/confints/modelci_trends.RDS")
 
 vars_trends <- as.data.frame(modelci_trends$data) %>% colnames()
+vars_names <- c("NDVI trend", "Precip. trend", "Potevap. trend", "Actevap. trend", "Temp. trend", "Autocov. trends model")
 
 par(mfrow = c(2, 3))
-lapply(vars_trends, function(x) plot(modelci_trends, which = x))
+# lapply(vars_trends, function(x) plot(modelci_trends, which = x))
+mapply(function(x, y) { plot(modelci_trends, which = x, xlab = y, ylab = "Partial effect", raw = TRUE)}, vars_trends, vars_names)
 ```
 For the predictability (`resids`) model.
 
@@ -83,9 +85,12 @@ rm(modelci_trends)
 if (!exists("modelci_resids")) modelci_resids <- readRDS("data/processed/models/confints/modelci_resids.RDS")
 
 vars_resids <- as.data.frame(modelci_resids$data) %>% colnames()
+vars_names <- c("NDVI variability", "Precip. variability", "Potevap. variability", "Actevap. variability", "Temp. variability", 
+                "Autocov. variability model")
 
 par(mfrow = c(2, 3))
-lapply(vars_resids, function(x) plot(modelci_resids, which = x))
+# lapply(vars_resids, function(x) plot(modelci_resids, which = x))
+mapply(function(x, y) { plot(modelci_resids, which = x, xlab = y, ylab = "Partial effect", raw = TRUE)}, vars_resids, vars_names)
 ```
 And finally the single-variable base-learners for the all-encompassing (`all`) model. The interaction effects will have to be visualised some other way.
 
@@ -95,7 +100,11 @@ if (!exists("modelci_all")) modelci_all <- readRDS("data/processed/models/confin
 
 vars_names <- as.data.frame(modelci_all$data) %>% select(!starts_with("bspatial")) %>% colnames()
 vars_ids <- unlist(lapply(vars_names, function(x) modelci_all$model$which(x)[1]))
+vars_names <- c("NDVI trend", "Precip. trend", "Potevap. trend", "Actevap. trend", "Temp. trend",
+                "NDVI variability", "Precip. variability", "Potevap. variability", "Actevap. variability",
+                "Temp. variability", "Autocov. combined model")
 
 par(mfrow = c(4, 3))
-lapply(vars_ids, function(x) plot(modelci_all, which = x))
+# lapply(vars_ids, function(x) plot(modelci_all, which = x))
+mapply(function(x, y) { plot(modelci_all, which = x, xlab = y, ylab = "Partial effect", raw = TRUE)}, vars_ids, vars_names)
 ```
