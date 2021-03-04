@@ -48,7 +48,10 @@ ggplot(data) +
   coord_sf(xlim = xlims, ylim = ylims) +
   scale_x_continuous(breaks = xbreaks) +
   theme_bw() +
-  labs(x = "Lon", y = "Lat", fill = "NDVI") -> ndvi
+  labs(subtitle = "(a) NDVI", fill = expression("[-]"~y^-1)) +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.key.width = unit(0.15, "in")) -> ndvi
 
 ggplot(data) +
   geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
@@ -58,7 +61,10 @@ ggplot(data) +
   coord_sf(xlim = xlims, ylim = ylims) +
   scale_x_continuous(breaks = xbreaks) +
   theme_bw() +
-  labs(x = "Lon", y = "Lat", fill = "Precip.") -> pr
+  labs(subtitle = "(b) Precipitation", fill = expression("mm"~y^-1)) +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.key.width = unit(0.15, "in")) -> pr
 
 ggplot(data) +
   geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
@@ -68,7 +74,10 @@ ggplot(data) +
   coord_sf(xlim = xlims, ylim = ylims) +
   scale_x_continuous(breaks = xbreaks) +
   theme_bw() +
-  labs(x = "Lon", y = "Lat", fill = "Temp.") -> tm
+  labs(subtitle = "(c) Temperature", fill = expression("0.1"~degree*C~y^-1)) +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.key.width = unit(0.15, "in")) -> tm
 
 ggplot(data) +
   geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
@@ -78,7 +87,10 @@ ggplot(data) +
   coord_sf(xlim = xlims, ylim = ylims) +
   scale_x_continuous(breaks = xbreaks) +
   theme_bw() +
-  labs(x = "Lon", y = "Lat", fill = "Potevap.") -> pet
+  labs(subtitle = "(d) Potential evapotransp.", fill = expression("0.1 mm"~y^-1)) +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.key.width = unit(0.15, "in")) -> pet
 
 ggplot(data) +
   geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
@@ -88,7 +100,10 @@ ggplot(data) +
   coord_sf(xlim = xlims, ylim = ylims) +
   scale_x_continuous(breaks = xbreaks) +
   theme_bw() +
-  labs(x = "Lon", y = "Lat", fill = "Actevap.") -> aet
+  labs(subtitle = "(e) Actual evapotransp.", fill = expression("0.1 mm"~y^-1)) +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.key.width = unit(0.15, "in")) -> aet
 
 ggplot(data) +
   geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
@@ -98,13 +113,16 @@ ggplot(data) +
   coord_sf(xlim = xlims, ylim = ylims) +
   scale_x_continuous(breaks = xbreaks) +
   theme_bw() +
-  labs(x = "Lon", y = "Lat", fill = "Ass. trend") -> pop
+  labs(subtitle = "(f) Assemblage trends", fill = "Trend [%]") +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.key.width = unit(0.15, "in")) -> pop
 
 
 ndvi + pr + tm + pet + aet + pop + plot_layout(ncol = 3) +
-  plot_annotation(title = "Environmental long-term trends", subtitle = "Model trends")
+  plot_annotation(title = "Environmental and species assemblage trends")
 
-ggsave(filename = "data/processed/plots/environmental_trends.pdf", device = "pdf", width = 12, units = "in")
+ggsave(filename = "data/processed/plots/environmental_trends.pdf", device = "pdf", width = 12, height = 6.21, units = "in")
 ```
 
 ## Environmental variability
@@ -124,67 +142,90 @@ data["total"] <- total_unpred(data)
 ggplot() +
   geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
   geom_raster(aes(x = x, y = y, fill = ndvi_resid), data = data) +
-  scale_fill_continuous_sequential(limits = c(0.006920418, 0.123886703), 
-                                   oob = scales::squish, na.value = NA, palette = "Greens") +
+  # scale_fill_continuous_sequential(limits = c(0.006920418, 0.123886703), 
+  #                                  oob = scales::squish, na.value = NA, palette = "Greens") +
+  scale_fill_viridis_c(limits = c(0.006920418, 0.123886703), oob = scales::squish, na.value = NA) +
   coord_sf(xlim = xlims, ylim = ylims) +
   scale_x_continuous(breaks = xbreaks) +
   theme_bw() +
-  labs(x = "Lon", y = "Lat", fill = "NDVI") -> ndvi
+  labs(subtitle = "(a) NDVI", fill = "[-]") +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.key.width = unit(0.15, "in"))-> ndvi
 
 ggplot() +
   geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
   geom_raster(aes(x = x, y = y, fill = pr_resid), data = data) +
-  scale_fill_continuous_sequential(limits = c(0.1481013, 118.3143118), 
-                                   oob = scales::squish, na.value = NA, palette = "Blues") +
+  # scale_fill_continuous_sequential(limits = c(0.1481013, 118.3143118), 
+  #                                  oob = scales::squish, na.value = NA, palette = "Blues") +
+  scale_fill_viridis_c(limits = c(0.1481013, 118.3143118), oob = scales::squish, na.value = NA) +
   coord_sf(xlim = xlims, ylim = ylims) +
   scale_x_continuous(breaks = xbreaks) +
   theme_bw() +
-  labs(x = "Lon", y = "Lat", fill = "Precip.") -> pr
+  labs(subtitle = "(b) Precipitation", fill = "mm") +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.key.width = unit(0.15, "in")) -> pr
 
 ggplot() +
   geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
   geom_raster(aes(x = x, y = y, fill = tm_resid), data = data) +
-  scale_fill_continuous_sequential(limits = c(5.577115, 22.475821), 
-                                   oob = scales::squish, na.value = NA, palette = "Reds") +
+  # scale_fill_continuous_sequential(limits = c(5.577115, 22.475821), 
+  #                                  oob = scales::squish, na.value = NA, palette = "Reds") +
+  scale_fill_viridis_c(limits = c(5.577115, 22.475821), oob = scales::squish, na.value = NA) +
   coord_sf(xlim = xlims, ylim = ylims) +
   scale_x_continuous(breaks = xbreaks) +
   theme_bw() +
-  labs(x = "Lon", y = "Lat", fill = "Temp.") -> tm
+  labs(subtitle = "(c) Temperature", fill = expression("0.1"~degree*C)) +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.key.width = unit(0.15, "in")) -> tm
 
 ggplot() +
   geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
   geom_raster(aes(x = x, y = y, fill = pet_resid), data = data) +
-  scale_fill_continuous_sequential(limits = c(69.39295, 244.31387), 
-                                   oob = scales::squish, na.value = NA, palette = "Oranges") +
+  # scale_fill_continuous_sequential(limits = c(69.39295, 244.31387), 
+  #                                  oob = scales::squish, na.value = NA, palette = "Oranges") +
+  scale_fill_viridis_c(limits = c(69.39295, 244.31387), oob = scales::squish, na.value = NA) +
   coord_sf(xlim = xlims, ylim = ylims) +
   scale_x_continuous(breaks = xbreaks) +
   theme_bw() +
-  labs(x = "Lon", y = "Lat", fill = "Potevap.") -> pet
+  labs(subtitle = "(d) Potential evapotransp.", fill = "0.1 mm") +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.key.width = unit(0.15, "in")) -> pet
 
 ggplot() +
   geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
   geom_raster(aes(x = x, y = y, fill = aet_resid), data = data) +
-  scale_fill_continuous_sequential(limits = c(1.212078, 384.816440), 
-                                   oob = scales::squish, na.value = NA, palette = "Oranges") +
+  # scale_fill_continuous_sequential(limits = c(1.212078, 384.816440), 
+  #                                  oob = scales::squish, na.value = NA, palette = "Oranges") +
+  scale_fill_viridis_c(limits = c(1.212078, 384.816440), oob = scales::squish, na.value = NA) +
   coord_sf(xlim = xlims, ylim = ylims) +
   scale_x_continuous(breaks = xbreaks) +
   theme_bw() +
-  labs(x = "Lon", y = "Lat", fill = "Actevap.") -> aet
+  labs(subtitle = "(e) Actual evapotransp.", fill = "0.1 mm") +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.key.width = unit(0.15, "in")) -> aet
 
-ggplot() +
+ggplot(data) +
   geom_sf(data = africa, colour = "grey", fill = NA, alpha = 0.5) +
-  geom_raster(aes(x = x, y = y, fill = trend_long), data = data) +
-  scale_fill_continuous_diverging(limits = c(-32.82353, 72.33334), 
+  geom_raster(aes(x = x, y = y, fill = trend_long)) +
+  scale_fill_continuous_diverging(limits = c(-32.82353, 72.33334),
                                   oob = scales::squish, na.value = NA, palette = "Blue-Red 3") +
   coord_sf(xlim = xlims, ylim = ylims) +
   scale_x_continuous(breaks = xbreaks) +
   theme_bw() +
-  labs(x = "Lon", y = "Lat", fill = "Ass. trend") -> pop
+  labs(subtitle = "(f) Assemblage trends", fill = "Trend [%]") +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.key.width = unit(0.15, "in")) -> popop
 
 ndvi + pr + tm + pet + aet + pop + plot_layout(ncol = 3) +
-  plot_annotation(title = "Environmental variability", subtitle = "Model RMSE")
+  plot_annotation(title = "Environmental variability (in RMSE) and species assemblage trends")
 
-ggsave(filename = "data/processed/plots/environmental_predictability.pdf", device = "pdf", width = 12, units = "in")
+ggsave(filename = "data/processed/plots/environmental_predictability.pdf", device = "pdf", width = 12, height = 6.21, units = "in")
 ```
 
 As `ggplot2` stores the last figure in cache, and memory during knitting of this document/website is limited, we have to empty the cache now explicitly.
