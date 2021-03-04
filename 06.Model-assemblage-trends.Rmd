@@ -20,6 +20,8 @@ library(mboost)
 library(patchwork)
 library(spdep)
 library(Metrics)
+library(lattice)
+library(rasterVis)
 data <- readRDS("data/processed/data.RDS")
 lut <- readRDS("data/processed/ecoregions_lut.RDS")
 ```
@@ -645,4 +647,19 @@ plot_all <- function(model, gridsize) {
 }
 plot_all(mod_all_rac, 200)
 rm(mod_all_rac)
+```
+
+And because we focus specifically on temperature, let's prettify that plot a bit.
+
+```{r temperature_interaction_levelplot, out.width='100%', fig.width=5, fig.height=5}
+preds <- names(model.frame(mod_all_rac))
+  single <- which(str_starts(preds, "bbs"))
+  interx <- which(str_starts(preds, "bspatial"))
+w <- which(names(variable.names(mod_all_rac)) == preds[14])
+pal <- rev(RColorBrewer::brewer.pal('RdBu', n=11))
+theme <- rasterTheme(region = pal)
+plot.mboost_grid(mod_all_rac, which = w, gridsize = 200, at = seq(from = -40, to = 40, by = 2.5),
+                 xlab = expression("Temp. trend [0.1"~degree*C~y^-1*"]"), 
+                 ylab = expression("Temp. variability [0.1"~degree*C*"]"), 
+                 par.settings = theme)
 ```
