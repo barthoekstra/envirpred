@@ -1,6 +1,6 @@
 ---
-title: "Environmental predictability & Population trends"
-subtitle: "Linking environmental predictability to assemblage population trends of Afro-Palearctic migrants"
+title: "Environmental variability & Population trends"
+subtitle: "Linking environmental variability to assemblage population trends of Afro-Palearctic migrants"
 author: "Bart Hoekstra"
 site: bookdown::bookdown_site
 documentclass: book
@@ -13,7 +13,7 @@ link-citations: yes
 
 ## Reproducible analysis
 
-The entire analysis contained in this book can be reproduced by running the following function from the `bookdown` package.
+Most of the analysis contained in this book can be reproduced by running the following function from the `bookdown` package. Some code chunks are set to `eval=FALSE` to avoid an extremely long-running knitting procedure, so it's best to run those manually when encountered.
 
 ```{r bookdown_code, eval=FALSE}
 bookdown::render_book("index.Rmd", new_session = TRUE)
@@ -26,3 +26,4 @@ install.packages("remotes")
 remotes::install_github("rstudio/bslib")
 install.packages("downlit")
 ```
+
